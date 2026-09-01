@@ -8,3 +8,5 @@ runs/*.pid
 runs/conversations/
 runs/pilot/
 !runs/.gitkeep
+# Local UI QA captures/logs; not research evidence.
+runs/qa_artifacts/

@@ -1,45 +1,58 @@
 # Pilot manifest registry
 
-This registry names the one manifest candidate that may be used for a future
-Pilot after the final gate.  Generated manifests in `runs/pilot/` are local
-evidence and are never silently deleted.
+This registry names the current prepared successor for a future Pilot. Every
+manifest under `runs/pilot/` is local preparation/evidence; historical files
+are preserved and are never silently overwritten or selected by directory
+order.
 
-## CANONICAL PILOT MANIFEST CANDIDATE
+## CANONICAL SUCCESSOR CANDIDATE (NOT AUTHORIZED)
 
-- path: `runs/pilot/taskh-final-manifest-v5.json`
-- manifest ID: `pm_9eced06dc61e`
-- run manifest SHA-256: `9eced06dc61ef8dc7ec61b543eb5e8bb97067c4eb10b07d77590d92839bbb028`
+- path: `runs/pilot/taskk-final-manifest-v7.json`
+- manifest ID: `pm_b38bd5d7e85c`
+- run manifest SHA-256: `b38bd5d7e85c677facad22c18f52e9b0da1fb02c46f6a89e987aa09ecdcf93f0`
+- predecessor: `runs/pilot/taskh-final-manifest-v5.json` (`pm_9eced06dc61e`)
 - benchmark binding: `pilot_benchmark_v1@1.1.0`
+- corpus binding: `PILOT-CORPUS-V1`
+- quality/QEP binding: `PILOT-RUBRIC-V1.0` / `QEP-1.1`
 - provider/model: `groq` / `openai/gpt-oss-120b`
+- model settings: `MODEL-SETTINGS-V1`
+- strategy/config identities: `SINGLE-DIRECT-V1`, `FIXED-TOPOLOGY-V1`,
+  `STATIC-PRESETS-V1`, `ORCH-ADAPTIVE-AUTO-V1`
 - units/conditions: `24` / `96`
 - order: balanced Latin square, top-level sequential
+- packet registry: `evaluation/pilot/pilot_evaluator_packets_v2_taskk.json`
+  (`PILOT-EVALUATOR-PACKETS-V2` v2.0, 96 `PLANNED` packets, evaluator slots
+  `UNASSIGNED`)
 - preparation status: `PREPARED`, not executed
-- freeze identity: `PILOT-FREEZE-CANDIDATE-V1`
+- authorization: `UNBOUND`
+- live window: `UNBOUND`
+- fresh provider preflight: `UNBOUND`; historical stale preflight is not
+  accepted as a live binding
 
-This candidate was generated after the Task H RAG settings, evidence-gate,
-and quality-denominator alignment changes. A fresh successful Groq PREFLIGHT
-now exists (see `docs/GROQ_PILOT_PREFLIGHT.md`), but it is not embedded as a
-`preflight_binding` in this candidate; explicit binding plus the remaining
-research sign-offs are required before any live Pilot command is accepted.
+Checkout provenance is part of the successor's hashed `configuration`:
+commit `e5d1c49fb58b8597b79fd516ec3dfad7f9017ff2` on `master`, Git tree
+`5924d0f83f9aa0ba9cacb5a359c9472a80870cda`. This is the post-UI baseline
+source tree against which the successor was prepared; the later artifact commit
+only records the successor/registry files and does not change runtime semantics.
 
-## SUPERSEDED / HISTORICAL
+## PREDECESSOR / HISTORICAL (PRESERVED)
 
-- `taskc-final-manifest-v3.json` (`pm_d4d1956fdf05`) — `SUPERSEDED`; it was
-  prepared before the RAG settings and manifest-integrity changes.
-- `taskh-final-manifest-v4.json` (`pm_e2d1221f6f2a`) — `SUPERSEDED`; it was
-  prepared before the final Case C denominator identity alignment.
-- `taskc-final-manifest-v2.json` and older `prepared-*` manifests —
-  `ARCHIVED` historical preparation outputs; do not resume or export them as
-  Pilot evidence.
-- All other generated manifest files under `runs/pilot/` (including `fixd-*`,
-  `taskfixc-*`, and `taskc-final-manifest.json`) are `ARCHIVED` unless named
-  above. Directory order is never a selection rule; only the canonical v5
-  path may be proposed for a future gate.
+- `runs/pilot/taskh-final-manifest-v5.json` (`pm_9eced06dc61e`) — strongest
+  validated predecessor; unchanged.
+- `runs/pilot/taskj-final-manifest-v6.json` (`pm_fc24a4e14c47`) — historical
+  candidate, unchanged; its old preflight is stale and its manifest-level
+  rubric references were null, so it is not the successor.
+- `evaluation/pilot/pilot_evaluator_packets_v1.json` — V1 packet registry is
+  preserved unchanged (`PILOT-EVALUATOR-PACKETS-V1`, 96 planned packets).
+- `evaluation/pilot/pilot_evaluator_packets_v2.json` — historical Task J V2
+  generation is preserved unchanged; the Task K packet file above is the new
+  successor binding.
 
-No raw evidence is removed by this registry.  A new frozen manifest requires a
-new path, ID, hash, and explicit registry entry.
+Other generated manifests under `runs/pilot/` remain archived preparation
+outputs. No raw evidence is removed by this registry. No Pilot condition,
+Main run, live provider request, authorization, live window, or fresh preflight
+was created by successor preparation.
 
-The Task H integration gate remains `NOT_PILOT_READY`: this prepared candidate
-is not a Pilot authorization or a Main Freeze. Do not execute its 96
-conditions until the recorded research-side P1 sign-offs and preflight
-binding are complete.
+The owner still must complete evaluator staffing, explicit
+`AUTHORIZE_PILOT_EXECUTION`, a timezone-aware live window, one fresh
+successor-bound preflight, and the final Pilot Freeze before any execution.
