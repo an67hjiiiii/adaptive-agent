@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Adaptive Agent</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23232323'/%3E%3Cpath d='M9 23 15.2 8h2L23 23h-3l-1.3-3.5h-5.6L11.8 23H9Zm5.1-6h3.7L16 12.1 14.1 17Z' fill='white'/%3E%3C/svg%3E"/>
-<link rel="stylesheet" href="/static/styles.css?v=20"/>
+<link rel="stylesheet" href="/static/styles.css?v=21"/>
 </head>
 <body>
 <svg class="icon-sprite" aria-hidden="true"><defs>
@@ -76,7 +76,7 @@
       <div class="welcome locked-empty">
         <div class="welcome-mark">✦</div>
         <h1>Tôi có thể giúp gì cho bạn?</h1>
-        <p>Sẵn sàng hỗ trợ phân tích dữ liệu, soạn thảo văn bản hoặc giải quyết yêu cầu phức tạp. Chat luôn chạy Adaptive AUTO.</p>
+        <p>Sẵn sàng hỗ trợ phân tích dữ liệu, soạn thảo văn bản hoặc giải quyết yêu cầu phức tạp. Chọn provider, model và chế độ xử lý riêng cho từng lượt chat.</p>
       </div>
     </section>
 
@@ -85,12 +85,13 @@
         <div class="drawer-top">
           <div><b id="contextHeading">Ngữ cảnh tham chiếu (Reference context)</b><span>Nguồn thông tin được đóng băng thành Ngữ cảnh đã đóng băng (Frozen Context) trước mỗi lượt chạy.</span></div>
           <div class="drawer-actions">
-            <label class="file-btn">↑ Tải tài liệu<input id="contextFile" type="file" accept=".txt,.md,.json,.csv"/></label>
+            <label class="file-btn">↑ Tải tài liệu<input id="contextFile" type="file" multiple/></label>
             <button id="clearContext">Xóa</button>
             <button id="closeContext" aria-label="Đóng context">×</button>
           </div>
         </div>
-        <textarea id="context" maxlength="100000"># Ví dụ tài liệu API
+        <div id="contextFileList" class="context-file-list" role="list" aria-live="polite"><div class="context-file-empty">Chưa có tệp đính kèm.</div></div>
+        <textarea id="context" maxlength="100000" aria-label="Ngữ cảnh tham chiếu"># Ví dụ tài liệu API
 
 ## Authentication (Xác thực)
 Mọi API request phải có header Authorization: Bearer &lt;token&gt;.
@@ -109,7 +110,7 @@ Page size mặc định là 25 và tối đa là 100.
 
       <div class="composer">
         <div class="file-chip" id="chatFileChip"><span class="file-badge">TỆP</span><span class="file-info"><b class="file-name"></b><small class="file-status"></small></span><span class="file-actions"><button class="file-retry" type="button">Thử lại</button><button class="file-remove" type="button" aria-label="Bỏ tệp">×</button></span></div>
-        <textarea id="prompt" rows="1" maxlength="12000" placeholder="Nhắn cho Adaptive Agent…"></textarea>
+        <textarea id="prompt" rows="1" maxlength="12000" aria-label="Nhập câu hỏi cho Adaptive Agent" placeholder="Nhắn cho Adaptive Agent…"></textarea>
         <div class="composer-bottom">
           <div class="composer-left">
             <button class="small-icon-btn" id="attachButton" aria-label="Đính kèm tệp" title="Đính kèm tệp" aria-expanded="false" aria-controls="contextDrawer"><svg class="ui-icon"><use href="#i-attach"></use></svg></button>
@@ -118,14 +119,16 @@ Page size mặc định là 25 và tối đa là 100.
           <button class="send" id="send" aria-label="Gửi tin nhắn" title="Gửi tin nhắn"><svg class="ui-icon"><use href="#i-send"></use></svg></button>
         </div>
         <div class="model-menu" id="modelMenu" aria-hidden="true" role="dialog" aria-labelledby="modelMenuTitle">
-          <div class="model-menu-head"><div><b id="modelMenuTitle">Chọn mô hình</b><span>Dùng cho lượt chat tiếp theo</span></div><span class="model-auto-badge">AUTO</span></div>
+          <div class="model-menu-head"><div><b id="modelMenuTitle">Chọn mô hình</b><span>Dùng cho lượt chat tiếp theo</span></div><span id="modelModeBadge" class="model-auto-badge">AUTO</span></div>
           <div class="provider-choices" id="providerChoices" role="tablist" aria-label="Nhà cung cấp"></div>
           <div class="model-choices" id="modelChoices" role="listbox" aria-label="Mô hình khả dụng"></div>
+          <div class="mode-group-label">Chế độ xử lý</div>
+          <div class="mode-choices" id="modeChoices" role="radiogroup" aria-label="Chế độ xử lý"></div>
           <div class="model-native-fields" aria-hidden="true">
             <label for="provider">Provider<select id="provider" tabindex="-1" aria-label="Nhà cung cấp (Provider)"></select></label>
             <label for="model">Model<select id="model" tabindex="-1" aria-label="Mô hình (Model)"></select></label>
           </div>
-          <div class="mode-note"><b>Tự động</b> là Adaptive AUTO. DIRECT, PARALLEL và PLANNED do controller chọn từ task, không phải strategy do người dùng ép.</div>
+          <div class="mode-note"><b>Tự động</b>: DIRECT, PARALLEL và PLANNED do controller chọn; các lựa chọn khác chỉ cố định một topology. Provider và model luôn là lựa chọn riêng.</div>
           <div class="provider"><span id="providerState" role="status" aria-live="polite">Chưa kiểm tra</span><button class="provider-check" id="providerCheck" type="button">Kiểm tra</button></div>
         </div>
       </div>
@@ -196,7 +199,7 @@ Page size mặc định là 25 và tối đa là 100.
           <div><dt>Bổ sung xử lý (Escalations)</dt><dd id="mEsc">0</dd></div>
           <div><dt>Chi phí API ước tính (Calculated Cost)</dt><dd id="mCost">—</dd></div>
         </dl>
-        <div class="metric-note"><b id="metricTitle">Adaptive AUTO</b><p id="researchNote">Chế độ, số lượt Agent và bổ sung xử lý được quyết định từ task/runtime; không chọn tay ở chat chính.</p></div>
+        <div class="metric-note"><b id="metricTitle">Adaptive AUTO</b><p id="researchNote">Chế độ, số lượt Agent và bổ sung xử lý được ghi nhận từ task/runtime; mode đã chọn chỉ quyết định topology, không đổi provider/model.</p></div>
       </section>
       <section class="ins-panel" id="tab-raw" role="tabpanel" aria-labelledby="ins-tab-raw"><div class="raw-toolbar"><span>Evidence JSON của lượt chạy</span><div><button id="rawCopyBtn">Sao chép</button><button id="rawDownloadBtn">Tải JSON</button></div></div><pre id="rawEvents">[]</pre></section>
       <section class="ins-panel" id="tab-context" role="tabpanel" aria-labelledby="ins-tab-context"><div class="context-screen-copy"><h3>Ngữ cảnh đã đóng băng (Frozen Context)</h3><p>Các đoạn nguồn đã được cung cấp cho lượt chạy này.</p></div><div id="evidenceContextMount"></div></section>
@@ -261,8 +264,8 @@ Page size mặc định là 25 và tối đa là 100.
       <div class="settings-scroll">
         <div class="settings-pane active" data-settings-pane="general"><h4>Tùy chọn chung</h4><div class="setting-group"><div class="setting-row"><span><b>Lưu lịch sử trò chuyện</b><small>Backend local lưu toàn bộ lượt trong cùng conversation.</small></span><button class="switch on" type="button" aria-pressed="true" aria-label="Lưu lịch sử trò chuyện"></button></div><div class="setting-row"><span><b>Thông báo khi hoàn thành</b><small>Hiển thị trạng thái hoàn thành trong giao diện.</small></span><button class="switch on" type="button" aria-pressed="true" aria-label="Thông báo khi hoàn thành"></button></div></div></div>
         <div class="settings-pane" data-settings-pane="appearance"><h4>Giao diện</h4><div class="setting-group"><div class="setting-row"><span><b>Chủ đề</b><small>Thiết kế khóa hiện dùng giao diện sáng.</small></span><strong>Sáng</strong></div><div class="setting-row"><span><b>Mật độ</b><small>Mật độ gọn phù hợp chat desktop.</small></span><strong>Gọn gàng</strong></div></div></div>
-        <div class="settings-pane" data-settings-pane="ai"><h4>AI &amp; Model</h4><div class="setting-group"><div class="setting-row"><span><b>Provider / Model</b><small>Chọn trong menu ngay dưới composer; danh sách lấy từ `/api/config`.</small></span><strong id="settingsModelSummary">—</strong></div><div class="setting-row"><span><b>Chế độ mặc định</b><small>Chat chính luôn Adaptive AUTO; controller tự chọn DIRECT / PARALLEL / PLANNED.</small></span><strong>Tự động</strong></div></div></div>
-        <div class="settings-pane" data-settings-pane="data"><h4>Dữ liệu</h4><div class="setting-group"><div class="setting-row"><span><b>Tệp được hỗ trợ</b><small>Chỉ văn bản local: TXT, Markdown, JSON và CSV.</small></span><strong>.txt · .md · .json · .csv</strong></div><div class="setting-row"><span><b>Nguồn trong chi tiết xử lý</b><small>Hiển thị snapshot/chunk provenance có thật từ run evidence.</small></span><strong>Bật</strong></div></div></div>
+        <div class="settings-pane" data-settings-pane="ai"><h4>AI &amp; Model</h4><div class="setting-group"><div class="setting-row"><span><b>Provider / Model</b><small>Chọn trong menu ngay dưới composer; danh sách lấy từ `/api/config`.</small></span><strong id="settingsModelSummary">—</strong></div><div class="setting-row"><span><b>Chế độ xử lý</b><small>Chọn Tự động, Trực tiếp, Song song hoặc Theo kế hoạch; mode không thay đổi model.</small></span><strong id="settingsModeSummary">Tự động</strong></div></div></div>
+        <div class="settings-pane" data-settings-pane="data"><h4>Dữ liệu</h4><div class="setting-group"><div class="setting-row"><span><b>Tệp được hỗ trợ</b><small>Văn bản/source local: TXT, Markdown, JSON, CSV, PY, JS, TS, HTML và CSS.</small></span><strong>.txt · .md · .json · .csv · .py · .js · .ts · .html · .css</strong></div><div class="setting-row"><span><b>Nguồn trong chi tiết xử lý</b><small>Hiển thị snapshot/chunk provenance có thật từ run evidence.</small></span><strong>Bật</strong></div></div></div>
       </div>
     </section>
   </div>
@@ -275,7 +278,7 @@ Page size mặc định là 25 và tối đa là 100.
 <div class="confirm-overlay" id="deleteConfirm" aria-hidden="true"><div class="confirm-box" role="alertdialog" aria-modal="true" aria-labelledby="deleteTitle"><h3 id="deleteTitle">Xóa cuộc trò chuyện này?</h3><p>Conversation và run evidence liên quan sẽ bị xóa khỏi máy local.</p><div class="confirm-actions"><button id="cancelDelete">Hủy</button><button class="danger-solid" id="confirmDelete">Xóa</button></div></div></div>
 
 <button class="panel-scrim" id="panelScrim" aria-label="Đóng panel đang mở"></button>
-<div class="toast-stack" id="toasts"></div>
-<script src="/static/app.js?v=20"></script>
+<div class="toast-stack" id="toasts" role="status" aria-live="polite" aria-atomic="true"></div>
+<script src="/static/app.js?v=21"></script>
 </body>
 </html>

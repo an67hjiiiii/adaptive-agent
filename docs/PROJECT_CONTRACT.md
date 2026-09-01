@@ -47,9 +47,11 @@ AUTO; users do not select a baseline strategy in the main chat.
 
 ## Frozen Context fairness
 
-Simple RAG may retrieve relevant pieces of the supplied textual reference (`.txt`,
-`.md`, `.json`, or `.csv`). Parsing is safe text normalization only; it must not
-execute document content. Chunking and lexical retrieval are deterministic. The
+Simple RAG may retrieve relevant pieces of the supplied textual reference. Product
+V1 supports UTF-8 `.txt`, `.md`, `.py`, `.js`, `.ts`, `.json`, `.html`, `.css`,
+and `.csv` files; `.pdf`, `.docx`, and `.xlsx` are explicitly unsupported.
+Parsing is safe text normalization only; it must not execute document content.
+Chunking and lexical retrieval are deterministic. The
 selected text plus retrieval metadata becomes one immutable **Frozen Context
 Snapshot** for the run. Its evidence records a deterministic `snapshot_id`,
 `snapshot_hash`/`context_hash`, source document IDs, selected/available chunk IDs,

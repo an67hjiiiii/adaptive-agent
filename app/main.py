@@ -32,6 +32,21 @@ from app.core.incidents import (
     safe_runtime_incident,
 )
 from app.core.security import redact_secrets
+from app.core.product_config import (
+    ProductSelectionError,
+    normalize_product_mode,
+    product_mode_options,
+    product_mode_to_orchestrator_mode,
+    product_model_catalog,
+    validate_product_model,
+)
+from app.core.context_files import (
+    ContextFileError,
+    MAX_CONTEXT_FILE_BYTES,
+    PRODUCT_CONTEXT_EXTENSIONS,
+    normalize_context_sources,
+    prepare_context_file,
+)
 
 BASE=Path(__file__).resolve().parent
 RUNS=BASE.parent/"runs"; RUNS.mkdir(exist_ok=True)
@@ -51,13 +66,29 @@ async def local_fresh_assets(request:Request,call_next):
         response.headers["Pragma"]="no-cache"
     return response
 
+class ContextSource(BaseModel):
+    filename:str=Field(min_length=1,max_length=255)
+    source_id:str|None=Field(default=None,max_length=32)
+    format:str|None=Field(default=None,max_length=12)
+    parser:str|None=Field(default=None,max_length=40)
+    char_count:int|None=Field(default=None,ge=1,le=MAX_CONTEXT_FILE_BYTES)
+    byte_count:int|None=Field(default=None,ge=1,le=MAX_CONTEXT_FILE_BYTES)
+    line_count:int|None=Field(default=None,ge=1,le=MAX_CONTEXT_FILE_BYTES)
+
 class ChatRequest(BaseModel):
     message:str=Field(min_length=1,max_length=12000)
     context:str=Field(default="",max_length=100000)
     provider:str=Field(default="fake",pattern="^(fake|openai|gemini|groq|openrouter)$")
     model:str|None=Field(default=None,max_length=80)
+    mode:str=Field(default="adaptive-auto",max_length=32)
     conversation_id:str|None=Field(default=None,pattern="^chat_[A-Za-z0-9_-]+$")
     history:list[dict]=Field(default_factory=list)
+    context_sources:list[ContextSource] = Field(default_factory=list,max_length=16)
+
+class ContextFileRequest(BaseModel):
+    filename:str=Field(min_length=1,max_length=255)
+    content:str|None=Field(default=None,max_length=MAX_CONTEXT_FILE_BYTES)
+    content_base64:str|None=Field(default=None,max_length=140000)
 
 class CompareRequest(ChatRequest): pass
 class ProviderTestRequest(BaseModel):
@@ -65,45 +96,24 @@ class ProviderTestRequest(BaseModel):
     model:str|None=Field(default=None,max_length=80)
 
 def model_catalog():
-    defaults={
-      "fake":"fake-research-v2",
-      "gemini":os.getenv("GEMINI_MODEL","gemini-3.7-flash"),
-      "groq":os.getenv("GROQ_MODEL","openai/gpt-oss-120b"),
-      "openrouter":os.getenv("OPENROUTER_MODEL","openrouter/free"),
-      "openai":os.getenv("OPENAI_MODEL","gpt-5.6-luna"),
-    }
-    options={
-      "fake":[{"id":"fake-research-v2","label":"Fake Research v2","tier":"offline"}],
-      "gemini":[
-        {"id":"gemini-3.7-flash","label":"Gemini 3.7 Flash","tier":"recommended"},
-        {"id":"gemini-3.6-flash","label":"Gemini 3.6 Flash","tier":"balanced"},
-        {"id":"gemini-3.5-flash-lite","label":"Gemini 3.5 Flash-Lite","tier":"economy"},
-      ],
-      "groq":[
-        {"id":"openai/gpt-oss-120b","label":"GPT-OSS 120B · Groq","tier":"fast"},
-        {"id":"openai/gpt-oss-20b","label":"GPT-OSS 20B · Groq","tier":"faster"},
-        {"id":"llama-3.3-70b-versatile","label":"Llama 3.3 70B · Groq","tier":"general"},
-      ],
-      "openrouter":[
-        {"id":"openrouter/free","label":"OpenRouter Free Router","tier":"dev-only"},
-      ],
-      "openai":[
-        {"id":"gpt-5.6-luna","label":"GPT-5.6 Luna","tier":"economy"},
-        {"id":"gpt-5.6-terra","label":"GPT-5.6 Terra","tier":"balanced"},
-        {"id":"gpt-5.6-sol","label":"GPT-5.6 Sol","tier":"quality"},
-      ],
-    }
-    for provider,current in defaults.items():
-        if current not in {item["id"] for item in options[provider]}:
-            options[provider].insert(0,{"id":current,"label":current,"tier":"custom"})
-    return defaults,options
+    return product_model_catalog()
 
 def validated_model(provider,requested=None):
-    defaults,options=model_catalog()
-    model=requested or defaults[provider]
-    if model not in {item["id"] for item in options[provider]}:
-        raise HTTPException(status_code=400,detail="Unsupported model selection")
-    return model
+    try:
+        return validate_product_model(provider,requested)
+    except ProductSelectionError as exc:
+        # Keep the existing plain detail contract while retaining a stable
+        # machine-readable prefix for local clients and friendly UI errors.
+        detail = exc.message
+        if exc.code == "UNSUPPORTED_MODEL_SELECTION":
+            detail = "Unsupported model selection for this provider."
+        raise HTTPException(status_code=400,detail=detail) from exc
+
+def validated_processing_mode(value=None):
+    try:
+        return normalize_product_mode(value)
+    except ProductSelectionError as exc:
+        raise HTTPException(status_code=400,detail=exc.message) from exc
 
 def make_budget(settings=None):
     settings=settings or {}
@@ -296,7 +306,8 @@ def save_failed_run_evidence(*,strategy,provider,model,message,context,retrieval
       "snapshot_hash":retrieval_meta.get("snapshot_hash"),
       "context_hash":retrieval_meta.get("context_hash"),
       "source_document_ids":retrieval_meta.get("source_document_ids",[]),
-      "chunk_ids":retrieval_meta.get("chunk_ids",[]),"answer":"",
+      "chunk_ids":retrieval_meta.get("chunk_ids",[]),
+      "sources":deepcopy(retrieval_meta.get("attached_sources") or []),"answer":"",
       "status":"failed","stop_reason":"STOP_FAILURE","error":safe_error,
       "metrics":comparison_metrics({"context_prep_ms":context_prep_ms},e2e_ms=e2e_ms),
       "incident":deepcopy(incident),
@@ -346,9 +357,9 @@ def history_from_conversation(data):
 
 def run_mode(data):
     for event in data.get("events",[]):
-        if event.get("title") in {"AUTO route selected","Static route frozen"}:
+        if event.get("title") in {"AUTO route selected","Product mode selected","Static route frozen"}:
             return (event.get("meta") or {}).get("mode") or event.get("detail")
-    return None
+    return data.get("processing_mode")
 
 def conversation_turns(data):
     messages=data.get("messages",[])
@@ -364,31 +375,35 @@ def conversation_turns(data):
     if pending: turns.append(pending)
     return turns
 
-def append_turn(conversation_id,*,message,data,context):
+def append_turn(conversation_id,*,message,data,context,context_sources=None):
     now=int(time.time())
     conversation=read_conversation(conversation_id) or {
       "conversation_id":conversation_id,"title":message[:72],"created_at":now,"messages":[],"run_ids":[]}
     conversation["updated_at"]=now
     conversation["provider"]=data.get("provider")
     conversation["model"]=data.get("model")
+    conversation["processing_mode"]=data.get("processing_mode") or run_mode(data)
     conversation["context"]=context
+    conversation["context_sources"]=deepcopy(context_sources or data.get("sources") or [])
     conversation["status"]=data.get("status")
     answer=data.get("answer","") or (
       f"Không thể nhận câu trả lời từ {data.get('provider','provider')}: "
       f"{data.get('error') or 'provider request failed'}"
     )
     conversation["messages"].extend([
-      {"role":"user","content":message,"run_id":data.get("run_id"),"created_at":now},
-      {"role":"assistant","content":answer,
+      {"conversation_id":conversation_id,"role":"user","content":message,
+       "run_id":data.get("run_id"),"created_at":now},
+      {"conversation_id":conversation_id,"role":"assistant","content":answer,
        "run_id":data.get("run_id"),"status":data.get("status"),"stop_reason":data.get("stop_reason"),
        "provider":data.get("provider"),"model":data.get("model"),"mode":run_mode(data),
-       "metrics":data.get("metrics") or {},"created_at":now},
+       "requested_mode":data.get("processing_mode"),
+       "metrics":data.get("metrics") or {},"sources":deepcopy(data.get("sources") or context_sources or []),"created_at":now},
     ])
     conversation["run_ids"].append(data.get("run_id"))
     write_conversation(conversation)
     return conversation
 
-def append_failed_turn(conversation_id,*,message,provider,model,error,context,run_id):
+def append_failed_turn(conversation_id,*,message,provider,model,error,context,run_id,context_sources=None,processing_mode=None):
     """Persist failures that happen before Orchestrator can emit a final event.
 
     A failed provider request is still a turn in the user's conversation. Keeping
@@ -401,14 +416,18 @@ def append_failed_turn(conversation_id,*,message,provider,model,error,context,ru
     conversation["updated_at"]=now
     conversation["provider"]=provider
     conversation["model"]=model
+    conversation["processing_mode"]=processing_mode
     conversation["context"]=context
+    conversation["context_sources"]=deepcopy(context_sources or [])
     conversation["status"]="failed"
     conversation["last_error"]=error
     conversation["messages"].extend([
-      {"role":"user","content":message,"run_id":run_id,"created_at":now},
-      {"role":"assistant","content":f"Không thể nhận câu trả lời từ {provider}: {error or 'provider request failed'}.","run_id":run_id,
+      {"conversation_id":conversation_id,"role":"user","content":message,
+       "run_id":run_id,"created_at":now},
+      {"conversation_id":conversation_id,"role":"assistant",
+       "content":f"Không thể nhận câu trả lời từ {provider}: {error or 'provider request failed'}.","run_id":run_id,
        "status":"failed","stop_reason":"STOP_FAILURE","provider":provider,"model":model,
-       "error":error,"mode":None,"metrics":{},"created_at":now},
+       "error":error,"mode":processing_mode,"metrics":{},"sources":deepcopy(context_sources or []),"created_at":now},
     ])
     conversation["run_ids"].append(run_id)
     write_conversation(conversation)
@@ -469,15 +488,18 @@ def write_provider_status(name,status=None,model=None,error=None,diagnostic=None
                     "checked_at":int(time.time()),"key_fingerprint":provider_key_fingerprint(name)}
     PROVIDER_STATUS.write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding="utf-8")
 
-async def execute_once(*,strategy,provider_name,model_name=None,message,frozen_context,retrieval_meta,history,emit,
+async def execute_once(*,strategy,provider_name,model_name=None,mode=None,message,frozen_context,retrieval_meta,history,emit,
                        conversation_id=None,budget_config=None,comparison_meta=None,run_id=None,
                        run_metadata=None,generation_settings=None,e2e_started_at=None,request_gate=None):
     accepted_started = float(e2e_started_at) if e2e_started_at is not None else time.perf_counter()
     model=validated_model(provider_name,model_name)
+    product_mode = validated_processing_mode(mode) if mode is not None else None
     p=get_provider(provider_name,model=model,generation_settings=generation_settings)
     async def enriched_emit(event):
         if event.get("type")=="final":
-            event={**event,"conversation_id":conversation_id,"provider":p.name,"model":p.model}
+            sources=deepcopy((retrieval_meta or {}).get("attached_sources") or [])
+            event={**event,"conversation_id":conversation_id,"provider":p.name,"model":p.model,
+                   "processing_mode":product_mode,"sources":sources}
         await emit(event)
     state=RunState(strategy=strategy,provider=p.name,model=p.model,task=message,
                    context=frozen_context,chat_history=format_history(history),retrieval_meta=retrieval_meta,
@@ -488,8 +510,10 @@ async def execute_once(*,strategy,provider_name,model_name=None,message,frozen_c
         enriched_emit,
         budget=make_budget(budget_config),
         request_gate=request_gate,
+        product_mode=product_mode_to_orchestrator_mode(product_mode) if product_mode else None,
     ); await orch.run(state)
     data={"run_id":state.run_id,"strategy":state.strategy,"provider":state.provider,"model":state.model,
+          "processing_mode":product_mode,
           "conversation_id":conversation_id,"user_message":message,"created_at":int(time.time()),
           "task":state.task,"chat_history":state.chat_history,"context":state.context,"retrieval_meta":state.retrieval_meta,"events":state.events,
           "snapshot_id":state.retrieval_meta.get("snapshot_id"),
@@ -497,6 +521,7 @@ async def execute_once(*,strategy,provider_name,model_name=None,message,frozen_c
           "context_hash":state.retrieval_meta.get("context_hash"),
           "source_document_ids":state.retrieval_meta.get("source_document_ids",[]),
           "chunk_ids":state.retrieval_meta.get("chunk_ids",[]),
+          "sources":deepcopy(state.retrieval_meta.get("attached_sources") or []),
           "answer":state.answer,"status":state.status,"stop_reason":state.stop_reason,
           "error":state.error or None,"metrics":orch.metrics(state),
           "incidents":deepcopy(state.incident_records),
@@ -547,7 +572,25 @@ async def config():
     default_provider=requested if configured.get(requested) else next((name for name in ("groq","openrouter","gemini","openai","fake") if configured.get(name)),"fake")
     return {"default_provider":default_provider,"models":models,"model_options":model_options,
             "available":configured,"configured":configured,"provider_status":read_provider_status(),
-            "chat_strategy":"adaptive-auto","app_version":APP_VERSION}
+            "chat_strategy":"adaptive-auto","default_mode":"adaptive-auto",
+            "mode_options":product_mode_options(),
+            "context_file_extensions":[suffix.removeprefix(".") for suffix in PRODUCT_CONTEXT_EXTENSIONS],
+            "app_version":APP_VERSION}
+
+@app.post("/api/context/prepare")
+async def prepare_context(payload:ContextFileRequest):
+    """Prepare one small textual attachment for the normal product chat path."""
+    try:
+        return prepare_context_file(
+            filename=payload.filename,
+            content=payload.content,
+            content_base64=payload.content_base64,
+        )
+    except ContextFileError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code":exc.code,"message":exc.message},
+        ) from None
 
 @app.post("/api/provider/test")
 @app.post("/api/provider/diagnostic")
@@ -596,6 +639,7 @@ async def list_conversations(limit:int=30):
             last_user=next((m.get("content","") for m in reversed(messages) if m.get("role")=="user"),"")
             rows.append({"conversation_id":d.get("conversation_id"),"title":d.get("title") or "Cuộc trò chuyện",
               "updated_at":d.get("updated_at"),"provider":d.get("provider"),"model":d.get("model"),
+              "mode":d.get("processing_mode"),
               "status":d.get("status"),"message_count":len(messages),
               "turn_count":sum(1 for m in messages if m.get("role")=="user"),
               "run_count":len(d.get("run_ids",[])),"last_preview":last_user[:120]})
@@ -615,7 +659,10 @@ class ConversationUpdate(BaseModel):
 async def rename_conversation(conversation_id:str,payload:ConversationUpdate):
     data=read_conversation(conversation_id)
     if not data: raise HTTPException(404,"Conversation not found")
-    data["title"]=payload.title.strip()
+    title=payload.title.strip()
+    if not title:
+        raise HTTPException(422,"Conversation title cannot be blank")
+    data["title"]=title
     data["updated_at"]=int(time.time())
     write_conversation(data)
     return {"ok":True,"conversation_id":conversation_id,"title":data["title"]}
@@ -640,6 +687,17 @@ async def get_run(run_id:str):
 
 @app.post("/api/chat/stream")
 async def chat(payload:ChatRequest):
+    # Normalize once at request acceptance so every event and persistence
+    # record uses the same product-mode identity.  Compare/Pilot callers do
+    # not pass this product-only control.
+    selected_mode=validated_processing_mode(payload.mode)
+    try:
+        provided_context_sources=normalize_context_sources(payload.context_sources)
+    except ContextFileError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code":exc.code,"message":exc.message},
+        ) from None
     async def gen():
         q=asyncio.Queue()
         async def emit(x): await q.put(x)
@@ -651,17 +709,30 @@ async def chat(payload:ChatRequest):
         context = payload.context if "context" in payload.model_fields_set else (
             (existing or {}).get("context", "")
         )
+        if "context_sources" in payload.model_fields_set:
+            context_sources=provided_context_sources
+        else:
+            try:
+                context_sources=normalize_context_sources((existing or {}).get("context_sources", []))
+            except ContextFileError:
+                # Old or manually edited local history must never make the
+                # normal product request fail or leak raw persisted values.
+                context_sources=[]
         accepted_started=time.perf_counter()
         snapshot,meta=frozen_snapshot(payload.message,context)
         meta=deepcopy(meta)
         meta["context_prep_ms"] = round((time.perf_counter()-accepted_started)*1000)
+        if context_sources:
+            meta["attached_sources"] = deepcopy(context_sources)
         async def work():
             try:
                 data=await execute_once(strategy="adaptive",provider_name=payload.provider,model_name=payload.model,
+                    mode=selected_mode,
                     message=payload.message,frozen_context=snapshot,retrieval_meta=meta,
                     history=stored_history,emit=emit,conversation_id=conversation_id,
                     e2e_started_at=accepted_started)
-                append_turn(conversation_id,message=payload.message,data=data,context=context)
+                append_turn(conversation_id,message=payload.message,data=data,context=context,
+                            context_sources=context_sources)
             except Exception as exc:
                 incident=(safe_runtime_incident(
                     category="INVALID_INPUT_OR_SCOPE",
@@ -678,7 +749,8 @@ async def chat(payload:ChatRequest):
                 # missing API key). Save an evidence record and failed turn so a
                 # retry remains attached to this conversation.
                 failed={"run_id":run_id,"strategy":"adaptive","provider":payload.provider,
-                        "model":payload.model,"conversation_id":conversation_id,
+                        "model":payload.model,"processing_mode":selected_mode,
+                        "conversation_id":conversation_id,
                         "user_message":payload.message,"created_at":int(time.time()),
                         "task":payload.message,"chat_history":format_history(stored_history),
                         "context":snapshot,"retrieval_meta":meta,"events":[],"answer":"",
@@ -686,6 +758,7 @@ async def chat(payload:ChatRequest):
                         "context_hash":meta.get("context_hash"),
                         "source_document_ids":meta.get("source_document_ids",[]),
                         "chunk_ids":meta.get("chunk_ids",[]),
+                        "sources":deepcopy(context_sources),
                         "status":"failed","stop_reason":"STOP_FAILURE","error":safe_error,
                         "metrics":{"e2e_ms":round((time.perf_counter()-accepted_started)*1000),
                                    "e2e_boundary_version":"E2E-MEASURE-V2",
@@ -707,14 +780,16 @@ async def chat(payload:ChatRequest):
                     save(failed)
                     append_failed_turn(conversation_id,message=payload.message,
                         provider=payload.provider,model=payload.model,error=safe_error,
-                        context=context,run_id=run_id)
+                        context=context,run_id=run_id,context_sources=context_sources,
+                        processing_mode=selected_mode)
                 except Exception:
                     # Never replace the original provider error with a storage
                     # error while streaming the fatal contract event.
                     pass
                 await q.put({"type":"fatal","error":safe_error,"run_id":run_id,
                              "conversation_id":conversation_id,"provider":payload.provider,
-                             "model":payload.model})
+                             "model":payload.model,"processing_mode":selected_mode,
+                             "sources":deepcopy(context_sources)})
             finally: await q.put(None)
         t=asyncio.create_task(work())
         try:
@@ -727,11 +802,22 @@ async def chat(payload:ChatRequest):
 
 @app.post("/api/compare/stream")
 async def compare(payload:CompareRequest):
+    try:
+        context_sources=normalize_context_sources(payload.context_sources)
+    except ContextFileError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code":exc.code,"message":exc.message},
+        ) from None
     async def gen():
         accepted_started=time.perf_counter()
         snapshot,meta=frozen_snapshot(payload.message,payload.context) # one frozen snapshot for all 4
         meta=deepcopy(meta)
         meta["context_prep_ms"] = round((time.perf_counter()-accepted_started)*1000)
+        if context_sources:
+            # Compare retains the same prepared attachment identity in every
+            # sequential strategy run, just as normal product chat does.
+            meta["attached_sources"] = deepcopy(context_sources)
         frozen_provider=payload.provider
         try:
             frozen_model=validated_model(frozen_provider,payload.model)

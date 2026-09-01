@@ -863,7 +863,7 @@ class ApiContractTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(seen, ["adaptive"])
         frontend = (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
-        self.assertIn("Chat luôn chạy Adaptive AUTO", frontend)
+        self.assertIn("Chọn provider, model và chế độ xử lý riêng cho từng lượt chat", frontend)
         self.assertNotIn('id="strategy"', frontend)
 
     def test_compare_strategy_names_remain_distinct_in_execution(self):
@@ -1088,7 +1088,12 @@ class ApiContractTests(unittest.TestCase):
         for response in (health, config, home, script, style):
             self.assertEqual(response.headers.get("cache-control"), "no-store, max-age=0")
             self.assertEqual(response.headers.get("pragma"), "no-cache")
-        self.assertIn('accept=".txt,.md,.json,.csv"', home.text)
+        self.assertEqual(
+            config.json()["context_file_extensions"],
+            ["txt", "md", "py", "js", "ts", "json", "html", "css", "csv"],
+        )
+        self.assertIn('id="contextFile" type="file" multiple', home.text)
+        self.assertNotIn("legacy API contract", home.text)
         self.assertIn('id="contextProvenance"', home.text)
 
     def test_two_turns_persist_under_one_conversation(self):
@@ -1403,8 +1408,8 @@ class FrontendV6Tests(unittest.TestCase):
         self.assertIn('summary.className="run-summary-line"', self.js)
         self.assertIn("m.total_tokens", self.js)
         self.assertIn('class="context-provenance"', self.html)
-        self.assertIn('styles.css?v=20', self.html)
-        self.assertIn('app.js?v=20', self.html)
+        self.assertIn('styles.css?v=21', self.html)
+        self.assertIn('app.js?v=21', self.html)
 
     def test_compare_headers_and_result_cells_have_exact_metric_mapping(self):
         head = self.html.split('<table class="compare-table"><thead><tr>', 1)[1].split("</tr>", 1)[0]
@@ -1424,7 +1429,8 @@ class FrontendV6Tests(unittest.TestCase):
         self.assertIn('id="searchInput"', self.html)
         self.assertIn("function renderSearchResults", self.js)
         self.assertIn("function mapUiModeToChatStrategy", self.js)
-        self.assertIn('?"adaptive-auto":null', self.js)
+        self.assertIn('if(raw==="auto")return "adaptive-auto";', self.js)
+        self.assertIn('direct:"DIRECT"', self.js)
         self.assertIn("DIRECT, PARALLEL và PLANNED do controller chọn", self.html)
         self.assertIn(".threads{display:flex;flex:1 1 auto", self.css)
 
@@ -1578,7 +1584,8 @@ class FrontendV6Tests(unittest.TestCase):
         self.assertIn('fetch("/api/conversations?limit=60")', self.js)
         self.assertIn("item.conversation_id", self.js)
         self.assertIn("currentConversationId===c.conversation_id", self.js)
-        self.assertIn('SUPPORTED_CONTEXT_EXTENSIONS = Object.freeze(["txt","md","json","csv"])', self.js)
+        self.assertNotIn("SUPPORTED_CONTEXT_EXTENSIONS", self.js)
+        self.assertIn("cfg.context_file_extensions", self.js)
         self.assertIn("activeContextFile", self.js)
         self.assertIn("processContextFile(activeContextFile)", self.js)
         self.assertNotIn("rename extension", self.js.lower())

@@ -175,11 +175,14 @@ def strategy_config_identity(strategy, budget, *, selected_preset=None,
     return identity
 
 class Orchestrator:
-    def __init__(self,provider,emit,*,budget,request_gate=None):
+    def __init__(self,provider,emit,*,budget,request_gate=None,product_mode=None):
         self.provider=provider; self.emit=emit; self.budget=budget
         # Optional experiment-level pacing gate.  It is shared across all
         # roles/strategies in a Pilot executor; normal chat remains unchanged.
         self.request_gate=request_gate
+        # Product mode is an optional forced topology.  Pilot/Compare callers
+        # leave it unset and retain the historical strategy dispatch below.
+        self.product_mode=product_mode
 
     def _set_config_identity(self,state,*,selected_preset=None):
         state.config_identity=strategy_config_identity(
@@ -494,17 +497,30 @@ class Orchestrator:
         return await self._call(state,"Direct Solver",SOLVER_SYS,self.prompt(state),PROMPT_VERSIONS["solver"],
                                 execution_meta={"agent_type":"Direct Solver","assigned_goal":"Answer the original task from frozen context","dependencies":[]})
 
-    async def run_adaptive(self,state):
-        a=await self.analyze(state)
-        mode,why=self.choose_mode(a)
-        agents=self.select_agents(a,mode)
-        await self._event(state,"decision","AUTO route selected",mode,{"mode":mode,"why":why,"selected_agents":agents})
+    async def run_adaptive(self,state,*,forced_mode=None):
+        if forced_mode is None:
+            a=await self.analyze(state)
+            mode,why=self.choose_mode(a)
+        else:
+            mode=forced_mode
+            why="Selected by the product processing-mode control."
+            # Parallel mode uses structural aspects to build worker goals, but
+            # never delegates the topology decision back to AUTO.  Planned
+            # mode obtains its DAG directly from the Planner.
+            a=await self.analyze(state) if mode=="PARALLEL" else None
+        agents=self.select_agents(a or {},mode)
+        route_title="AUTO route selected" if forced_mode is None else "Product mode selected"
+        await self._event(state,"decision",route_title,mode,
+                          {"mode":mode,"why":why,"selected_agents":agents,
+                           "source":"adaptive-controller" if forced_mode is None else "product-selection"})
         await self._event(state,"agent_selection","Agent selection",
                           ", ".join(f"{k}={v}" for k,v in agents.items() if v),agents)
 
         if mode=="DIRECT":
             candidate=await self.direct(state)
         elif mode=="PARALLEL":
+            if a is None:
+                a=await self.analyze(state)
             subtasks=self.parallel_subtasks(a)
             await self._event(state,"plan","Parallel plan from structural aspects",f"{len(subtasks)} independent node(s)",{"subtasks":subtasks})
             candidate=await self.synthesize(state,await self.execute_dag(state,subtasks))
@@ -659,7 +675,9 @@ class Orchestrator:
             state.retrieval_meta)
         await self._event(state,"run","Run started",f"{state.strategy} · {state.provider} · {state.model}")
         try:
-            if state.strategy=="adaptive": answer=await self.run_adaptive(state)
+            if self.product_mode is not None:
+                answer=await self.run_adaptive(state,forced_mode=self.product_mode)
+            elif state.strategy=="adaptive": answer=await self.run_adaptive(state)
             elif state.strategy=="single": answer=await self.run_single(state)
             elif state.strategy=="fixed": answer=await self.run_fixed(state)
             elif state.strategy=="static": answer=await self.run_static(state)
