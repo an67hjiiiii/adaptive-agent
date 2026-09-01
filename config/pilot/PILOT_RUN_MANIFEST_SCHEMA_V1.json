@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "PILOT-R4-V1",
+  "title": "Pilot Run Manifest",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "manifest_type",
+    "run_manifest_version",
+    "manifest_id",
+    "run_manifest_hash",
+    "preregistration_version",
+    "task_manifest_id",
+    "task_manifest_hash",
+    "benchmark_id",
+    "benchmark_version",
+    "provider",
+    "model",
+    "model_settings_identity",
+    "pricing_version",
+    "order_policy",
+    "units"
+  ],
+  "properties": {
+    "manifest_type": {"const": "pilot_run_manifest"},
+    "run_manifest_version": {"const": "PILOT-R4-V1"},
+    "manifest_id": {"type": "string", "minLength": 1},
+    "run_manifest_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "dry_run": {"type": "boolean"},
+    "phase": {"enum": ["DRY_RUN", "PILOT"]},
+    "freeze_identity": {"type": "string", "minLength": 1},
+    "preflight_binding": {"type": ["object", "null"]},
+    "provider": {"type": "string", "minLength": 1},
+    "model": {"type": "string", "minLength": 1},
+    "benchmark_id": {"type": "string", "minLength": 1},
+    "benchmark_version": {"type": "string", "minLength": 1},
+    "benchmark_provenance_version": {"type": ["string", "null"]},
+    "model_settings_identity": {"const": "MODEL-SETTINGS-V1"},
+    "pricing_version": {"type": "string", "minLength": 1},
+    "order_policy": {
+      "type": "object",
+      "required": ["algorithm", "top_level_sequential", "balance_status"],
+      "properties": {
+        "algorithm": {"type": "string"},
+        "top_level_sequential": {"const": true},
+        "balance_status": {"type": "string"}
+      }
+    },
+    "units": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "unit_id",
+          "task_id",
+          "repeat_index",
+          "benchmark_id",
+          "benchmark_version",
+          "reference_scope",
+          "reference_scope_hash",
+          "strategy_order",
+          "order_seed",
+          "execution_order",
+          "conditions"
+        ],
+        "properties": {
+          "unit_id": {"type": "string", "minLength": 1},
+          "task_id": {"type": "string", "minLength": 1},
+          "repeat_index": {"type": "integer", "minimum": 1},
+          "strategy_order": {
+            "type": "array",
+            "prefixItems": [
+              {"enum": ["single", "fixed", "static", "adaptive"]},
+              {"enum": ["single", "fixed", "static", "adaptive"]},
+              {"enum": ["single", "fixed", "static", "adaptive"]},
+              {"enum": ["single", "fixed", "static", "adaptive"]}
+            ],
+            "minItems": 4,
+            "maxItems": 4,
+            "uniqueItems": true
+          },
+          "order_seed": {"type": "string", "minLength": 1},
+          "execution_order": {"type": "object"},
+          "benchmark_id": {"type": "string", "minLength": 1},
+          "benchmark_version": {"type": "string", "minLength": 1},
+          "benchmark_provenance_version": {"type": ["string", "null"]},
+          "reference_scope": {"type": "array"},
+          "reference_scope_hash": {"type": ["string", "null"]},
+          "conditions": {
+            "type": "array",
+            "minItems": 4,
+            "maxItems": 4,
+            "items": {
+              "type": "object",
+              "required": [
+                "strategy",
+                "strategy_config_id",
+                "strategy_config_version",
+                "provider",
+                "model",
+                "model_settings_identity",
+                "benchmark_id",
+                "context_snapshot_id",
+                "context_snapshot_hash",
+                "benchmark_version",
+                "rubric_version_reference",
+                "pricing_version",
+                "pilot_pricing_version",
+                "pilot_strategy_config_id",
+                "rag_config_id",
+                "rag_pilot_config_id",
+                "price_config_id",
+                "phase",
+                "execution_order",
+                "run_id",
+                "status",
+                "run_state"
+              ],
+              "properties": {
+                "strategy": {"enum": ["single", "fixed", "static", "adaptive"]},
+                "strategy_config_id": {"type": "string", "minLength": 1},
+                "strategy_config_version": {"type": "string", "minLength": 1},
+                "provider": {"type": "string", "minLength": 1},
+                "model": {"type": "string", "minLength": 1},
+                "model_settings_identity": {"const": "MODEL-SETTINGS-V1"},
+                "benchmark_id": {"type": "string", "minLength": 1},
+                "context_snapshot_id": {"type": ["string", "null"]},
+                "context_snapshot_hash": {"type": ["string", "null"]},
+                "snapshot_metadata": {"type": ["object", "null"]},
+                "unit_attempt_id": {"type": ["string", "null"]},
+                "benchmark_version": {"type": "string", "minLength": 1},
+                "rubric_version_reference": {"type": ["string", "null"]},
+                "pricing_version": {"type": "string", "minLength": 1},
+                "pilot_pricing_version": {"type": "string", "minLength": 1},
+                "pilot_strategy_config_id": {"type": "string", "minLength": 1},
+                "rag_config_id": {"type": "string", "minLength": 1},
+                "rag_pilot_config_id": {"type": "string", "minLength": 1},
+                "price_config_id": {"type": "string", "minLength": 1},
+                "phase": {"enum": ["DRY_RUN", "PILOT"]},
+                "execution_order": {"type": "integer", "minimum": 1, "maximum": 4},
+                "run_id": {"type": ["string", "null"]},
+                "status": {"enum": ["observed", "missing_not_run", "failed", "stopped", "provider_incident", "invalidated", "running"]},
+                "run_state": {"enum": ["PENDING", "RUNNING", "COMPLETED", "FAILED", "STOPPED", "PROVIDER_ERROR"]}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

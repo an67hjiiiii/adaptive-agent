@@ -1,0 +1,23 @@
+{
+  "config_type": "pilot_pricing_snapshot",
+  "pricing_id": "PRICE-PILOT-V1",
+  "pricing_version": "1.1",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "input_usd_per_million_tokens": 0.15,
+  "cached_input_usd_per_million_tokens": 0.075,
+  "output_usd_per_million_tokens": 0.6,
+  "reasoning_token_rate": "Unavailable",
+  "reasoning_token_treatment": "Groq publishes no separate reasoning-token rate. If completion_tokens_details.reasoning_tokens is returned, it remains a usage breakdown and the reported completion_tokens total is priced at the published output rate.",
+  "currency": "USD",
+  "unit": "USD per 1M tokens",
+  "status": "VERIFIED",
+  "source": "https://console.groq.com/docs/model/openai/gpt-oss-120b",
+  "cached_input_source": "https://console.groq.com/docs/prompt-caching",
+  "verified_at": "2026-08-30T13:49:38Z",
+  "cost_formula": "((input_tokens-cached_input_tokens)*0.15 + cached_input_tokens*0.075 + completion_tokens*0.60) / 1000000",
+  "unavailable_fields": [
+    "separate reasoning-token price"
+  ],
+  "credentials": "excluded"
+}

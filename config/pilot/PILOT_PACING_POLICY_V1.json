@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "PILOT-PACING-POLICY-V1",
+  "title": "Groq Pilot conservative pacing policy",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "policy_id",
+    "version",
+    "provider",
+    "model",
+    "max_requests_per_minute",
+    "max_in_flight",
+    "tpm_ceiling",
+    "rpd_ceiling",
+    "tpd_ceiling",
+    "reserve_policy",
+    "retry_after_behavior",
+    "pause_behavior",
+    "rate_limit_incident_behavior"
+  ],
+  "properties": {
+    "policy_id": {"const": "GROQ-PILOT-PACING-V1"},
+    "version": {"const": "1.0"},
+    "provider": {"const": "groq"},
+    "model": {"const": "openai/gpt-oss-120b"},
+    "max_requests_per_minute": {"type": "integer", "minimum": 1, "maximum": 20},
+    "max_in_flight": {"type": "integer", "minimum": 1, "maximum": 3},
+    "tpm_ceiling": {"const": 8000},
+    "rpd_ceiling": {"const": 1000},
+    "tpd_ceiling": {"const": 200000},
+    "reserve_policy": {
+      "type": "object",
+      "required": [
+        "kind",
+        "fraction",
+        "rpd_reserve_requests",
+        "tpd_reserve_tokens",
+        "effective_rpd_ceiling",
+        "effective_tpd_ceiling"
+      ],
+      "properties": {
+        "kind": {"const": "DAILY_HEADROOM"},
+        "fraction": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "rpd_reserve_requests": {"type": "integer", "minimum": 0},
+        "tpd_reserve_tokens": {"type": "integer", "minimum": 0},
+        "effective_rpd_ceiling": {"type": "integer", "minimum": 1},
+        "effective_tpd_ceiling": {"type": "integer", "minimum": 1},
+        "basis": {"type": "string"}
+      }
+    },
+    "retry_after_behavior": {"type": "object"},
+    "pause_behavior": {"type": "object"},
+    "rate_limit_incident_behavior": {"type": "string"},
+    "header_absence_behavior": {"const": "UNAVAILABLE_NOT_ZERO"}
+  }
+}

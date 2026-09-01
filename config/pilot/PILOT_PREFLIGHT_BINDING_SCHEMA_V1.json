@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "PILOT-PREFLIGHT-BINDING-V1",
+  "title": "Fresh Pilot preflight binding",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "binding_id",
+    "binding_schema_id",
+    "binding_schema_version",
+    "preflight_id",
+    "manifest_id",
+    "provider",
+    "model",
+    "model_settings_identity",
+    "freeze_identity",
+    "phase",
+    "success",
+    "result",
+    "checked_at"
+  ],
+  "properties": {
+    "binding_id": {"type": "string", "minLength": 1},
+    "binding_schema_id": {"const": "PILOT-PREFLIGHT-BINDING-V1"},
+    "binding_schema_version": {"const": "1.0"},
+    "preflight_id": {"type": "string", "minLength": 1},
+    "manifest_id": {"type": "string", "minLength": 1},
+    "provider": {"type": "string", "minLength": 1},
+    "model": {"type": "string", "minLength": 1},
+    "model_settings_identity": {"type": "string", "minLength": 1},
+    "settings_identity": {"type": "string", "minLength": 1},
+    "freeze_identity": {"type": "string", "minLength": 1},
+    "config_identity": {"type": ["string", "null"]},
+    "phase": {"const": "PREFLIGHT"},
+    "success": {"const": true},
+    "result": {"enum": ["PASS", "SUCCESS"]},
+    "status": {"enum": ["PASS", "SUCCESS", "VALID", "OK"]},
+    "checked_at": {"type": "string", "format": "date-time"},
+    "timestamp": {"type": "string", "format": "date-time"}
+  }
+}

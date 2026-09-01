@@ -1,0 +1,10 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+runs/*.json
+runs/*.log
+runs/*.pid
+runs/conversations/
+runs/pilot/
+!runs/.gitkeep

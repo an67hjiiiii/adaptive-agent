@@ -1,0 +1,3048 @@
+{
+  "artifact_id": "pilot_evaluator_packets_v2",
+  "packet_set_id": "PILOT-EVALUATOR-PACKETS-V2",
+  "version": "2.0",
+  "status": "PLANNED",
+  "evaluation_protocol_id": "QEP-1.1",
+  "benchmark_id": "pilot_benchmark_v1",
+  "benchmark_version": "pilot_benchmark_v1@1.1.0",
+  "corpus_version": "PILOT-CORPUS-V1",
+  "rubric_version": "PILOT-RUBRIC-V1.0",
+  "source_manifest_path": "runs/pilot/taskj-final-manifest-v6.json",
+  "candidate_identity": {
+    "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+    "candidate_manifest_id": "pm_fc24a4e14c47",
+    "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+  },
+  "planned_packet_count": 96,
+  "planned_evaluable_count": 0,
+  "evaluable_rule": "EVALUABLE requires a valid bound raw run evidence record for the same packet task/unit/repeat/strategy/freeze identity; PLANNED is never EVALUABLE.",
+  "blind_packet_fields": [
+    "anonymized_candidate_id",
+    "task_id",
+    "repeat_index",
+    "candidate_answer",
+    "permitted_reference_scope",
+    "hidden_task_rubric"
+  ],
+  "hidden_from_evaluator": [
+    "strategy",
+    "unit_id",
+    "candidate_manifest_id",
+    "candidate_manifest_hash",
+    "provider",
+    "model",
+    "latency",
+    "tokens",
+    "cost",
+    "trace"
+  ],
+  "evaluator_plan": {
+    "plan_id": "PILOT-EVALUATION-OPS-V1",
+    "version": "1.0",
+    "evaluation_protocol_id": "QEP-1.1",
+    "packet_set_id": "PILOT-EVALUATOR-PACKETS-V2",
+    "planned_packet_count": 96,
+    "planned_e1_count": 96,
+    "planned_e2_overlap_count": 24,
+    "slots": {
+      "E1": {
+        "role_id": "E1",
+        "status": "UNASSIGNED",
+        "planned_count": 96
+      },
+      "E2": {
+        "role_id": "E2",
+        "status": "UNASSIGNED",
+        "planned_count": 24,
+        "exception_policy": "all UNCLEAR, borderline, invalid, and disputed cases"
+      },
+      "ADJ-1": {
+        "role_id": "ADJ-1",
+        "status": "UNASSIGNED",
+        "planned_count": 0,
+        "on_demand": true
+      }
+    },
+    "capacity_status": "UNCONFIRMED",
+    "identity_recording": "Record role IDs, assignments, timestamps, locked labels, changes, and adjudication rationale in the research ledger."
+  },
+  "packets": [
+    {
+      "packet_id": "PILOT-PACKET-0894D6EDD9B948AE9E48",
+      "anonymized_candidate_id": "CANDIDATE-0894D6EDD9B948AE9E48",
+      "task_id": "PILOT-R2-01",
+      "repeat_index": 1,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-01-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-01-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-119E4393508EDAD49946",
+      "anonymized_candidate_id": "CANDIDATE-119E4393508EDAD49946",
+      "task_id": "PILOT-R2-01",
+      "repeat_index": 1,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-01-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-01-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-B56A92B2E83E929C8913",
+      "anonymized_candidate_id": "CANDIDATE-B56A92B2E83E929C8913",
+      "task_id": "PILOT-R2-01",
+      "repeat_index": 1,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-01-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-01-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-D44FCD5EA99E781D9301",
+      "anonymized_candidate_id": "CANDIDATE-D44FCD5EA99E781D9301",
+      "task_id": "PILOT-R2-01",
+      "repeat_index": 1,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-01-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-01-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-221D54CDA108A91BAAFE",
+      "anonymized_candidate_id": "CANDIDATE-221D54CDA108A91BAAFE",
+      "task_id": "PILOT-R2-01",
+      "repeat_index": 2,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-01-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-01-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-33A5A967A44182C0A019",
+      "anonymized_candidate_id": "CANDIDATE-33A5A967A44182C0A019",
+      "task_id": "PILOT-R2-01",
+      "repeat_index": 2,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-01-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-01-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-4EE915823EC649FDB110",
+      "anonymized_candidate_id": "CANDIDATE-4EE915823EC649FDB110",
+      "task_id": "PILOT-R2-01",
+      "repeat_index": 2,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-01-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-01-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-DB3F5881067E3A1FDA4D",
+      "anonymized_candidate_id": "CANDIDATE-DB3F5881067E3A1FDA4D",
+      "task_id": "PILOT-R2-01",
+      "repeat_index": 2,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-01-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-01-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-3303D7B7DE88BF3C545F",
+      "anonymized_candidate_id": "CANDIDATE-3303D7B7DE88BF3C545F",
+      "task_id": "PILOT-R2-01",
+      "repeat_index": 3,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-01-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-01-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-463B0124383B45EE5D28",
+      "anonymized_candidate_id": "CANDIDATE-463B0124383B45EE5D28",
+      "task_id": "PILOT-R2-01",
+      "repeat_index": 3,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-01-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-01-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-826DF243C36A027E4896",
+      "anonymized_candidate_id": "CANDIDATE-826DF243C36A027E4896",
+      "task_id": "PILOT-R2-01",
+      "repeat_index": 3,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-01-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-01-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-C72949EAA9523657FC40",
+      "anonymized_candidate_id": "CANDIDATE-C72949EAA9523657FC40",
+      "task_id": "PILOT-R2-01",
+      "repeat_index": 3,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-01-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-01-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-74DA5E5B193134F4C68D",
+      "anonymized_candidate_id": "CANDIDATE-74DA5E5B193134F4C68D",
+      "task_id": "PILOT-R2-02",
+      "repeat_index": 1,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-02-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-02-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-93A82E5D598FFF67AEA6",
+      "anonymized_candidate_id": "CANDIDATE-93A82E5D598FFF67AEA6",
+      "task_id": "PILOT-R2-02",
+      "repeat_index": 1,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-02-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-02-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-AC0BC22CB0D38951D717",
+      "anonymized_candidate_id": "CANDIDATE-AC0BC22CB0D38951D717",
+      "task_id": "PILOT-R2-02",
+      "repeat_index": 1,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-02-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-02-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-2120A7A41FB0DD29C229",
+      "anonymized_candidate_id": "CANDIDATE-2120A7A41FB0DD29C229",
+      "task_id": "PILOT-R2-02",
+      "repeat_index": 1,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-02-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-02-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-F69AF8B0E13E6621DFCF",
+      "anonymized_candidate_id": "CANDIDATE-F69AF8B0E13E6621DFCF",
+      "task_id": "PILOT-R2-02",
+      "repeat_index": 2,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-02-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-02-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-34DC130F287D31366AF2",
+      "anonymized_candidate_id": "CANDIDATE-34DC130F287D31366AF2",
+      "task_id": "PILOT-R2-02",
+      "repeat_index": 2,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-02-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-02-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-246B3129F9591337FB29",
+      "anonymized_candidate_id": "CANDIDATE-246B3129F9591337FB29",
+      "task_id": "PILOT-R2-02",
+      "repeat_index": 2,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-02-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-02-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-303DF68E3DDEF58F2DCC",
+      "anonymized_candidate_id": "CANDIDATE-303DF68E3DDEF58F2DCC",
+      "task_id": "PILOT-R2-02",
+      "repeat_index": 2,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-02-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-02-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-D6D3B56C0207700F339C",
+      "anonymized_candidate_id": "CANDIDATE-D6D3B56C0207700F339C",
+      "task_id": "PILOT-R2-02",
+      "repeat_index": 3,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-02-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-02-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-B494D93708D9DD18772C",
+      "anonymized_candidate_id": "CANDIDATE-B494D93708D9DD18772C",
+      "task_id": "PILOT-R2-02",
+      "repeat_index": 3,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-02-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-02-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-5A1C92887B6F86D021CB",
+      "anonymized_candidate_id": "CANDIDATE-5A1C92887B6F86D021CB",
+      "task_id": "PILOT-R2-02",
+      "repeat_index": 3,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-02-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-02-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-972894B011BF7E407D28",
+      "anonymized_candidate_id": "CANDIDATE-972894B011BF7E407D28",
+      "task_id": "PILOT-R2-02",
+      "repeat_index": 3,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-02-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-02-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-B6A384DD33A770E500D0",
+      "anonymized_candidate_id": "CANDIDATE-B6A384DD33A770E500D0",
+      "task_id": "PILOT-R2-03",
+      "repeat_index": 1,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-03-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-03-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-22EC7EB381116DC9D56C",
+      "anonymized_candidate_id": "CANDIDATE-22EC7EB381116DC9D56C",
+      "task_id": "PILOT-R2-03",
+      "repeat_index": 1,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-03-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-03-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-65E00482D27B74AE331B",
+      "anonymized_candidate_id": "CANDIDATE-65E00482D27B74AE331B",
+      "task_id": "PILOT-R2-03",
+      "repeat_index": 1,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-03-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-03-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-4A9951E900DC18FE7917",
+      "anonymized_candidate_id": "CANDIDATE-4A9951E900DC18FE7917",
+      "task_id": "PILOT-R2-03",
+      "repeat_index": 1,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-03-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-03-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-FB49814EE8DA45E7F477",
+      "anonymized_candidate_id": "CANDIDATE-FB49814EE8DA45E7F477",
+      "task_id": "PILOT-R2-03",
+      "repeat_index": 2,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-03-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-03-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-90621FC83D96CA2A3A34",
+      "anonymized_candidate_id": "CANDIDATE-90621FC83D96CA2A3A34",
+      "task_id": "PILOT-R2-03",
+      "repeat_index": 2,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-03-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-03-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-F0F477001AC6C9CDD932",
+      "anonymized_candidate_id": "CANDIDATE-F0F477001AC6C9CDD932",
+      "task_id": "PILOT-R2-03",
+      "repeat_index": 2,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-03-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-03-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-71B5C3D33EB58BC1EF0C",
+      "anonymized_candidate_id": "CANDIDATE-71B5C3D33EB58BC1EF0C",
+      "task_id": "PILOT-R2-03",
+      "repeat_index": 2,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-03-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-03-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-592453831F1428914F28",
+      "anonymized_candidate_id": "CANDIDATE-592453831F1428914F28",
+      "task_id": "PILOT-R2-03",
+      "repeat_index": 3,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-03-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-03-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-35B34BFA2E05662AAC7E",
+      "anonymized_candidate_id": "CANDIDATE-35B34BFA2E05662AAC7E",
+      "task_id": "PILOT-R2-03",
+      "repeat_index": 3,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-03-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-03-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-4A1FEE436E059DE43E3F",
+      "anonymized_candidate_id": "CANDIDATE-4A1FEE436E059DE43E3F",
+      "task_id": "PILOT-R2-03",
+      "repeat_index": 3,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-03-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-03-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-C6AF589FF2C33F1CA2D3",
+      "anonymized_candidate_id": "CANDIDATE-C6AF589FF2C33F1CA2D3",
+      "task_id": "PILOT-R2-03",
+      "repeat_index": 3,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-03-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-03-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-D17D844D26977F9EF20D",
+      "anonymized_candidate_id": "CANDIDATE-D17D844D26977F9EF20D",
+      "task_id": "PILOT-R2-04",
+      "repeat_index": 1,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-04-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-04-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-2A668B9C1D1DA435C0B6",
+      "anonymized_candidate_id": "CANDIDATE-2A668B9C1D1DA435C0B6",
+      "task_id": "PILOT-R2-04",
+      "repeat_index": 1,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-04-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-04-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-DFE90F10CC3082E1FB94",
+      "anonymized_candidate_id": "CANDIDATE-DFE90F10CC3082E1FB94",
+      "task_id": "PILOT-R2-04",
+      "repeat_index": 1,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-04-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-04-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-525CA2B9FB3F89DDF32B",
+      "anonymized_candidate_id": "CANDIDATE-525CA2B9FB3F89DDF32B",
+      "task_id": "PILOT-R2-04",
+      "repeat_index": 1,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-04-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-04-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-6328D083786A5E98F06E",
+      "anonymized_candidate_id": "CANDIDATE-6328D083786A5E98F06E",
+      "task_id": "PILOT-R2-04",
+      "repeat_index": 2,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-04-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-04-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-28A0436ECF36AA488DEB",
+      "anonymized_candidate_id": "CANDIDATE-28A0436ECF36AA488DEB",
+      "task_id": "PILOT-R2-04",
+      "repeat_index": 2,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-04-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-04-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-D89325E6B2D23841EEA6",
+      "anonymized_candidate_id": "CANDIDATE-D89325E6B2D23841EEA6",
+      "task_id": "PILOT-R2-04",
+      "repeat_index": 2,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-04-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-04-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-FF3D9CDE17F5597501D5",
+      "anonymized_candidate_id": "CANDIDATE-FF3D9CDE17F5597501D5",
+      "task_id": "PILOT-R2-04",
+      "repeat_index": 2,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-04-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-04-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-2446EF4304D586919A99",
+      "anonymized_candidate_id": "CANDIDATE-2446EF4304D586919A99",
+      "task_id": "PILOT-R2-04",
+      "repeat_index": 3,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-04-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-04-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-D29A3E8C1140CA71CEDE",
+      "anonymized_candidate_id": "CANDIDATE-D29A3E8C1140CA71CEDE",
+      "task_id": "PILOT-R2-04",
+      "repeat_index": 3,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-04-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-04-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-5E21D9482ED7B5CD28A7",
+      "anonymized_candidate_id": "CANDIDATE-5E21D9482ED7B5CD28A7",
+      "task_id": "PILOT-R2-04",
+      "repeat_index": 3,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-04-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-04-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-183530D7D56C6D19B278",
+      "anonymized_candidate_id": "CANDIDATE-183530D7D56C6D19B278",
+      "task_id": "PILOT-R2-04",
+      "repeat_index": 3,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-04-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-04-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-42F5B777E57223B5CD28",
+      "anonymized_candidate_id": "CANDIDATE-42F5B777E57223B5CD28",
+      "task_id": "PILOT-R2-05",
+      "repeat_index": 1,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-05-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-05-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-A310F5B8035E697B5748",
+      "anonymized_candidate_id": "CANDIDATE-A310F5B8035E697B5748",
+      "task_id": "PILOT-R2-05",
+      "repeat_index": 1,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-05-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-05-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-474C0E6A0450E8AFF340",
+      "anonymized_candidate_id": "CANDIDATE-474C0E6A0450E8AFF340",
+      "task_id": "PILOT-R2-05",
+      "repeat_index": 1,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-05-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-05-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-0161B1257442EFC8BCE2",
+      "anonymized_candidate_id": "CANDIDATE-0161B1257442EFC8BCE2",
+      "task_id": "PILOT-R2-05",
+      "repeat_index": 1,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-05-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-05-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-6CFA40BB3B2815FD21BB",
+      "anonymized_candidate_id": "CANDIDATE-6CFA40BB3B2815FD21BB",
+      "task_id": "PILOT-R2-05",
+      "repeat_index": 2,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-05-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-05-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-99579A487497AFC5D2E4",
+      "anonymized_candidate_id": "CANDIDATE-99579A487497AFC5D2E4",
+      "task_id": "PILOT-R2-05",
+      "repeat_index": 2,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-05-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-05-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-05D2195EEFA1B59BD0AC",
+      "anonymized_candidate_id": "CANDIDATE-05D2195EEFA1B59BD0AC",
+      "task_id": "PILOT-R2-05",
+      "repeat_index": 2,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-05-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-05-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-61D7530EF2AB03BC4BD1",
+      "anonymized_candidate_id": "CANDIDATE-61D7530EF2AB03BC4BD1",
+      "task_id": "PILOT-R2-05",
+      "repeat_index": 2,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-05-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-05-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-621562933251A3CA9AF5",
+      "anonymized_candidate_id": "CANDIDATE-621562933251A3CA9AF5",
+      "task_id": "PILOT-R2-05",
+      "repeat_index": 3,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-05-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-05-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-369DDBF04137FEB3AABB",
+      "anonymized_candidate_id": "CANDIDATE-369DDBF04137FEB3AABB",
+      "task_id": "PILOT-R2-05",
+      "repeat_index": 3,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-05-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-05-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-F83A47AAEADEF52956D9",
+      "anonymized_candidate_id": "CANDIDATE-F83A47AAEADEF52956D9",
+      "task_id": "PILOT-R2-05",
+      "repeat_index": 3,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-05-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-05-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-DBD1914A6AF2D469D3BA",
+      "anonymized_candidate_id": "CANDIDATE-DBD1914A6AF2D469D3BA",
+      "task_id": "PILOT-R2-05",
+      "repeat_index": 3,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-05-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-05-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-BBE032D653CA0D05A38B",
+      "anonymized_candidate_id": "CANDIDATE-BBE032D653CA0D05A38B",
+      "task_id": "PILOT-R2-06",
+      "repeat_index": 1,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-06-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-06-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-9E93E7ED9CA299296FDF",
+      "anonymized_candidate_id": "CANDIDATE-9E93E7ED9CA299296FDF",
+      "task_id": "PILOT-R2-06",
+      "repeat_index": 1,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-06-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-06-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-3B4479578E9DF6A42042",
+      "anonymized_candidate_id": "CANDIDATE-3B4479578E9DF6A42042",
+      "task_id": "PILOT-R2-06",
+      "repeat_index": 1,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-06-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-06-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-22F15930323EC7E2E422",
+      "anonymized_candidate_id": "CANDIDATE-22F15930323EC7E2E422",
+      "task_id": "PILOT-R2-06",
+      "repeat_index": 1,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-06-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-06-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-9A55B06A8989EE5B1848",
+      "anonymized_candidate_id": "CANDIDATE-9A55B06A8989EE5B1848",
+      "task_id": "PILOT-R2-06",
+      "repeat_index": 2,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-06-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-06-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-419F9E77E71F5AFD5D1D",
+      "anonymized_candidate_id": "CANDIDATE-419F9E77E71F5AFD5D1D",
+      "task_id": "PILOT-R2-06",
+      "repeat_index": 2,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-06-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-06-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-380A5693E987C35014C9",
+      "anonymized_candidate_id": "CANDIDATE-380A5693E987C35014C9",
+      "task_id": "PILOT-R2-06",
+      "repeat_index": 2,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-06-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-06-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-F27B4235DEB092E6C2A1",
+      "anonymized_candidate_id": "CANDIDATE-F27B4235DEB092E6C2A1",
+      "task_id": "PILOT-R2-06",
+      "repeat_index": 2,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-06-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-06-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-87A06BEE367F5E702DD4",
+      "anonymized_candidate_id": "CANDIDATE-87A06BEE367F5E702DD4",
+      "task_id": "PILOT-R2-06",
+      "repeat_index": 3,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-06-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-06-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-33AC24A94BEDA26A39E9",
+      "anonymized_candidate_id": "CANDIDATE-33AC24A94BEDA26A39E9",
+      "task_id": "PILOT-R2-06",
+      "repeat_index": 3,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-06-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-06-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-714B2597587B152384FD",
+      "anonymized_candidate_id": "CANDIDATE-714B2597587B152384FD",
+      "task_id": "PILOT-R2-06",
+      "repeat_index": 3,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-06-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-06-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-7B7D373B8C4EA5C80B44",
+      "anonymized_candidate_id": "CANDIDATE-7B7D373B8C4EA5C80B44",
+      "task_id": "PILOT-R2-06",
+      "repeat_index": 3,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-06-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-06-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-101D5FBDDC24789E31B9",
+      "anonymized_candidate_id": "CANDIDATE-101D5FBDDC24789E31B9",
+      "task_id": "PILOT-R2-07",
+      "repeat_index": 1,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-07-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-07-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-67B245239C39264B8173",
+      "anonymized_candidate_id": "CANDIDATE-67B245239C39264B8173",
+      "task_id": "PILOT-R2-07",
+      "repeat_index": 1,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-07-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-07-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-5EF3679793D558800A84",
+      "anonymized_candidate_id": "CANDIDATE-5EF3679793D558800A84",
+      "task_id": "PILOT-R2-07",
+      "repeat_index": 1,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-07-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-07-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-E1B1BC5B672EAFABCB19",
+      "anonymized_candidate_id": "CANDIDATE-E1B1BC5B672EAFABCB19",
+      "task_id": "PILOT-R2-07",
+      "repeat_index": 1,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-07-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-07-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-AF2A0F7534156D5587B9",
+      "anonymized_candidate_id": "CANDIDATE-AF2A0F7534156D5587B9",
+      "task_id": "PILOT-R2-07",
+      "repeat_index": 2,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-07-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-07-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-B237BD56A060F176D9E1",
+      "anonymized_candidate_id": "CANDIDATE-B237BD56A060F176D9E1",
+      "task_id": "PILOT-R2-07",
+      "repeat_index": 2,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-07-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-07-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-226370444018859B756D",
+      "anonymized_candidate_id": "CANDIDATE-226370444018859B756D",
+      "task_id": "PILOT-R2-07",
+      "repeat_index": 2,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-07-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-07-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-833F87185FBFA9FD6016",
+      "anonymized_candidate_id": "CANDIDATE-833F87185FBFA9FD6016",
+      "task_id": "PILOT-R2-07",
+      "repeat_index": 2,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-07-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-07-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-23480A2A7879D5ECC04F",
+      "anonymized_candidate_id": "CANDIDATE-23480A2A7879D5ECC04F",
+      "task_id": "PILOT-R2-07",
+      "repeat_index": 3,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-07-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-07-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-BDAE9850C5796B758021",
+      "anonymized_candidate_id": "CANDIDATE-BDAE9850C5796B758021",
+      "task_id": "PILOT-R2-07",
+      "repeat_index": 3,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-07-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-07-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-22AE88134C61168C178B",
+      "anonymized_candidate_id": "CANDIDATE-22AE88134C61168C178B",
+      "task_id": "PILOT-R2-07",
+      "repeat_index": 3,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-07-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-07-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-5902A927A11C7099C1BC",
+      "anonymized_candidate_id": "CANDIDATE-5902A927A11C7099C1BC",
+      "task_id": "PILOT-R2-07",
+      "repeat_index": 3,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-07-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-07-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-6E015B18B36AB938E0F9",
+      "anonymized_candidate_id": "CANDIDATE-6E015B18B36AB938E0F9",
+      "task_id": "PILOT-R2-08",
+      "repeat_index": 1,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-08-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-08-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-2017A60B5C292BDA891E",
+      "anonymized_candidate_id": "CANDIDATE-2017A60B5C292BDA891E",
+      "task_id": "PILOT-R2-08",
+      "repeat_index": 1,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-08-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-08-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-3292C2B02C4DE41357C4",
+      "anonymized_candidate_id": "CANDIDATE-3292C2B02C4DE41357C4",
+      "task_id": "PILOT-R2-08",
+      "repeat_index": 1,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-08-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-08-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-FE6B1AD3E7C11E627E00",
+      "anonymized_candidate_id": "CANDIDATE-FE6B1AD3E7C11E627E00",
+      "task_id": "PILOT-R2-08",
+      "repeat_index": 1,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-08-r1",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-08-r1",
+        "repeat_index": 1,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-3233091FC6F1EFF2E2F8",
+      "anonymized_candidate_id": "CANDIDATE-3233091FC6F1EFF2E2F8",
+      "task_id": "PILOT-R2-08",
+      "repeat_index": 2,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-08-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-08-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-F5E0D2AC681B87F6F643",
+      "anonymized_candidate_id": "CANDIDATE-F5E0D2AC681B87F6F643",
+      "task_id": "PILOT-R2-08",
+      "repeat_index": 2,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-08-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-08-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-EDBAAC5F45D09130C625",
+      "anonymized_candidate_id": "CANDIDATE-EDBAAC5F45D09130C625",
+      "task_id": "PILOT-R2-08",
+      "repeat_index": 2,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-08-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-08-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-E7A34A8D53F8FD2E884E",
+      "anonymized_candidate_id": "CANDIDATE-E7A34A8D53F8FD2E884E",
+      "task_id": "PILOT-R2-08",
+      "repeat_index": 2,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-08-r2",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-08-r2",
+        "repeat_index": 2,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-7EF69313884408A52C63",
+      "anonymized_candidate_id": "CANDIDATE-7EF69313884408A52C63",
+      "task_id": "PILOT-R2-08",
+      "repeat_index": 3,
+      "strategy": "single",
+      "unit_id": "PILOT-R2-08-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "single",
+        "unit_id": "PILOT-R2-08-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-81091D90FD5F7AF9388A",
+      "anonymized_candidate_id": "CANDIDATE-81091D90FD5F7AF9388A",
+      "task_id": "PILOT-R2-08",
+      "repeat_index": 3,
+      "strategy": "fixed",
+      "unit_id": "PILOT-R2-08-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "fixed",
+        "unit_id": "PILOT-R2-08-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-6F54673DD07DC994ECEF",
+      "anonymized_candidate_id": "CANDIDATE-6F54673DD07DC994ECEF",
+      "task_id": "PILOT-R2-08",
+      "repeat_index": 3,
+      "strategy": "static",
+      "unit_id": "PILOT-R2-08-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "static",
+        "unit_id": "PILOT-R2-08-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    },
+    {
+      "packet_id": "PILOT-PACKET-8EBE7233309672D49619",
+      "anonymized_candidate_id": "CANDIDATE-8EBE7233309672D49619",
+      "task_id": "PILOT-R2-08",
+      "repeat_index": 3,
+      "strategy": "adaptive",
+      "unit_id": "PILOT-R2-08-r3",
+      "candidate_identity": {
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1",
+        "candidate_manifest_id": "pm_fc24a4e14c47",
+        "candidate_manifest_hash": "fc24a4e14c47551f1cb03bbfe0669f3dc23f079a5359b5827c0a467c1b3157e8"
+      },
+      "rubric_binding": {
+        "evaluation_protocol_id": "QEP-1.1",
+        "rubric_version": "PILOT-RUBRIC-V1.0",
+        "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json"
+      },
+      "evaluation_protocol_id": "QEP-1.1",
+      "status": "PLANNED",
+      "raw_evidence_binding": {
+        "required_for_evaluable": true,
+        "run_id": null,
+        "raw_evidence_path": null
+      },
+      "coordinator_only": {
+        "strategy": "adaptive",
+        "unit_id": "PILOT-R2-08-r3",
+        "repeat_index": 3,
+        "freeze_identity": "PILOT-FREEZE-CANDIDATE-V1"
+      }
+    }
+  ]
+}

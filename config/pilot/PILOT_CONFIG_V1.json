@@ -1,0 +1,386 @@
+{
+  "config_type": "pilot_execution_config",
+  "config_id": "PILOT-EXECUTION-INFRA-V1",
+  "config_version": "1.0",
+  "purpose": "No-secret snapshot for reproducible Pilot preparation and dry-run control.",
+  "runtime_source_of_truth": [
+    "app/core/orchestrator.py",
+    "app/core/pilot.py",
+    "app/core/rag.py",
+    "app/core/types.py",
+    "app/main.py",
+    "app/providers/compatible.py",
+    "app/providers/factory.py",
+    "scripts/provider_probe.py",
+    "config/pilot/MODEL_PILOT_V1.json",
+    "config/pilot/PRICE_PILOT_V1.json"
+  ],
+  "primary_pilot_candidate": {
+    "provider": "groq",
+    "model": "openai/gpt-oss-120b",
+    "source": "config/pilot/MODEL_PILOT_V1.json; candidate named by project preregistration",
+    "credentials": "excluded"
+  },
+  "benchmark_binding": {
+    "benchmark_id": "pilot_benchmark_v1",
+    "benchmark_version": "pilot_benchmark_v1@1.1.0",
+    "provenance_label": "PILOT-R2",
+    "source": "benchmarks/pilot/pilot_benchmark_v1.json"
+  },
+  "quality_binding": {
+    "protocol_version": "QEP-1.1",
+    "rubric_version": "PILOT-RUBRIC-V1.0",
+    "corpus_version": "PILOT-CORPUS-V1",
+    "source": "evaluation/pilot/pilot_rubrics_v1.json"
+  },
+  "reference_scope_policy": {
+    "authoritative_binding": "tasks[].reference_bindings",
+    "section_resolution": "frozen CORPUS_MANIFEST.json line_range by section_id",
+    "invalid_section_action": "FAIL_CLOSED",
+    "whole_document": "EXPLICIT_ONLY",
+    "snapshot_provenance_fields": [
+      "source_document_ids",
+      "source_document_hashes",
+      "reference_scope",
+      "reference_scope_hash",
+      "context_snapshot_id",
+      "context_snapshot_hash"
+    ]
+  },
+  "rag_settings": {
+    "version": "RAG-LEXICAL-V1@1.1",
+    "top_k": 32,
+    "max_chars": 16000,
+    "chunk_chars": 1400,
+    "completeness_policy": "ALL_DECLARED_REFERENCE_SECTIONS_REQUIRED",
+    "truncation_policy": "RECORD_AND_FAIL_CLOSED_WHEN_REQUIRED_SECTION_MISSING"
+  },
+  "provider_limits_snapshot": {
+    "snapshot_id": "GROQ-PILOT-LIMITS-V1",
+    "snapshot_version": "1.0",
+    "organization_rpm": 30,
+    "organization_rpd": 1000,
+    "organization_tpm": 8000,
+    "organization_tpd": 200000,
+    "project_override": "NONE",
+    "itpm_otpm": "SEPARATE_ITPM_OTPM_NOT_VERIFIED",
+    "source": "docs/PILOT_PROVIDER_LIMITS.md"
+  },
+  "pacing_policy": {
+    "policy_id": "GROQ-PILOT-PACING-V1",
+    "version": "1.0",
+    "provider": "groq",
+    "model": "openai/gpt-oss-120b",
+    "max_requests_per_minute": 20,
+    "max_in_flight": 3,
+    "tpm_ceiling": 8000,
+    "rpd_ceiling": 1000,
+    "tpd_ceiling": 200000,
+    "reserve_policy": {
+      "kind": "DAILY_HEADROOM",
+      "fraction": 0.1,
+      "rpd_reserve_requests": 100,
+      "tpd_reserve_tokens": 20000,
+      "effective_rpd_ceiling": 900,
+      "effective_tpd_ceiling": 180000,
+      "basis": "Retain ten percent of the verified daily ceilings for provider overhead and non-Pilot traffic; these are local safety ceilings, not provider quota claims."
+    },
+    "retry_after_behavior": {
+      "honor": true,
+      "accepted_forms": ["seconds", "http-date"],
+      "missing_header": "FALL_BACK_TO_BOUNDED_EXPONENTIAL_BACKOFF",
+      "negative_or_invalid": "IGNORE_AND_USE_FALLBACK"
+    },
+    "pause_behavior": {
+      "local_safe_ceiling": "FAIL_CLOSED",
+      "provider_remaining_unavailable": "PAUSE_BEFORE_NEW_BLOCK_OR_OWNER_REVIEW",
+      "daily_ceiling": "PAUSE_UNTIL_NEXT_WINDOW_OR_OWNER_REVIEW",
+      "rate_limit": "PAUSE_AND_REASSESS_AFTER_RETRY_AFTER"
+    },
+    "rate_limit_incident_behavior": "RECORD_PROVIDER_INCIDENT_MISSINGNESS_NOT_QUALITY_FAILURE",
+    "header_absence_behavior": "UNAVAILABLE_NOT_ZERO",
+    "max_in_flight_workers": 3,
+    "conservative_requests_per_minute_until_header_observation": 20,
+    "aggregate_token_ceiling_per_minute": 8000,
+    "honor_retry_after": true,
+    "rate_limit_incident_is_quality_failure": false,
+    "enforcement": "AsyncRequestPacer shared by all roles in one executor",
+    "request_gate_scope": "provider_account_and_process"
+  },
+  "authorization_mechanism": {
+    "authorization_schema_id": "PILOT-AUTHORIZATION-V1",
+    "authorization_schema_version": "1.0",
+    "preflight_binding_schema_id": "PILOT-PREFLIGHT-BINDING-V1",
+    "preflight_binding_schema_version": "1.0",
+    "live_window_schema_id": "PILOT-LIVE-WINDOW-V1",
+    "live_window_schema_version": "1.0",
+    "authorized_scope": "AUTHORIZE_PILOT_EXECUTION",
+    "owner_role": "PROJECT_OWNER",
+    "final_authorization": "INTEGRATION_DECISION_REQUIRED",
+    "execution_side_effect": false
+  },
+  "incident_taxonomy": {
+    "version": "INCIDENT-TAXONOMY-V1",
+    "provider_vs_runtime_origins": true
+  },
+  "denominator_policy": {
+    "policy_id": "QEP-DENOMINATOR-V1",
+    "version": "1.0",
+    "canonical_attempt_per_condition": true,
+    "case_a_evaluable": "quality_denominator",
+    "case_b_provider_or_infrastructure": "reliability_only",
+    "case_c_strategy_terminal_without_answer": "strategy_missingness",
+    "case_d_invalid_unit": "exclude_and_report",
+    "case_e_manual_exclusion": "predeclared_only",
+    "differential_missingness": {
+      "policy_id": "PILOT-DIFFERENTIAL-MISSINGNESS-V1",
+      "version": "1.0",
+      "numeric_threshold": 0,
+      "classification": "MAX_DIFFERENTIAL_MISSINGNESS_PER_ACCEPTED_UNIT",
+      "comparable_unit": "task_id x repeat_index x four registered strategies x same freeze_identity",
+      "reason_code": "DIFFERENTIAL_INFRASTRUCTURE_MISSINGNESS",
+      "accepted_unit_rule": "infrastructure_missing_count <= numeric_threshold",
+      "strategy_terminal_failure": "STRATEGY_TERMINAL_FAILURE_REMAINS_RESEARCH_EVIDENCE",
+      "provider_or_infrastructure_invalidation": "WHOLE_UNIT_RERUN_REQUIRED"
+    },
+    "case_e_policy": {
+      "policy_id": "PILOT-CASE-E-ADMIN-V1",
+      "version": "1.0",
+      "classification": "PREDECLARED_ADMINISTRATIVE_NON_PERFORMANCE_ONLY",
+      "reason_code": "CASE_E_PREDECLARED_ADMINISTRATIVE_EXCLUSION",
+      "allowed_reason_codes": [
+        "ADMIN_DUPLICATE_ASSIGNMENT",
+        "ADMIN_CONSENT_OR_PRIVACY_EVENT",
+        "ADMIN_EXTERNAL_INTERRUPTION"
+      ],
+      "forbidden_reason_codes": [
+        "LOW_QUALITY",
+        "ADAPTIVE_LOST",
+        "FIXED_FAILED",
+        "OUTLIER_RESULT",
+        "UNEXPECTED_RESULT"
+      ],
+      "approval_record_fields": [
+        "requester_role",
+        "approver_role",
+        "reason_code",
+        "requested_at",
+        "approved_at",
+        "approval_status",
+        "evidence_reference",
+        "approved_before_unblinding"
+      ],
+      "approval_rule": "INDEPENDENT_APPROVAL_REQUIRED",
+      "timing_rule": "APPROVED_BEFORE_UNBLINDING",
+      "whole_unit_only": true,
+      "preserve_original_raw_evidence": true,
+      "exclusion_report_required": true,
+      "free_text_reason": false,
+      "outcome_based_exclusion": false
+    }
+  },
+  "evaluator_plan": {
+    "plan_id": "PILOT-EVALUATION-OPS-V1",
+    "version": "1.0",
+    "evaluation_protocol_id": "QEP-1.1",
+    "packet_set_id": "PILOT-EVALUATOR-PACKETS-V1",
+    "planned_packet_count": 96,
+    "planned_e1_count": 96,
+    "planned_e2_overlap_count": 24,
+    "slots": {
+      "E1": {
+        "role_id": "E1",
+        "status": "UNASSIGNED",
+        "planned_count": 96
+      },
+      "E2": {
+        "role_id": "E2",
+        "status": "UNASSIGNED",
+        "planned_count": 24,
+        "exception_policy": "all UNCLEAR, borderline, invalid, and disputed cases"
+      },
+      "ADJ-1": {
+        "role_id": "ADJ-1",
+        "status": "UNASSIGNED",
+        "planned_count": 0,
+        "on_demand": true
+      }
+    },
+    "capacity_status": "UNCONFIRMED",
+    "identity_recording": "Record role IDs, assignments, timestamps, locked labels, changes, and adjudication rationale in the research ledger."
+  },
+  "e2e_measurement": {
+    "version": "E2E-MEASURE-V2",
+    "boundary": "accepted_run_to_final_ready_before_persistence",
+    "shared_context_attribution": "context_prep_ms is attributed once to each compared condition"
+  },
+  "identities": {
+    "model_config_id": "MODEL-CATALOG-V1",
+    "model_pilot_config_id": "MODEL-PILOT-V1",
+    "model_pilot_config_version": "1.1",
+    "model_settings_id": "MODEL-SETTINGS-V1",
+    "model_settings_version": "1.1",
+    "rag_config_id": "RAG-LEXICAL-V1",
+    "rag_pilot_config_id": "RAG-PILOT-V1",
+    "orchestrator_config_id": "ORCH-ADAPTIVE-AUTO-V1",
+    "orch_pilot_config_id": "ORCH-PILOT-V1",
+    "single_config_id": "SINGLE-DIRECT-V1",
+    "fixed_config_id": "FIXED-TOPOLOGY-V1",
+    "fixed_pilot_config_id": "FIXED-PILOT-V1",
+    "static_config_id": "STATIC-PRESETS-V1",
+    "static_pilot_config_id": "STATIC-PILOT-V1",
+    "price_config_id": "PRICE-TABLE-V1",
+    "price_pilot_config_id": "PRICE-PILOT-V1",
+    "price_pilot_config_version": "1.1",
+    "strategy_config_version": "1.0"
+  },
+  "strategy_configurations": {
+    "single": {
+      "strategy_config_id": "SINGLE-DIRECT-V1",
+      "strategy_config_version": "1.0"
+    },
+    "fixed": {
+      "strategy_config_id": "FIXED-TOPOLOGY-V1",
+      "pilot_strategy_config_id": "FIXED-PILOT-V1",
+      "strategy_config_version": "1.0"
+    },
+    "static": {
+      "strategy_config_id": "STATIC-PRESETS-V1",
+      "pilot_strategy_config_id": "STATIC-PILOT-V1",
+      "strategy_config_version": "1.0"
+    },
+    "adaptive": {
+      "strategy_config_id": "ORCH-ADAPTIVE-AUTO-V1",
+      "pilot_strategy_config_id": "ORCH-PILOT-V1",
+      "strategy_config_version": "1.0"
+    }
+  },
+  "generation_settings": {
+    "provider_adapter": "openai-compatible",
+    "request_shape": [
+      "model",
+      "messages.system",
+      "messages.user"
+    ],
+    "model_settings_id": "MODEL-SETTINGS-V1",
+    "model_settings_version": "1.1",
+    "request_parameters": {
+      "temperature": 0.6,
+      "max_completion_tokens": 4096,
+      "top_p": 1.0,
+      "reasoning_effort": "medium",
+      "include_reasoning": false,
+      "response_format": {"type": "text"},
+      "stream": false,
+      "n": 1,
+      "service_tier": "on_demand",
+      "seed": null
+    },
+    "parameter_status": {
+      "temperature": "EXPLICIT",
+      "max_completion_tokens": "EXPLICIT",
+      "top_p": "EXPLICIT",
+      "reasoning_effort": "EXPLICIT",
+      "include_reasoning": "EXPLICIT_VIA_EXTRA_BODY",
+      "response_format": "EXPLICIT",
+      "stream": "EXPLICIT",
+      "n": "EXPLICIT",
+      "service_tier": "EXPLICIT",
+      "seed": "UNUSED_BY_DESIGN",
+      "reasoning_format": "UNSUPPORTED",
+      "stop": "PROVIDER_DEFAULT_NULL",
+      "citation_options": "PROVIDER_DEFAULT_ENABLED_NO_DOCUMENTS_OR_SEARCH",
+      "compound_custom": "UNUSED_BY_DESIGN_NO_COMPOUND",
+      "documents": "UNUSED_BY_DESIGN_NO_DOCUMENTS",
+      "exclude_domains": "UNUSED_BY_DESIGN_NO_WEB_SEARCH",
+      "include_domains": "UNUSED_BY_DESIGN_NO_WEB_SEARCH",
+      "tools": "UNUSED_BY_DESIGN_NO_TOOLS",
+      "tool_choice": "PROVIDER_DEFAULT_NONE_NO_TOOLS",
+      "parallel_tool_calls": "PROVIDER_DEFAULT_TRUE_NO_TOOLS",
+      "stream_options": "NOT_APPLICABLE_STREAM_FALSE",
+      "user": "UNUSED_BY_DESIGN",
+      "store": "UNSUPPORTED_BY_GROQ",
+      "search_settings": "UNUSED_BY_DESIGN_NO_WEB_SEARCH",
+      "max_tokens": "DEPRECATED_NOT_SENT",
+      "metadata": "UNSUPPORTED_BY_GROQ",
+      "logit_bias": "UNSUPPORTED_BY_GROQ_MODELS",
+      "functions": "DEPRECATED_NOT_SENT",
+      "function_call": "DEPRECATED_NOT_SENT",
+      "disable_tool_validation": "UNUSED_BY_DESIGN",
+      "presence_penalty": "UNSUPPORTED_BY_GROQ_MODELS",
+      "frequency_penalty": "UNSUPPORTED_BY_GROQ_MODELS",
+      "logprobs": "UNSUPPORTED_BY_GROQ_MODELS",
+      "top_logprobs": "UNSUPPORTED_BY_GROQ_MODELS"
+    },
+    "provider_timeout_seconds": 60.0,
+    "sdk_max_retries": 0,
+    "retry_owner": "orchestrator",
+    "verified_at": "2026-08-30T14:04:25Z",
+    "note": "Frozen Groq request controls. seed is intentionally omitted so Pilot repeats remain independent; reasoning_format is unsupported for GPT-OSS."
+  },
+  "budget": {
+    "max_logical_calls": 12,
+    "max_physical_requests": 18,
+    "max_workers": 3,
+    "max_escalations": 1,
+    "max_retries_per_call": 1,
+    "retry_base_seconds": 1.0,
+    "retry_max_seconds": 30.0,
+    "call_timeout_seconds": 60.0
+  },
+  "pricing": {
+    "pricing_id": "PRICE-PILOT-V1",
+    "pricing_version": "1.1",
+    "price_config_id": "PRICE-TABLE-V1",
+    "price_config_version": "1.1",
+    "price_pilot_config_id": "PRICE-PILOT-V1",
+    "price_pilot_config_version": "1.1",
+    "provider": "groq",
+    "model": "openai/gpt-oss-120b",
+    "status": "VERIFIED",
+    "allow_cost_calculation": true,
+    "input_usd_per_million_tokens": 0.15,
+    "cached_input_usd_per_million_tokens": 0.075,
+    "output_usd_per_million_tokens": 0.6,
+    "reasoning_token_rate": "Unavailable",
+    "reasoning_token_treatment": "No separate Groq reasoning rate is published; reported completion_tokens (including any reasoning-token detail) use the output rate.",
+    "cost_formula": "((input_tokens-cached_input_tokens)*input_rate + cached_input_tokens*cached_input_rate + completion_tokens*output_rate) / 1000000",
+    "currency": "USD",
+    "unit": "USD per 1M tokens",
+    "source": "https://console.groq.com/docs/model/openai/gpt-oss-120b",
+    "cached_input_source": "https://console.groq.com/docs/prompt-caching",
+    "verified_at": "2026-08-30T13:49:38Z",
+    "rule": "Do not replace unavailable cost with zero."
+  },
+  "order_policy": {
+    "algorithm": "balanced-latin-square-v1",
+    "rows": [
+      ["single", "fixed", "static", "adaptive"],
+      ["fixed", "static", "adaptive", "single"],
+      ["static", "adaptive", "single", "fixed"],
+      ["adaptive", "single", "fixed", "static"]
+    ],
+    "unit_seed_derivation": "SHA-256(preregistration_version|task_manifest_hash|unit_id)",
+    "assignment": "seeded Fisher-Yates over units and expanded Latin-square rows",
+    "top_level_sequential": true,
+    "internal_worker_parallelism_allowed": true,
+    "required_live_units": 24,
+    "strategy_occurrences_per_ordinal": 6
+  },
+  "evidence_policy": {
+    "raw_evidence_append_oriented": true,
+    "raw_evidence_is_source_of_truth": true,
+    "missing_usage_value": null,
+    "missing_cost_value": null,
+    "allowed_condition_statuses": [
+      "observed",
+      "missing_not_run",
+      "failed",
+      "stopped",
+      "provider_incident",
+      "invalidated"
+    ],
+    "dry_run_tag": "DRY_RUN=true",
+    "research_evidence_from_dry_run": false
+  }
+}

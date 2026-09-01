@@ -1,0 +1,1005 @@
+{
+  "benchmark_id": "pilot_benchmark_v1",
+  "pilot_version": "PILOT-R2",
+  "benchmark_version": "pilot_benchmark_v1@1.1.0",
+  "artifact_version": "1.1.0",
+  "corpus_version": "PILOT-CORPUS-V1",
+  "corpus_snapshot_timestamp": "2026-08-30T13:33:12Z",
+  "corpus_manifest_sha256": "3b620be8de1252dd9a4e4e00a2a220f9821d2722b4faaecfd4f56dcc26bd9ea2",
+  "artifact_sha256": "18c1941c4f057f85160634bba334866795aa06b5746e9107cbe902c1f73ba706",
+  "status": "QUALITY_REVIEWED",
+  "purpose": "A controlled, source-grounded eight-task benchmark for the Pilot design review. Runtime receives only the public task projection; quality scoring is frozen separately in the research-only rubric manifest.",
+  "quality_binding": {
+    "protocol_version": "QEP-1.1",
+    "rubric_version": "PILOT-RUBRIC-V1.0",
+    "rubric_manifest": "evaluation/pilot/pilot_rubrics_v1.json",
+    "corpus_version": "PILOT-CORPUS-V1",
+    "binding_status": "QUALITY_REVIEWED",
+    "tasks_required": 8,
+    "tasks_bound": 8,
+    "mandatory_criteria_total": 36,
+    "critical_error_definitions_total": 16
+  },
+  "design_reference": {
+    "source_id": "pilot-preregistration-r1",
+    "path": "docs/PILOT_PREREGISTRATION.md",
+    "version": "PILOT-R1",
+    "sha256": "b3ac71e7422395c30cb65421bb2f99386fa0e9d9d664efe387322e984a7e2f03"
+  },
+  "corpus_manifest": [
+    {
+      "source_id": "contract-v0.6.3",
+      "path": "corpus/pilot/v1/PROJECT_CONTRACT.md",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "version": "0.6.3",
+      "sha256": "42cfbe2fc0a7905951e69f45a328fedf275db7e878c033f951603467bf2f5a58",
+      "line_count": 130,
+      "origin_path": "docs/PROJECT_CONTRACT.md",
+      "origin_sha256": "42cfbe2fc0a7905951e69f45a328fedf275db7e878c033f951603467bf2f5a58",
+      "snapshot_timestamp": "2026-08-30T13:33:12Z",
+      "role": "stable research semantics and measurement contract"
+    },
+    {
+      "source_id": "state-v6.3",
+      "path": "corpus/pilot/v1/CURRENT_STATE.md",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "version": "V6.3",
+      "sha256": "91c289335a266eda8f3025ec861fafe88b00dd5eb1d062bb77a7cf1db0e78594",
+      "line_count": 163,
+      "origin_path": "docs/CURRENT_STATE.md",
+      "origin_sha256": "91c289335a266eda8f3025ec861fafe88b00dd5eb1d062bb77a7cf1db0e78594",
+      "snapshot_timestamp": "2026-08-30T13:33:12Z",
+      "role": "verified implementation facts and declared limits"
+    },
+    {
+      "source_id": "audit-v6.3",
+      "path": "corpus/pilot/v1/ORCHESTRATION_AUDIT.md",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "version": "V6.3",
+      "sha256": "67c6676a26b0cacb35d5f3bef1a7743dd45d656a5c4254b6d946431088d88884",
+      "line_count": 476,
+      "origin_path": "docs/ORCHESTRATION_AUDIT.md",
+      "origin_sha256": "67c6676a26b0cacb35d5f3bef1a7743dd45d656a5c4254b6d946431088d88884",
+      "snapshot_timestamp": "2026-08-30T13:33:12Z",
+      "role": "component-level runtime and baseline evidence"
+    },
+    {
+      "source_id": "matrix-v0.6.3",
+      "path": "corpus/pilot/v1/TEST_MATRIX.md",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "version": "0.6.3",
+      "sha256": "5deafd5bffc67eb1f5a53e5d2fef2f77b7248ac4d3e76fd3acd1c9f7a8eaf486",
+      "line_count": 92,
+      "origin_path": "docs/TEST_MATRIX.md",
+      "origin_sha256": "5deafd5bffc67eb1f5a53e5d2fef2f77b7248ac4d3e76fd3acd1c9f7a8eaf486",
+      "snapshot_timestamp": "2026-08-30T13:33:12Z",
+      "role": "verified feature and regression coverage"
+    },
+    {
+      "source_id": "fixes-v0.6",
+      "path": "corpus/pilot/v1/AUDIT_FIXES.md",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "version": "v0.6",
+      "sha256": "40ff37df0c0b953b920eb0aa1f51cef7473c01fa241355defc4da96c734fcf8f",
+      "line_count": 87,
+      "origin_path": "AUDIT_FIXES.md",
+      "origin_sha256": "40ff37df0c0b953b920eb0aa1f51cef7473c01fa241355defc4da96c734fcf8f",
+      "snapshot_timestamp": "2026-08-30T13:33:12Z",
+      "role": "documented safety fixes and research invariants"
+    },
+    {
+      "source_id": "readme-v0.6",
+      "path": "corpus/pilot/v1/README.md",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "version": "v0.6",
+      "sha256": "a9caf7c5e4a767b941be66c8f90bd585f0b68f3a576c629cf2367128c3475b43",
+      "line_count": 82,
+      "origin_path": "README.md",
+      "origin_sha256": "a9caf7c5e4a767b941be66c8f90bd585f0b68f3a576c629cf2367128c3475b43",
+      "snapshot_timestamp": "2026-08-30T13:33:12Z",
+      "role": "operator-facing flow and provider reference"
+    }
+  ],
+  "corpus_reference_policy": {
+    "authoritative_task_field": "tasks[].reference_bindings",
+    "legacy_traceability_field": "tasks[].reference_scope",
+    "section_identity": "corpus/pilot/v1/CORPUS_MANIFEST.json documents[].sections[].section_id",
+    "hash_authority": "corpus/pilot/v1/CORPUS_MANIFEST.json documents[].sha256"
+  },
+  "runtime_projection": {
+    "source": "tasks",
+    "send_only_fields": [
+      "task_id",
+      "pilot_version",
+      "task_text_version",
+      "task_text",
+      "corpus_version",
+      "reference_source_ids",
+      "reference_bindings",
+      "reference_scope",
+      "expected_output_instruction"
+    ],
+    "never_send_fields": [
+      "research_taxonomy",
+      "observable_characteristics",
+      "taxonomy_rationale",
+      "expected_source_facts",
+      "evaluation_criteria_version",
+      "ambiguity_flag",
+      "authoring_notes"
+    ],
+    "notes": "The tasks array is the runtime-safe projection. Research annotations are joined by task_id only for authoring and quality handoff; they are not runtime input."
+  },
+  "tasks": [
+    {
+      "task_id": "PILOT-R2-01",
+      "pilot_version": "PILOT-R2",
+      "task_text_version": "1.0.0",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "reference_bindings": [
+        {
+          "source_id": "contract-v0.6.3",
+          "corpus_path": "corpus/pilot/v1/PROJECT_CONTRACT.md",
+          "source_sha256": "42cfbe2fc0a7905951e69f45a328fedf275db7e878c033f951603467bf2f5a58",
+          "section_ids": ["runtime-structural-signals", "rule-based-adaptive-controller", "runtime-roles", "verifier-and-terminal-behavior"]
+        }
+      ],
+      "task_text": "Using the Adaptive Agent Lab contract, explain the decision rule for selecting the execution path when the current task has one main focus, no prerequisite edges, and no high verification trigger. State which structural signals are consulted, which role is skipped, and the terminal behavior after a successful verification.",
+      "reference_source_ids": [
+        "contract-v0.6.3"
+      ],
+      "reference_scope": [
+        {
+          "source_id": "contract-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Runtime structural signals",
+              "lines": "49-62"
+            },
+            {
+              "heading": "Rule-based Adaptive Controller",
+              "lines": "64-75"
+            },
+            {
+              "heading": "Runtime roles",
+              "lines": "77-85"
+            },
+            {
+              "heading": "Verifier and terminal behavior",
+              "lines": "87-98"
+            }
+          ]
+        }
+      ],
+      "expected_output_instruction": "Answer in a compact decision table or 4–6 sentences. Name the observable signals, the role participation, and the successful terminal state; cite the referenced contract headings and do not add unstated policy."
+    },
+    {
+      "task_id": "PILOT-R2-02",
+      "pilot_version": "PILOT-R2",
+      "task_text_version": "1.0.0",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "reference_bindings": [
+        {
+          "source_id": "contract-v0.6.3",
+          "corpus_path": "corpus/pilot/v1/PROJECT_CONTRACT.md",
+          "source_sha256": "42cfbe2fc0a7905951e69f45a328fedf275db7e878c033f951603467bf2f5a58",
+          "section_ids": ["measurement-definitions"]
+        },
+        {
+          "source_id": "audit-v6.3",
+          "corpus_path": "corpus/pilot/v1/ORCHESTRATION_AUDIT.md",
+          "source_sha256": "67c6676a26b0cacb35d5f3bef1a7743dd45d656a5c4254b6d946431088d88884",
+          "section_ids": ["retry", "instrumentation"]
+        }
+      ],
+      "task_text": "According to the measurement contract, how should one bounded role execution that makes a second provider attempt because of a retry be counted in Agent Execution, Logical Model Call, and Physical Provider Request metrics? Include how the retry should be evidenced and what happens to token and cost fields if provider usage is unavailable.",
+      "reference_source_ids": [
+        "contract-v0.6.3",
+        "audit-v6.3"
+      ],
+      "reference_scope": [
+        {
+          "source_id": "contract-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Measurement definitions",
+              "lines": "116-130"
+            }
+          ]
+        },
+        {
+          "source_id": "audit-v6.3",
+          "anchors": [
+            {
+              "heading": "14. Retry",
+              "lines": "333-353"
+            },
+            {
+              "heading": "16. Instrumentation",
+              "lines": "376-404"
+            }
+          ]
+        }
+      ],
+      "expected_output_instruction": "Provide a three-row metric table followed by a short evidence note. Keep logical calls distinct from physical requests, distinguish unavailable values from zero, and cite the measurement and retry sections."
+    },
+    {
+      "task_id": "PILOT-R2-03",
+      "pilot_version": "PILOT-R2",
+      "task_text_version": "1.0.0",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "reference_bindings": [
+        {
+          "source_id": "contract-v0.6.3",
+          "corpus_path": "corpus/pilot/v1/PROJECT_CONTRACT.md",
+          "source_sha256": "42cfbe2fc0a7905951e69f45a328fedf275db7e878c033f951603467bf2f5a58",
+          "section_ids": ["provider-diagnostics"]
+        },
+        {
+          "source_id": "state-v6.3",
+          "corpus_path": "corpus/pilot/v1/CURRENT_STATE.md",
+          "source_sha256": "91c289335a266eda8f3025ec861fafe88b00dd5eb1d062bb77a7cf1db0e78594",
+          "section_ids": ["providers-and-current-safe-status"]
+        },
+        {
+          "source_id": "fixes-v0.6",
+          "corpus_path": "corpus/pilot/v1/AUDIT_FIXES.md",
+          "source_sha256": "40ff37df0c0b953b920eb0aa1f51cef7473c01fa241355defc4da96c734fcf8f",
+          "section_ids": ["provider-test-failure-isolation", "provider-api-information", "stale-api-test-badge-after-config-change"]
+        },
+        {
+          "source_id": "readme-v0.6",
+          "corpus_path": "corpus/pilot/v1/README.md",
+          "source_sha256": "a9caf7c5e4a767b941be66c8f90bd585f0b68f3a576c629cf2367128c3475b43",
+          "section_ids": ["provider"]
+        }
+      ],
+      "task_text": "Compare three independent safeguards documented for the project: provider diagnostic output, secret handling, and live-status behavior after a provider key or model change. For each safeguard, state the safe observable result, the private boundary, and the operator implication.",
+      "reference_source_ids": [
+        "contract-v0.6.3",
+        "state-v6.3",
+        "fixes-v0.6",
+        "readme-v0.6"
+      ],
+      "reference_scope": [
+        {
+          "source_id": "contract-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Provider diagnostics",
+              "lines": "100-114"
+            }
+          ]
+        },
+        {
+          "source_id": "state-v6.3",
+          "anchors": [
+            {
+              "heading": "Providers and current safe status",
+              "lines": "88-107"
+            }
+          ]
+        },
+        {
+          "source_id": "fixes-v0.6",
+          "anchors": [
+            {
+              "heading": "3. Provider test thất bại có thể khóa nhầm cả provider",
+              "lines": "19-22"
+            },
+            {
+              "heading": "7. Provider/API information chưa đủ rõ",
+              "lines": "39-42"
+            },
+            {
+              "heading": "10. A stale API-test badge could survive a changed key",
+              "lines": "79-82"
+            }
+          ]
+        },
+        {
+          "source_id": "readme-v0.6",
+          "anchors": [
+            {
+              "heading": "Provider",
+              "lines": "16-31"
+            }
+          ]
+        }
+      ],
+      "expected_output_instruction": "Use three labeled sections, one per safeguard. For each, separate what an operator may observe from what must remain server-side or redacted, and cite the relevant source heading."
+    },
+    {
+      "task_id": "PILOT-R2-04",
+      "pilot_version": "PILOT-R2",
+      "task_text_version": "1.0.0",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "reference_bindings": [
+        {
+          "source_id": "contract-v0.6.3",
+          "corpus_path": "corpus/pilot/v1/PROJECT_CONTRACT.md",
+          "source_sha256": "42cfbe2fc0a7905951e69f45a328fedf275db7e878c033f951603467bf2f5a58",
+          "section_ids": ["frozen-context-fairness"]
+        },
+        {
+          "source_id": "state-v6.3",
+          "corpus_path": "corpus/pilot/v1/CURRENT_STATE.md",
+          "source_sha256": "91c289335a266eda8f3025ec861fafe88b00dd5eb1d062bb77a7cf1db0e78594",
+          "section_ids": ["verified-architecture"]
+        },
+        {
+          "source_id": "matrix-v0.6.3",
+          "corpus_path": "corpus/pilot/v1/TEST_MATRIX.md",
+          "source_sha256": "5deafd5bffc67eb1f5a53e5d2fef2f77b7248ac4d3e76fd3acd1c9f7a8eaf486",
+          "section_ids": ["compare-and-inspector-coverage-rows"]
+        },
+        {
+          "source_id": "readme-v0.6",
+          "corpus_path": "corpus/pilot/v1/README.md",
+          "source_sha256": "a9caf7c5e4a767b941be66c8f90bd585f0b68f3a576c629cf2367128c3475b43",
+          "section_ids": ["main-chat-flow", "conversation-persistence"]
+        }
+      ],
+      "task_text": "Summarize the evidence surfaces available for one run and for a four-strategy comparison: identify what the Frozen Context Snapshot records, what the Execution Inspector exposes, and how a comparison result represents missing provider usage or cost. Organize the answer by evidence surface.",
+      "reference_source_ids": [
+        "contract-v0.6.3",
+        "state-v6.3",
+        "matrix-v0.6.3",
+        "readme-v0.6"
+      ],
+      "reference_scope": [
+        {
+          "source_id": "contract-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Frozen Context fairness",
+              "lines": "28-47"
+            }
+          ]
+        },
+        {
+          "source_id": "state-v6.3",
+          "anchors": [
+            {
+              "heading": "Verified architecture",
+              "lines": "20-86"
+            }
+          ]
+        },
+        {
+          "source_id": "matrix-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Compare and inspector coverage rows",
+              "lines": "28-45"
+            }
+          ]
+        },
+        {
+          "source_id": "readme-v0.6",
+          "anchors": [
+            {
+              "heading": "Flow chat chính",
+              "lines": "33-49"
+            },
+            {
+              "heading": "Conversation persistence",
+              "lines": "51-62"
+            }
+          ]
+        }
+      ],
+      "expected_output_instruction": "Use three sections—snapshot, inspector, comparison. List exact evidence fields or views where the source specifies them, and state the unavailable-value convention without inventing a quality score."
+    },
+    {
+      "task_id": "PILOT-R2-05",
+      "pilot_version": "PILOT-R2",
+      "task_text_version": "1.0.0",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "reference_bindings": [
+        {
+          "source_id": "audit-v6.3",
+          "corpus_path": "corpus/pilot/v1/ORCHESTRATION_AUDIT.md",
+          "source_sha256": "67c6676a26b0cacb35d5f3bef1a7743dd45d656a5c4254b6d946431088d88884",
+          "section_ids": ["runtime-evidence-fixtures", "task-decomposition", "dag-construction", "dag-validation", "kahn-ready-set-scheduling", "concurrent-worker-execution", "runtime-verifier", "early-stopping"]
+        },
+        {
+          "source_id": "contract-v0.6.3",
+          "corpus_path": "corpus/pilot/v1/PROJECT_CONTRACT.md",
+          "source_sha256": "42cfbe2fc0a7905951e69f45a328fedf275db7e878c033f951603467bf2f5a58",
+          "section_ids": ["rule-based-adaptive-controller", "verifier-and-terminal-behavior"]
+        },
+        {
+          "source_id": "matrix-v0.6.3",
+          "corpus_path": "corpus/pilot/v1/TEST_MATRIX.md",
+          "source_sha256": "5deafd5bffc67eb1f5a53e5d2fef2f77b7248ac4d3e76fd3acd1c9f7a8eaf486",
+          "section_ids": ["dag-ready-set-and-concurrent-worker-rows"]
+        }
+      ],
+      "task_text": "Trace, in source order, the audited execution whose graph starts with two independent subtasks and then releases a third after its prerequisites complete. Explain the prerequisite edges, validation checkpoint, ready sets, worker timing, synthesis or verification, and terminal evidence.",
+      "reference_source_ids": [
+        "audit-v6.3",
+        "contract-v0.6.3",
+        "matrix-v0.6.3"
+      ],
+      "reference_scope": [
+        {
+          "source_id": "audit-v6.3",
+          "anchors": [
+            {
+              "heading": "Runtime evidence fixtures",
+              "lines": "27-49"
+            },
+            {
+              "heading": "4. Task decomposition",
+              "lines": "124-146"
+            },
+            {
+              "heading": "5. DAG construction",
+              "lines": "148-166"
+            },
+            {
+              "heading": "6. DAG validation",
+              "lines": "167-185"
+            },
+            {
+              "heading": "7. Kahn/ready-set scheduling",
+              "lines": "186-204"
+            },
+            {
+              "heading": "8. Concurrent Worker execution",
+              "lines": "205-226"
+            },
+            {
+              "heading": "9. Runtime Verifier",
+              "lines": "227-248"
+            },
+            {
+              "heading": "11. Early stopping",
+              "lines": "271-287"
+            }
+          ]
+        },
+        {
+          "source_id": "contract-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Rule-based Adaptive Controller",
+              "lines": "64-75"
+            },
+            {
+              "heading": "Verifier and terminal behavior",
+              "lines": "87-98"
+            }
+          ]
+        },
+        {
+          "source_id": "matrix-v0.6.3",
+          "anchors": [
+            {
+              "heading": "DAG, ready-set, and concurrent-worker rows",
+              "lines": "15-18"
+            }
+          ]
+        }
+      ],
+      "expected_output_instruction": "Give an ordered numbered trace. Name only nodes and evidence events present in the cited fixture, distinguish a prerequisite boundary from a concurrency boundary, and cite each major transition."
+    },
+    {
+      "task_id": "PILOT-R2-06",
+      "pilot_version": "PILOT-R2",
+      "task_text_version": "1.0.0",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "reference_bindings": [
+        {
+          "source_id": "contract-v0.6.3",
+          "corpus_path": "corpus/pilot/v1/PROJECT_CONTRACT.md",
+          "source_sha256": "42cfbe2fc0a7905951e69f45a328fedf275db7e878c033f951603467bf2f5a58",
+          "section_ids": ["verifier-and-terminal-behavior", "rule-based-adaptive-controller"]
+        },
+        {
+          "source_id": "audit-v6.3",
+          "corpus_path": "corpus/pilot/v1/ORCHESTRATION_AUDIT.md",
+          "source_sha256": "67c6676a26b0cacb35d5f3bef1a7743dd45d656a5c4254b6d946431088d88884",
+          "section_ids": ["runtime-verifier", "targeted-escalation", "early-stopping", "budget-constraint"]
+        },
+        {
+          "source_id": "matrix-v0.6.3",
+          "corpus_path": "corpus/pilot/v1/TEST_MATRIX.md",
+          "source_sha256": "5deafd5bffc67eb1f5a53e5d2fef2f77b7248ac4d3e76fd3acd1c9f7a8eaf486",
+          "section_ids": ["verifier-escalation-and-fail-rows"]
+        }
+      ],
+      "task_text": "Explain the required sequence after a candidate receives a verifier result containing two actionable missing issues while escalation and call/request budgets still have headroom. Include what is targeted, what is re-run, and the stopping behavior for PASS and FAIL outcomes.",
+      "reference_source_ids": [
+        "contract-v0.6.3",
+        "audit-v6.3",
+        "matrix-v0.6.3"
+      ],
+      "reference_scope": [
+        {
+          "source_id": "contract-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Verifier and terminal behavior",
+              "lines": "87-98"
+            },
+            {
+              "heading": "Rule-based Adaptive Controller",
+              "lines": "64-75"
+            }
+          ]
+        },
+        {
+          "source_id": "audit-v6.3",
+          "anchors": [
+            {
+              "heading": "9. Runtime Verifier",
+              "lines": "227-248"
+            },
+            {
+              "heading": "10. Targeted escalation",
+              "lines": "249-270"
+            },
+            {
+              "heading": "11. Early stopping",
+              "lines": "271-287"
+            },
+            {
+              "heading": "12. Budget constraint",
+              "lines": "288-310"
+            }
+          ]
+        },
+        {
+          "source_id": "matrix-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Verifier, escalation, and FAIL rows",
+              "lines": "18-22"
+            }
+          ]
+        }
+      ],
+      "expected_output_instruction": "Write an ordered sequence, then a small branch table for the three verifier outcomes. Report only permitted actions and terminal states from the cited contract; do not infer a score or an unregistered rerun."
+    },
+    {
+      "task_id": "PILOT-R2-07",
+      "pilot_version": "PILOT-R2",
+      "task_text_version": "1.0.0",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "reference_bindings": [
+        {
+          "source_id": "contract-v0.6.3",
+          "corpus_path": "corpus/pilot/v1/PROJECT_CONTRACT.md",
+          "source_sha256": "42cfbe2fc0a7905951e69f45a328fedf275db7e878c033f951603467bf2f5a58",
+          "section_ids": ["provider-diagnostics"]
+        },
+        {
+          "source_id": "state-v6.3",
+          "corpus_path": "corpus/pilot/v1/CURRENT_STATE.md",
+          "source_sha256": "91c289335a266eda8f3025ec861fafe88b00dd5eb1d062bb77a7cf1db0e78594",
+          "section_ids": ["providers-and-current-safe-status", "known-discrepancies-and-environment-limits"]
+        },
+        {
+          "source_id": "fixes-v0.6",
+          "corpus_path": "corpus/pilot/v1/AUDIT_FIXES.md",
+          "source_sha256": "40ff37df0c0b953b920eb0aa1f51cef7473c01fa241355defc4da96c734fcf8f",
+          "section_ids": ["provider-test-failure-isolation", "provider-api-information", "stale-api-test-badge-after-config-change"]
+        },
+        {
+          "source_id": "readme-v0.6",
+          "corpus_path": "corpus/pilot/v1/README.md",
+          "source_sha256": "a9caf7c5e4a767b941be66c8f90bd585f0b68f3a576c629cf2367128c3475b43",
+          "section_ids": ["provider"]
+        }
+      ],
+      "task_text": "An operator sees a provider marked `unknown` even though configuration is present, then changes the provider model and receives an upstream diagnostic error. Determine which facts are established, which remain unverified, how the badge should change, and what information must not be exposed. Distinguish provider-incident status from an application failure.",
+      "reference_source_ids": [
+        "contract-v0.6.3",
+        "state-v6.3",
+        "fixes-v0.6",
+        "readme-v0.6"
+      ],
+      "reference_scope": [
+        {
+          "source_id": "contract-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Provider diagnostics",
+              "lines": "100-114"
+            }
+          ]
+        },
+        {
+          "source_id": "state-v6.3",
+          "anchors": [
+            {
+              "heading": "Providers and current safe status",
+              "lines": "88-107"
+            },
+            {
+              "heading": "Known discrepancies and environment limits",
+              "lines": "152-163"
+            }
+          ]
+        },
+        {
+          "source_id": "fixes-v0.6",
+          "anchors": [
+            {
+              "heading": "3. Provider test thất bại có thể khóa nhầm cả provider",
+              "lines": "19-22"
+            },
+            {
+              "heading": "7. Provider/API information chưa đủ rõ",
+              "lines": "39-42"
+            },
+            {
+              "heading": "10. A stale API-test badge could survive a changed key",
+              "lines": "79-82"
+            }
+          ]
+        },
+        {
+          "source_id": "readme-v0.6",
+          "anchors": [
+            {
+              "heading": "Provider",
+              "lines": "16-31"
+            }
+          ]
+        }
+      ],
+      "expected_output_instruction": "Separate established observations, unverified conclusions, incident classification, and privacy boundaries. Cite the relevant source headings and avoid printing any credential, raw provider body, or unsupported application verdict."
+    },
+    {
+      "task_id": "PILOT-R2-08",
+      "pilot_version": "PILOT-R2",
+      "task_text_version": "1.0.0",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "reference_bindings": [
+        {
+          "source_id": "contract-v0.6.3",
+          "corpus_path": "corpus/pilot/v1/PROJECT_CONTRACT.md",
+          "source_sha256": "42cfbe2fc0a7905951e69f45a328fedf275db7e878c033f951603467bf2f5a58",
+          "section_ids": ["comparison-strategies", "frozen-context-fairness"]
+        },
+        {
+          "source_id": "state-v6.3",
+          "corpus_path": "corpus/pilot/v1/CURRENT_STATE.md",
+          "source_sha256": "91c289335a266eda8f3025ec861fafe88b00dd5eb1d062bb77a7cf1db0e78594",
+          "section_ids": ["verified-architecture", "tests-verified-in-this-audit", "known-discrepancies-and-environment-limits"]
+        },
+        {
+          "source_id": "audit-v6.3",
+          "corpus_path": "corpus/pilot/v1/ORCHESTRATION_AUDIT.md",
+          "source_sha256": "67c6676a26b0cacb35d5f3bef1a7743dd45d656a5c4254b6d946431088d88884",
+          "section_ids": ["v63-baseline-contract-audit", "correctness-conclusion-and-known-limits"]
+        },
+        {
+          "source_id": "matrix-v0.6.3",
+          "corpus_path": "corpus/pilot/v1/TEST_MATRIX.md",
+          "source_sha256": "5deafd5bffc67eb1f5a53e5d2fef2f77b7248ac4d3e76fd3acd1c9f7a8eaf486",
+          "section_ids": ["fixed-static-baseline-rows"]
+        }
+      ],
+      "task_text": "Reconcile the research contract with the V6.3 audit for the fixed-topology and static-preset comparison baselines that had earlier topology gaps. State what is now frozen, what the verifier is allowed to do, what evidence identities must be persisted, and which limitations still prevent a production-readiness claim.",
+      "reference_source_ids": [
+        "contract-v0.6.3",
+        "state-v6.3",
+        "audit-v6.3",
+        "matrix-v0.6.3"
+      ],
+      "reference_scope": [
+        {
+          "source_id": "contract-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Comparison strategies",
+              "lines": "14-26"
+            },
+            {
+              "heading": "Frozen Context fairness",
+              "lines": "28-47"
+            }
+          ]
+        },
+        {
+          "source_id": "state-v6.3",
+          "anchors": [
+            {
+              "heading": "Verified architecture",
+              "lines": "74-86"
+            },
+            {
+              "heading": "Tests verified in this audit",
+              "lines": "109-150"
+            },
+            {
+              "heading": "Known discrepancies and environment limits",
+              "lines": "152-163"
+            }
+          ]
+        },
+        {
+          "source_id": "audit-v6.3",
+          "anchors": [
+            {
+              "heading": "V6.3 baseline contract audit",
+              "lines": "405-449"
+            },
+            {
+              "heading": "Correctness conclusion and known limits",
+              "lines": "450-463"
+            }
+          ]
+        },
+        {
+          "source_id": "matrix-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Fixed and Static baseline rows",
+              "lines": "51-57"
+            }
+          ]
+        }
+      ],
+      "expected_output_instruction": "Write a reconciliation memo with three labeled parts: contract baseline, V6.3 closure, and remaining limits. Cite both contract and audit evidence, and end with a readiness statement bounded by the sources."
+    }
+  ],
+  "research_annotations": [
+    {
+      "task_id": "PILOT-R2-01",
+      "pilot_version": "PILOT-R2",
+      "task_text_version": "1.0.0",
+      "research_taxonomy": "T1",
+      "observable_characteristics": {
+        "aspects": [
+          "structural signals used by the route rule",
+          "planner participation",
+          "successful verification terminal"
+        ],
+        "dependency_characteristics": "No prerequisite edge between answer components; the condition is a single decision gate.",
+        "evidence_distribution": "One contiguous contract region covering signals, controller, roles, and terminal behavior.",
+        "expected_parallelizability": "None; one focus and no useful decomposition.",
+        "verification_demand": "Low"
+      },
+      "taxonomy_rationale": "The question has one main information need—how the contract handles a single-focus, non-dependent task—and does not require ordering among multiple answer products.",
+      "expected_source_facts": [
+        "The analyzer exposes aspects, dependencies, parallelizable groups, verification demand/reasons, and rationale.",
+        "A single focus without dependencies or a high-verification trigger follows the direct path under the rule-based controller.",
+        "The planner is reserved for the planned path and is skipped for the direct path.",
+        "A verifier PASS ends the run with STOP_SUFFICIENT."
+      ],
+      "evaluation_criteria_version": "PILOT-RUBRIC-V1.0",
+      "ambiguity_flag": false,
+      "authoring_notes": "Derived from the contract's decision rule; the wording describes observable conditions and does not name a hidden taxonomy or preferred strategy outcome."
+    },
+    {
+      "task_id": "PILOT-R2-02",
+      "pilot_version": "PILOT-R2",
+      "task_text_version": "1.0.0",
+      "research_taxonomy": "T1",
+      "observable_characteristics": {
+        "aspects": [
+          "Agent Execution unit",
+          "Logical Model Call accounting",
+          "Physical Provider Request accounting",
+          "retry and unavailable-usage evidence"
+        ],
+        "dependency_characteristics": "No cross-aspect prerequisite; all parts describe one accounting rule for one role attempt.",
+        "evidence_distribution": "Measurement definitions plus the retry/instrumentation audit sections.",
+        "expected_parallelizability": "None; the metrics must be interpreted as one accounting unit.",
+        "verification_demand": "Low"
+      },
+      "taxonomy_rationale": "This is a single-focus measurement question about retry accounting, not a multi-topic orchestration analysis.",
+      "expected_source_facts": [
+        "One bounded role activation is one Agent Execution.",
+        "A retry remains one Logical Model Call.",
+        "Each attempt is a Physical Provider Request, so two attempts produce two physical requests.",
+        "Retry evidence is emitted while tokens/cost remain unavailable when provider usage is unavailable; unavailable is not zero."
+      ],
+      "evaluation_criteria_version": "PILOT-RUBRIC-V1.0",
+      "ambiguity_flag": false,
+      "authoring_notes": "Uses a realistic instrumentation question and requires the reader to reconcile definitions with the concrete retry evidence rather than guessing from a route label."
+    },
+    {
+      "task_id": "PILOT-R2-03",
+      "pilot_version": "PILOT-R2",
+      "task_text_version": "1.0.0",
+      "research_taxonomy": "T2",
+      "observable_characteristics": {
+        "aspects": [
+          "diagnostic schema and safe categories",
+          "secret and frontend/log boundary",
+          "status invalidation after key/model change"
+        ],
+        "dependency_characteristics": "The three safeguards are documented independently; none is a prerequisite for answering another.",
+        "evidence_distribution": "Provider sections in the contract/state plus three focused fix notes and the operator README.",
+        "expected_parallelizability": "Useful; each safeguard can be summarized without the other two.",
+        "verification_demand": "Medium"
+      },
+      "taxonomy_rationale": "It asks for three meaningful, separable safeguards and their operator implications; the aspects can be answered independently.",
+      "expected_source_facts": [
+        "Diagnostics expose normalized configuration/reachability/auth/model/generation/usage/latency/category/safe-message information.",
+        "Raw provider bodies, credentials, and key values stay server-side and out of frontend/log output; .env is protected by .gitignore.",
+        "Configured-but-never-checked providers are unknown, no-key providers are missing, and a key/model change invalidates the old badge."
+      ],
+      "evaluation_criteria_version": "PILOT-RUBRIC-V1.0",
+      "ambiguity_flag": false,
+      "authoring_notes": "The three aspects were selected from separate source sections and are not phrased as a concurrency request or as a claim that one safeguard is superior."
+    },
+    {
+      "task_id": "PILOT-R2-04",
+      "pilot_version": "PILOT-R2",
+      "task_text_version": "1.0.0",
+      "research_taxonomy": "T2",
+      "observable_characteristics": {
+        "aspects": [
+          "Frozen Context Snapshot provenance",
+          "Execution Inspector views",
+          "comparison missingness and quality labeling"
+        ],
+        "dependency_characteristics": "Each evidence surface has its own contract; the surfaces are related by a run but not prerequisite answer steps.",
+        "evidence_distribution": "Fairness contract, verified architecture, regression rows, and operator flow documentation.",
+        "expected_parallelizability": "Useful; snapshot, inspector, and comparison conventions can be enumerated separately.",
+        "verification_demand": "Medium"
+      },
+      "taxonomy_rationale": "The task deliberately spans three independent evidence surfaces and asks for a structured comparison, without prescribing an execution route.",
+      "expected_source_facts": [
+        "The snapshot records deterministic IDs/hashes, source and chunk provenance, retrieval settings, timestamp, truncation details, and exact context text.",
+        "The inspector exposes Overview, Graph, Agents, Metrics, and Raw views built from safe evidence; hidden prompts are not shown by default.",
+        "Compare is sequential and shared-snapshot; missing usage/cost stays null or Unavailable and quality remains Not evaluated until a formal protocol exists."
+      ],
+      "evaluation_criteria_version": "PILOT-RUBRIC-V1.0",
+      "ambiguity_flag": false,
+      "authoring_notes": "The source surfaces are adjacent in the implementation record but have distinct observable outputs, supporting a clean multi-aspect task."
+    },
+    {
+      "task_id": "PILOT-R2-05",
+      "pilot_version": "PILOT-R2",
+      "task_text_version": "1.0.0",
+      "research_taxonomy": "T3",
+      "observable_characteristics": {
+        "aspects": [
+          "subtask and edge construction",
+          "DAG validation",
+          "ready-set scheduling and worker timing",
+          "candidate verification and terminal evidence"
+        ],
+        "dependency_characteristics": "A later node is released only after its recorded prerequisites complete; validation precedes scheduling.",
+        "evidence_distribution": "One named audit fixture plus the decomposition, graph, scheduling, concurrency, verifier, and stop sections.",
+        "expected_parallelizability": "Partial; the first ready set is concurrent, while the dependent node is serialized behind its prerequisites.",
+        "verification_demand": "Medium"
+      },
+      "taxonomy_rationale": "The answer is a causal execution trace whose later scheduling and evidence steps depend on earlier graph construction and validation.",
+      "expected_source_facts": [
+        "The fixture records a first ready set containing S1 and S3, followed by dependent S2.",
+        "Plans are validated for duplicate, unknown, self, and cyclic dependencies before execution.",
+        "Ready nodes are selected Kahn-style; independent workers use asyncio.gather and the dependent node waits for prerequisites.",
+        "The candidate is synthesized/verified and a successful PASS produces STOP_SUFFICIENT evidence."
+      ],
+      "evaluation_criteria_version": "PILOT-RUBRIC-V1.0",
+      "ambiguity_flag": false,
+      "authoring_notes": "The dependency pattern is taken directly from the audited fixture, not invented to force a particular route."
+    },
+    {
+      "task_id": "PILOT-R2-06",
+      "pilot_version": "PILOT-R2",
+      "task_text_version": "1.0.0",
+      "research_taxonomy": "T3",
+      "observable_characteristics": {
+        "aspects": [
+          "verifier issue handoff",
+          "targeted repair execution",
+          "re-synthesis and re-verification",
+          "PASS/FAIL terminal branches"
+        ],
+        "dependency_characteristics": "Repair actions are enabled by a NEEDS_WORK result and budget headroom; re-verification follows repair and synthesis.",
+        "evidence_distribution": "Verifier, escalation, early-stop, budget, and corresponding test rows.",
+        "expected_parallelizability": "Repair workers for separate issues may overlap, but the repair round depends on the verifier result and re-verification follows it.",
+        "verification_demand": "High"
+      },
+      "taxonomy_rationale": "The main challenge is the source-defined order of dependent control transitions after a verifier finding; the branch outcomes complete that sequence.",
+      "expected_source_facts": [
+        "NEEDS_WORK selects one bounded repair subtask per reported issue when budgets allow.",
+        "Targeted repairs run without an unrelated full-pipeline rerun, then synthesis and targeted re-verification occur.",
+        "A verifier PASS stops sufficiently; FAIL does not trigger escalation and stops under the applicable terminal state.",
+        "Escalation is constrained by logical/physical/request and escalation budgets."
+      ],
+      "evaluation_criteria_version": "PILOT-RUBRIC-V1.0",
+      "ambiguity_flag": false,
+      "authoring_notes": "Although verifier behavior is involved, the annotation is dependency-heavy because the prompt asks for the ordered control sequence rather than for conflict adjudication."
+    },
+    {
+      "task_id": "PILOT-R2-07",
+      "pilot_version": "PILOT-R2",
+      "task_text_version": "1.0.0",
+      "research_taxonomy": "T4",
+      "observable_characteristics": {
+        "aspects": [
+          "configured-but-unverified status",
+          "model-change invalidation",
+          "upstream-error interpretation",
+          "privacy boundary"
+        ],
+        "dependency_characteristics": "The interpretation is conditional: configuration, prior-check state, model change, and diagnostic category must be cross-checked.",
+        "evidence_distribution": "Provider contract/state plus safety-fix notes and operator guidance.",
+        "expected_parallelizability": "Low; the facts must be reconciled in context before a status conclusion is made.",
+        "verification_demand": "High"
+      },
+      "taxonomy_rationale": "The scenario contains a conditional status, a state invalidation event, and an upstream error that could be misread as an application defect; omission and overclaiming are the central risks.",
+      "expected_source_facts": [
+        "Unknown means configured without a current successful server-side check, not provider failure.",
+        "Changing the model or key invalidates the stored badge and requires a fresh check; no-key providers remain missing.",
+        "An upstream diagnostic error is a normalized provider incident/error category and does not by itself prove application failure.",
+        "Raw provider responses and credentials must not be exposed."
+      ],
+      "evaluation_criteria_version": "PILOT-RUBRIC-V1.0",
+      "ambiguity_flag": false,
+      "authoring_notes": "This is a genuine exception/interpretation task built from the documented unknown-versus-failure and stale-badge fixes, not a long lookup question."
+    },
+    {
+      "task_id": "PILOT-R2-08",
+      "pilot_version": "PILOT-R2",
+      "task_text_version": "1.0.0",
+      "research_taxonomy": "T4",
+      "observable_characteristics": {
+        "aspects": [
+          "contractual baseline topology",
+          "V6.3 fixed/static closure",
+          "observational verifier and identity evidence",
+          "remaining limits and readiness claim"
+        ],
+        "dependency_characteristics": "A valid conclusion requires cross-checking earlier gaps against the later closure and then preserving explicit limits.",
+        "evidence_distribution": "Comparison contract, V6.3 current-state record, baseline audit, and regression rows.",
+        "expected_parallelizability": "Low to medium; the closure and limitation claims must be reconciled across sources rather than copied from one section.",
+        "verification_demand": "High"
+      },
+      "taxonomy_rationale": "The task is conflict-sensitive because it asks the reader to reconcile a historical contract gap with a later closure while avoiding the invalid inference that closure equals production readiness.",
+      "expected_source_facts": [
+        "The fixed baseline now freezes Planner presence, three independent S1/S2/S3 slots, an observational verifier, and a synthesizer under FIXED-TOPOLOGY-V1; planner text cannot change topology or escalate.",
+        "The static baseline selects one versioned preset once under STATIC-PRESETS-V1; it cannot switch presets or add repair workers after NEEDS_WORK.",
+        "Runs persist strategy/config identities and shared snapshot/provider/model/settings evidence.",
+        "The audit still distinguishes Fake mechanics from live quality and records remaining environment limits; the result is not a production-readiness claim or Main Freeze."
+      ],
+      "evaluation_criteria_version": "PILOT-RUBRIC-V1.0",
+      "ambiguity_flag": false,
+      "authoring_notes": "The task deliberately requires both closure evidence and remaining-limit evidence, making omission of the caveat a meaningful verification failure."
+    }
+  ],
+  "distribution": {
+    "T1": [
+      "PILOT-R2-01",
+      "PILOT-R2-02"
+    ],
+    "T2": [
+      "PILOT-R2-03",
+      "PILOT-R2-04"
+    ],
+    "T3": [
+      "PILOT-R2-05",
+      "PILOT-R2-06"
+    ],
+    "T4": [
+      "PILOT-R2-07",
+      "PILOT-R2-08"
+    ]
+  },
+  "authoring_boundary": {
+    "runtime_contains": [
+      "task text",
+      "reference source IDs and resolvable scopes",
+      "output-format instruction"
+    ],
+    "runtime_does_not_contain": [
+      "taxonomy labels",
+      "taxonomy rationales",
+      "expected source facts",
+      "mandatory or critical-error criteria",
+      "intended route or expected strategy winner"
+    ],
+    "scoring": "No scoring logic or hidden rubric is stored in this artifact. Quality evaluation is defined by QEP-1.1 and the research-only PILOT-RUBRIC-V1.0 manifest; rubric contents are never runtime input."
+  }
+}

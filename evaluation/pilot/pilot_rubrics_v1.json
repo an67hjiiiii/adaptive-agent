@@ -1,0 +1,1750 @@
+{
+  "artifact_id": "pilot_rubrics_v1",
+  "rubric_version": "PILOT-RUBRIC-V1.0",
+  "protocol_version": "QEP-1.1",
+  "benchmark_id": "pilot_benchmark_v1",
+  "benchmark_version": "pilot_benchmark_v1@1.1.0",
+  "corpus_version": "PILOT-CORPUS-V1",
+  "status": "QUALITY_REVIEWED",
+  "quality_review_status": "QUALITY_REVIEWED",
+  "research_only": true,
+  "runtime_injection": false,
+  "review_signoff": {
+    "review_method": "Independent corpus-scope, rubric-schema, benchmark-binding, and runtime-leakage audit",
+    "review_date": "2026-08-30",
+    "review_scope": "8/8 task entries",
+    "status_basis": "All task rubrics are complete and source-supported; no runtime orchestration change is required.",
+    "human_ledger_action": "Record the assigned E1/E2/ADJ-1 role identities and timestamps before scoring begins."
+  },
+  "blocker_summary": {
+    "P0": [],
+    "P1": [
+      "Integration must re-audit order randomization, provider/model freeze, pricing verification, staffing, and live-run preflight before execution; this quality package does not authorize a live Pilot."
+    ],
+    "quality_scope_status": "No quality-package P0/P1 defect remains after the binding and leakage audits."
+  },
+  "benchmark_binding": {
+    "manifest_path": "benchmarks/pilot/pilot_benchmark_v1.json",
+    "manifest_artifact_sha256": "18c1941c4f057f85160634bba334866795aa06b5746e9107cbe902c1f73ba706",
+    "manifest_status": "QUALITY_REVIEWED",
+    "tasks_required": 8,
+    "tasks_bound": 8,
+    "task_ids": [
+      "PILOT-R2-01",
+      "PILOT-R2-02",
+      "PILOT-R2-03",
+      "PILOT-R2-04",
+      "PILOT-R2-05",
+      "PILOT-R2-06",
+      "PILOT-R2-07",
+      "PILOT-R2-08"
+    ]
+  },
+  "corpus_binding": {
+    "corpus_version": "PILOT-CORPUS-V1",
+    "manifest_path": "benchmarks/pilot/pilot_benchmark_v1.json#/corpus_manifest",
+    "corpus_manifest_sha256": "3b620be8de1252dd9a4e4e00a2a220f9821d2722b4faaecfd4f56dcc26bd9ea2",
+    "source_snapshot_hashes_locked": true,
+    "source_ids": [
+      "contract-v0.6.3",
+      "state-v6.3",
+      "audit-v6.3",
+      "matrix-v0.6.3",
+      "fixes-v0.6",
+      "readme-v0.6"
+    ],
+    "provenance_rule": "Every mandatory criterion and critical-error definition cites only a source ID and locator inside the task's permitted scope; no general-knowledge inference is allowed."
+  },
+  "scope_authority": {
+    "immutable_corpus_manifest": "corpus/pilot/v1/CORPUS_MANIFEST.json",
+    "authoritative_task_bindings": "benchmarks/pilot/pilot_benchmark_v1.json#/tasks/*/reference_bindings",
+    "human_traceability_scopes": "benchmarks/pilot/pilot_benchmark_v1.json#/tasks/*/reference_scope",
+    "locator_rule": "Headings and line ranges in this manifest resolve against the frozen corpus paths, never against mutable living-document content."
+  },
+  "scoring_contract": {
+    "mandatory_coverage": "PassedMandatory / TotalMandatory",
+    "sufficient_pass": "MandatoryCoverage == 1.0 AND CriticalErrorCount == 0",
+    "primary_aggregate": "Sufficient Pass Rate",
+    "supporting_aggregates": [
+      "Mandatory Coverage",
+      "Critical Error Count",
+      "Critical Error Rate"
+    ],
+    "not_evaluable_rule": "A missing, unusable, or provider-incident answer is marked NOT_EVALUABLE and excluded from quality denominators; no answer, criterion, token, latency, or cost is imputed.",
+    "prohibited_metrics": [
+      "weighted quality score",
+      "QLC score",
+      "Quality/Cost primary ratio",
+      "Quality/Latency primary ratio"
+    ]
+  },
+  "evaluator_packet": {
+    "required_fields": [
+      "anonymized_candidate_id",
+      "exact_task_text",
+      "permitted_reference_scope",
+      "candidate_answer",
+      "hidden_task_rubric"
+    ],
+    "labels": {
+      "mandatory_criterion": [
+        "PASS",
+        "FAIL",
+        "UNCLEAR"
+      ],
+      "critical_error": [
+        "PRESENT",
+        "ABSENT",
+        "UNCLEAR"
+      ],
+      "answer_status": [
+        "EVALUABLE",
+        "NOT_EVALUABLE"
+      ]
+    },
+    "label_rules": {
+      "mandatory_pass": "The answer satisfies the criterion's pass_rule using only the permitted corpus scope.",
+      "mandatory_fail": "The answer omits a necessary proposition or contradicts the criterion's fail_rule.",
+      "critical_present": "The answer matches the critical-error trigger with source-grounded evidence.",
+      "unclear": "The evaluator cannot decide from the answer, rubric, and permitted scope; UNCLEAR is not a pass and is routed to second review.",
+      "not_evaluable": "The packet lacks a usable final answer or a declared incident prevents a valid answer-level judgment."
+    },
+    "hidden_from_evaluator": [
+      "strategy",
+      "selected route",
+      "agent count",
+      "provider",
+      "model",
+      "latency",
+      "token usage",
+      "cost",
+      "runtime trace",
+      "run ID",
+      "repeat ID",
+      "taxonomy label"
+    ],
+    "identity_policy": "The coordinator records evaluator role IDs in the research ledger; the packet contains only an opaque candidate ID and does not expose reviewer identity."
+  },
+  "second_review_plan": {
+    "primary_evaluator": {
+      "role_id": "E1",
+      "coverage": "All 96 Pilot answer packets, including packets later marked NOT_EVALUABLE.",
+      "independent_lock": "Primary labels are locked before any second-review discussion."
+    },
+    "second_reviewer": {
+      "role_id": "E2",
+      "base_subset_count": 24,
+      "base_subset_fraction": "25% of 96",
+      "subset_selection_rule": "Before packet release, compute SHA-256('PILOT-R2-QA-SUBSET-20260830|' + anonymized_candidate_id). Within each of the 16 coordinator-only taxonomy-by-strategy strata, sort by this digest and take the first packet from every stratum. Using frozen ordinal orders T1,T2,T3,T4 and Single,Fixed,Static,Adaptive, take a second packet from exactly those eight strata where (taxonomy_ordinal + strategy_ordinal) mod 2 = 0. This yields exactly 24 packets, two packets in two strata per taxonomy and per strategy, and at least one packet per stratum.",
+      "additional_cases": [
+        "every UNCLEAR label",
+        "every borderline or UNCLEAR critical-error decision",
+        "every invalid-task or invalid-rubric finding",
+        "every primary/second-review disagreement"
+      ],
+      "blinding": "E2 receives the same blinded packet fields as E1 and does not receive E1 labels before independent lock."
+    },
+    "disagreement_resolution": [
+      "Compare the locked item-level labels against the criterion and cited corpus locator.",
+      "Resolve by the frozen rubric and source evidence when the rubric is clear.",
+      "If wording or source scope is ambiguous, mark the rubric version defective, issue a new version, and re-evaluate every affected packet; do not silently edit a locked score.",
+      "An unresolved substantive disagreement goes to blinded adjudicator role ADJ-1, whose decision and rationale are retained."
+    ],
+    "reviewer_identity_recording": "Record E1, E2, and ADJ-1 role IDs, assignment, timestamps, labels, changes, and adjudication rationale in the research ledger; do not put identities in candidate packets.",
+    "inter_rater_reliability": "Not claimed before the overlap is scored and an agreement statistic is actually calculated."
+  },
+  "workload_estimate": {
+    "answer_packets": 96,
+    "estimated_minutes_per_packet": "6-8",
+    "primary_evaluator_hours": "9.6-12.8",
+    "second_reviewer_base_hours": "2.4-3.2",
+    "calibration_hours": "0.5-1.0",
+    "adjudication_hours": "1.0-2.0",
+    "expected_total_person_hours": "14-19",
+    "practicality_note": "The rubric uses four or five atomic mandatory criteria and two critical-error definitions per task; optional criteria never add scoring burden. The estimate is a planning range, not a measured duration."
+  },
+  "leakage_audit": {
+    "audit_date": "2026-08-30",
+    "policy": "This manifest is research-only. No rubric field or file may be imported, read, rendered, or persisted by runtime orchestration, Analyzer, Planner, Worker, Verifier, Synthesizer, frontend code, or run evidence.",
+    "mechanical_checks": [
+      {
+        "check_id": "LEAK-01",
+        "scope": "app/**/*.py",
+        "rule": "No import or file-read path to evaluation/pilot/pilot_rubrics_v1.json and no mandatory_criteria or critical_errors payload is constructed.",
+        "result": "PASS"
+      },
+      {
+        "check_id": "LEAK-02",
+        "scope": "app/static/** and runs/**",
+        "rule": "No rubric file, hidden criterion, critical-error definition, or evaluator packet field is exposed or persisted.",
+        "result": "PASS"
+      },
+      {
+        "check_id": "LEAK-03",
+        "scope": "benchmarks/pilot/pilot_benchmark_v1.json#/tasks",
+        "rule": "Runtime task payloads contain no rubric terms, taxonomy labels, expected facts, or quality criteria; research annotations remain outside the runtime projection.",
+        "result": "PASS"
+      },
+      {
+        "check_id": "LEAK-04",
+        "scope": "app/core/orchestrator.py",
+        "rule": "Analyzer, Planner, Worker, Verifier, and Synthesizer prompts have no research rubric input.",
+        "result": "PASS"
+      }
+    ],
+    "failure_policy": "Any rubric content reaching a runtime role or frontend is a P0 blocker. A missing/invalid task-rubric binding or broken blinding is P1."
+  },
+  "tasks": [
+    {
+      "task_id": "PILOT-R2-01",
+      "benchmark_version": "pilot_benchmark_v1@1.1.0",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "rubric_version": "PILOT-RUBRIC-V1.0",
+      "task_packet_id": "PILOT-R2-01-PACKET-V1",
+      "task_wording_sha256": "ed421ad4a5b3a743a4755679c1ebf294c79201a780a96cf14b39306644080242",
+      "immutable_reference_bindings_ref": "benchmarks/pilot/pilot_benchmark_v1.json#/tasks/PILOT-R2-01/reference_bindings",
+      "permitted_reference_scope": [
+        {
+          "source_id": "contract-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Runtime structural signals",
+              "lines": "49-62"
+            },
+            {
+              "heading": "Rule-based Adaptive Controller",
+              "lines": "64-75"
+            },
+            {
+              "heading": "Runtime roles",
+              "lines": "77-85"
+            },
+            {
+              "heading": "Verifier and terminal behavior",
+              "lines": "87-98"
+            }
+          ]
+        }
+      ],
+      "mandatory_criteria": [
+        {
+          "id": "M01",
+          "criterion": "Names the validated analyzer fields consulted by the routing rule: aspects, dependencies, parallelizable_groups, and verification_demand.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Runtime structural signals, lines 49-59"
+            }
+          ],
+          "observable_test": "The answer explicitly identifies all four field names or their unambiguous source-grounded equivalents.",
+          "pass_rule": "All four consulted fields are present and no hidden label or score is substituted.",
+          "fail_rule": "One or more consulted fields are omitted, replaced with a hidden taxonomy/score, or attributed to an unsupported signal.",
+          "non_examples": [
+            "Saying only that the controller uses a vague task difficulty score.",
+            "Listing provider latency or token cost as a routing signal."
+          ]
+        },
+        {
+          "id": "M02",
+          "criterion": "Selects the DIRECT path when the task has one main focus, no prerequisite dependencies, and no high-verification trigger.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Rule-based Adaptive Controller, lines 64-73"
+            }
+          ],
+          "observable_test": "The answer maps the three conditions in the prompt to DIRECT rather than PARALLEL or PLANNED.",
+          "pass_rule": "The route is DIRECT and the answer explains that no dependency/high-verification trigger applies.",
+          "fail_rule": "The answer selects PLANNED, PARALLEL, or an unsupported route for the stated conditions.",
+          "non_examples": [
+            "Choosing PLANNED solely because every task is assumed to need a Planner.",
+            "Choosing PARALLEL without multiple useful independent aspects."
+          ]
+        },
+        {
+          "id": "M03",
+          "criterion": "States that the Planner is skipped on the DIRECT path.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Rule-based Adaptive Controller and Runtime roles, lines 64-85"
+            }
+          ],
+          "observable_test": "The role sequence identifies Direct Solver participation and explicitly marks Planner as not called.",
+          "pass_rule": "Planner omission is stated as a route rule, not as a runtime accident.",
+          "fail_rule": "The answer calls Planner, requires Planner, or leaves role participation inconsistent with DIRECT.",
+          "non_examples": [
+            "Saying the orchestrator itself is an additional LLM role.",
+            "Describing Planner output as required for a direct lookup."
+          ]
+        },
+        {
+          "id": "M04",
+          "criterion": "States that a Runtime Verifier PASS ends the run with STOP_SUFFICIENT.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Verifier and terminal behavior, lines 87-98"
+            }
+          ],
+          "observable_test": "The terminal state is named exactly or with an unambiguous equivalent.",
+          "pass_rule": "PASS is connected to STOP_SUFFICIENT and no further adaptive action.",
+          "fail_rule": "PASS is treated as NEEDS_WORK, a failure, or a non-terminal intermediate state.",
+          "non_examples": [
+            "Claiming PASS automatically launches a repair round.",
+            "Replacing STOP_SUFFICIENT with an invented quality score."
+          ]
+        }
+      ],
+      "critical_errors": [
+        {
+          "id": "C01",
+          "definition": "The answer reverses the route boundary by asserting that Planner or a planned/parallel route is required for the stated single-focus, dependency-free, low-verification case.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Rule-based Adaptive Controller, lines 64-75"
+            }
+          ],
+          "trigger": "A route or mandatory Planner claim contradicts the DIRECT rule for the exact conditions in the task.",
+          "non_examples": [
+            "A minor omission of one analyzer field while still selecting DIRECT correctly."
+          ]
+        },
+        {
+          "id": "C02",
+          "definition": "The answer reverses terminal behavior by claiming a verifier PASS continues adaptive work or does not produce STOP_SUFFICIENT.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Verifier and terminal behavior, lines 87-98"
+            }
+          ],
+          "trigger": "A PASS is explicitly made non-terminal or mapped to a different terminal outcome.",
+          "non_examples": [
+            "Unclear wording about whether the Direct Solver is counted as a role."
+          ]
+        }
+      ],
+      "optional_criteria": [
+        {
+          "id": "O01",
+          "criterion": "Uses a compact decision table or short prose and cites the named contract headings.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "All permitted headings for this task"
+            }
+          ],
+          "scoring_effect": "No effect on mandatory coverage or sufficient pass."
+        }
+      ],
+      "rubric_review_status": "QUALITY_REVIEWED"
+    },
+    {
+      "task_id": "PILOT-R2-02",
+      "benchmark_version": "pilot_benchmark_v1@1.1.0",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "rubric_version": "PILOT-RUBRIC-V1.0",
+      "task_packet_id": "PILOT-R2-02-PACKET-V1",
+      "task_wording_sha256": "440c73f15f62d903cf728659415b509e4a6adc34d2a55bde4a92ed1a4430f764",
+      "immutable_reference_bindings_ref": "benchmarks/pilot/pilot_benchmark_v1.json#/tasks/PILOT-R2-02/reference_bindings",
+      "permitted_reference_scope": [
+        {
+          "source_id": "contract-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Measurement definitions",
+              "lines": "116-130"
+            }
+          ]
+        },
+        {
+          "source_id": "audit-v6.3",
+          "anchors": [
+            {
+              "heading": "14. Retry",
+              "lines": "333-353"
+            },
+            {
+              "heading": "16. Instrumentation",
+              "lines": "376-404"
+            }
+          ]
+        }
+      ],
+      "mandatory_criteria": [
+        {
+          "id": "M01",
+          "criterion": "Counts one bounded role activation as one Agent Execution.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Measurement definitions, lines 116-120"
+            }
+          ],
+          "observable_test": "The Agent Execution row gives a count of one for the described bounded role.",
+          "pass_rule": "The answer says one role activation is one Agent Execution, independent of retry attempts.",
+          "fail_rule": "The answer counts provider attempts as Agent Executions or omits the bounded-role unit.",
+          "non_examples": [
+            "Counting the second provider attempt as a second Agent Execution.",
+            "Using total tokens as the Agent Execution count."
+          ]
+        },
+        {
+          "id": "M02",
+          "criterion": "Keeps the retried role at one Logical Model Call.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Measurement definitions, lines 118-122"
+            },
+            {
+              "source_id": "audit-v6.3",
+              "scope": "14. Retry, lines 341-348"
+            }
+          ],
+          "observable_test": "The Logical Model Call row reports one, with retry described as internal to the call.",
+          "pass_rule": "Exactly one logical call is reported for the bounded role despite the retry.",
+          "fail_rule": "The retry is counted as a second logical call.",
+          "non_examples": [
+            "Calling the retry a second physical request while retaining one logical call."
+          ]
+        },
+        {
+          "id": "M03",
+          "criterion": "Counts the two provider attempts as two Physical Provider Requests.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Measurement definitions, lines 120-122"
+            },
+            {
+              "source_id": "audit-v6.3",
+              "scope": "14. Retry, lines 341-352"
+            }
+          ],
+          "observable_test": "The Physical Provider Request row reports two and explicitly ties the increment to attempts.",
+          "pass_rule": "Two attempts produce two physical requests.",
+          "fail_rule": "The answer reports one physical request or treats a logical call as the physical count.",
+          "non_examples": [
+            "Reporting two physical requests but also two logical calls."
+          ]
+        },
+        {
+          "id": "M04",
+          "criterion": "Identifies retry evidence containing the next attempt and physical-request linkage.",
+          "source_support": [
+            {
+              "source_id": "audit-v6.3",
+              "scope": "14. Retry, lines 341-353"
+            }
+          ],
+          "observable_test": "The evidence note names a retry event and its next_attempt/physical_request fields or unambiguous equivalents.",
+          "pass_rule": "Retry evidence is described as an emitted event that makes the second attempt auditable.",
+          "fail_rule": "The answer gives counts with no retry evidence or invents an unrelated trace field.",
+          "non_examples": [
+            "Saying only that a retry happened without an observable event or attempt link."
+          ]
+        },
+        {
+          "id": "M05",
+          "criterion": "Leaves token and cost values unavailable when provider usage or price is unavailable, rather than converting them to zero.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Measurement definitions, lines 123-127"
+            }
+          ],
+          "observable_test": "The answer uses null/Unavailable or equivalent missingness language and rejects zero imputation.",
+          "pass_rule": "Both token usage and calculated cost remain unavailable when their inputs are unavailable.",
+          "fail_rule": "The answer supplies an invented numeric value or says unavailable equals zero.",
+          "non_examples": [
+            "Reporting a provider-returned real usage value when the prompt says usage is unavailable."
+          ]
+        }
+      ],
+      "critical_errors": [
+        {
+          "id": "C01",
+          "definition": "The answer collapses retry accounting by counting the retry as two logical calls or as only one physical request.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Measurement definitions, lines 118-122"
+            }
+          ],
+          "trigger": "Either logical-call or physical-request count is reversed in a way that invalidates the measurement contract.",
+          "non_examples": [
+            "A formatting error in the metric table while all three counts are unambiguous in prose."
+          ]
+        },
+        {
+          "id": "C02",
+          "definition": "The answer fabricates token or cost numbers, or explicitly treats unavailable provider usage as zero.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Measurement definitions, lines 123-127"
+            }
+          ],
+          "trigger": "A made-up or zero value is presented as measured usage/cost under the stated missing-usage condition.",
+          "non_examples": [
+            "Leaving one optional explanatory field blank while preserving null/unavailable accounting."
+          ]
+        }
+      ],
+      "optional_criteria": [
+        {
+          "id": "O01",
+          "criterion": "Uses a three-row table with separate Agent Execution, Logical Model Call, and Physical Provider Request labels.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Measurement definitions, lines 116-130"
+            }
+          ],
+          "scoring_effect": "No effect on mandatory coverage or sufficient pass."
+        }
+      ],
+      "rubric_review_status": "QUALITY_REVIEWED"
+    },
+    {
+      "task_id": "PILOT-R2-03",
+      "benchmark_version": "pilot_benchmark_v1@1.1.0",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "rubric_version": "PILOT-RUBRIC-V1.0",
+      "task_packet_id": "PILOT-R2-03-PACKET-V1",
+      "task_wording_sha256": "a7d1124124bdcb4db8b6e163b36325c49bce2935499804eb8ed7f81a6c0719e1",
+      "immutable_reference_bindings_ref": "benchmarks/pilot/pilot_benchmark_v1.json#/tasks/PILOT-R2-03/reference_bindings",
+      "permitted_reference_scope": [
+        {
+          "source_id": "contract-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Provider diagnostics",
+              "lines": "100-114"
+            }
+          ]
+        },
+        {
+          "source_id": "state-v6.3",
+          "anchors": [
+            {
+              "heading": "Providers and current safe status",
+              "lines": "88-107"
+            }
+          ]
+        },
+        {
+          "source_id": "fixes-v0.6",
+          "anchors": [
+            {
+              "heading": "3. Provider test thất bại có thể khóa nhầm cả provider",
+              "lines": "19-22"
+            },
+            {
+              "heading": "7. Provider/API information chưa đủ rõ",
+              "lines": "39-42"
+            },
+            {
+              "heading": "10. A stale API-test badge could survive a changed key",
+              "lines": "79-82"
+            }
+          ]
+        },
+        {
+          "source_id": "readme-v0.6",
+          "anchors": [
+            {
+              "heading": "Provider",
+              "lines": "16-31"
+            }
+          ]
+        }
+      ],
+      "mandatory_criteria": [
+        {
+          "id": "M01",
+          "criterion": "Describes provider diagnostics as one bounded live generation check with a normalized result.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Provider diagnostics, lines 100-109"
+            }
+          ],
+          "observable_test": "The answer distinguishes the diagnostic check from an unconstrained provider session or application verdict.",
+          "pass_rule": "A single bounded check and normalized output are both stated.",
+          "fail_rule": "The answer describes diagnostics as raw passthrough, unlimited generation, or an automatic application-health verdict.",
+          "non_examples": [
+            "Calling a normalized provider error a raw provider response."
+          ]
+        },
+        {
+          "id": "M02",
+          "criterion": "Lists the safe observable diagnostic dimensions: configuration, reachability, authentication, model access, generation, usage metadata, latency, error category, and safe message.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Provider diagnostics, lines 100-109"
+            }
+          ],
+          "observable_test": "The answer names the normalized dimensions without requiring raw provider payloads.",
+          "pass_rule": "All listed dimensions or clearly equivalent categories are represented.",
+          "fail_rule": "The answer reduces the diagnostic to a binary badge or claims raw body/credential output is observable.",
+          "non_examples": [
+            "Treating a latency value as proof that the model's content was high quality."
+          ]
+        },
+        {
+          "id": "M03",
+          "criterion": "Keeps raw provider errors, credentials, and key values server-side and out of frontend/log output.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Provider diagnostics, lines 111-114"
+            },
+            {
+              "source_id": "fixes-v0.6",
+              "scope": "7. Provider/API information chưa đủ rõ, lines 39-42"
+            },
+            {
+              "source_id": "readme-v0.6",
+              "scope": "Provider, lines 26-31"
+            }
+          ],
+          "observable_test": "The privacy boundary is explicit and no secret value is proposed for display or logging.",
+          "pass_rule": "Raw bodies and credentials remain private; only safe normalized information is operator-visible.",
+          "fail_rule": "The answer proposes exposing a key, fingerprint, raw body, or unredacted provider error.",
+          "non_examples": [
+            "Showing a safe error category and safe message."
+          ]
+        },
+        {
+          "id": "M04",
+          "criterion": "Applies the badge rules: configured-but-never-checked is unknown, no key is missing, and a key/model change invalidates the old live-check badge.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Provider diagnostics, lines 111-114"
+            },
+            {
+              "source_id": "state-v6.3",
+              "scope": "Providers and current safe status, lines 109-118"
+            },
+            {
+              "source_id": "fixes-v0.6",
+              "scope": "3. Provider test thất bại có thể khóa nhầm cả provider and 10. A stale API-test badge could survive a changed key, lines 19-22 and 79-82"
+            }
+          ],
+          "observable_test": "The answer gives all three status transitions and an operator action consistent with a fresh check.",
+          "pass_rule": "Unknown, missing, and invalidated-after-change are distinguished without overclaiming failure.",
+          "fail_rule": "Any of the three states is conflated or the old badge is retained after a key/model change.",
+          "non_examples": [
+            "Calling unknown a prompt-quality failure.",
+            "Treating a changed model as still covered by an old green check."
+          ]
+        }
+      ],
+      "critical_errors": [
+        {
+          "id": "C01",
+          "definition": "The answer exposes or recommends exposing raw provider bodies, credentials, key values, or key fingerprints to the browser, logs, or evaluator packet.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Provider diagnostics, lines 111-114"
+            },
+            {
+              "source_id": "state-v6.3",
+              "scope": "Providers and current safe status, lines 109-118"
+            }
+          ],
+          "trigger": "Any secret or unredacted provider response is treated as a permitted observable safeguard result.",
+          "non_examples": [
+            "Reporting a safe category such as MODEL_NOT_FOUND or PROVIDER_ERROR."
+          ]
+        },
+        {
+          "id": "C02",
+          "definition": "The answer turns an unknown or invalidated badge into an established provider/application failure, or says a failed test should hard-lock every request for the provider.",
+          "source_support": [
+            {
+              "source_id": "state-v6.3",
+              "scope": "Providers and current safe status, lines 109-118"
+            },
+            {
+              "source_id": "fixes-v0.6",
+              "scope": "3. Provider test thất bại có thể khóa nhầm cả provider, lines 19-22"
+            }
+          ],
+          "trigger": "Unknown or a scoped diagnostic failure is presented as conclusive application/provider unavailability.",
+          "non_examples": [
+            "Saying the operator should run a fresh diagnostic after a model change."
+          ]
+        }
+      ],
+      "optional_criteria": [
+        {
+          "id": "O01",
+          "criterion": "Uses three labeled sections that separate observation, private boundary, and operator implication.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Provider diagnostics, lines 100-114"
+            }
+          ],
+          "scoring_effect": "No effect on mandatory coverage or sufficient pass."
+        }
+      ],
+      "rubric_review_status": "QUALITY_REVIEWED"
+    },
+    {
+      "task_id": "PILOT-R2-04",
+      "benchmark_version": "pilot_benchmark_v1@1.1.0",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "rubric_version": "PILOT-RUBRIC-V1.0",
+      "task_packet_id": "PILOT-R2-04-PACKET-V1",
+      "task_wording_sha256": "d5b212b213d21b2bec9551e089fe8670fa26e87c4696984bde373adfaab17f90",
+      "immutable_reference_bindings_ref": "benchmarks/pilot/pilot_benchmark_v1.json#/tasks/PILOT-R2-04/reference_bindings",
+      "permitted_reference_scope": [
+        {
+          "source_id": "contract-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Frozen Context fairness",
+              "lines": "28-47"
+            }
+          ]
+        },
+        {
+          "source_id": "state-v6.3",
+          "anchors": [
+            {
+              "heading": "Verified architecture",
+              "lines": "20-86"
+            }
+          ]
+        },
+        {
+          "source_id": "matrix-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Compare and inspector coverage rows",
+              "lines": "28-45"
+            }
+          ]
+        },
+        {
+          "source_id": "readme-v0.6",
+          "anchors": [
+            {
+              "heading": "Flow chat chính",
+              "lines": "33-49"
+            },
+            {
+              "heading": "Conversation persistence",
+              "lines": "51-62"
+            }
+          ]
+        }
+      ],
+      "mandatory_criteria": [
+        {
+          "id": "M01",
+          "criterion": "States that the Frozen Context Snapshot records deterministic IDs/hashes and source/chunk provenance.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Frozen Context fairness, lines 28-37"
+            },
+            {
+              "source_id": "state-v6.3",
+              "scope": "Verified architecture, lines 25-28"
+            }
+          ],
+          "observable_test": "The snapshot section names both identity/hash and provenance rather than only saying context is frozen.",
+          "pass_rule": "IDs/hashes and source/chunk provenance are both present.",
+          "fail_rule": "Either identity/hash or provenance is omitted or replaced with a generic context claim.",
+          "non_examples": [
+            "Calling a run ID the snapshot hash.",
+            "Listing only the final answer as snapshot evidence."
+          ]
+        },
+        {
+          "id": "M02",
+          "criterion": "States that the snapshot records retrieval settings, creation time, explicit truncation details, and exact context text.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Frozen Context fairness, lines 33-37"
+            },
+            {
+              "source_id": "state-v6.3",
+              "scope": "Verified architecture, lines 25-28"
+            }
+          ],
+          "observable_test": "The answer distinguishes metadata and exact text from an unspecified retrieval summary.",
+          "pass_rule": "All four evidence elements are stated, including an explicit representation when text is dropped.",
+          "fail_rule": "The answer omits truncation or exact snapshot text, or claims retrieval is nondeterministic.",
+          "non_examples": [
+            "Saying only that a timestamp exists without the retrieval/truncation fields."
+          ]
+        },
+        {
+          "id": "M03",
+          "criterion": "Lists the Execution Inspector views Overview, Graph, Agents, Metrics, and Raw, and notes that they use safe evidence without hidden prompts by default.",
+          "source_support": [
+            {
+              "source_id": "state-v6.3",
+              "scope": "Verified architecture, lines 63-70"
+            },
+            {
+              "source_id": "matrix-v0.6.3",
+              "scope": "Compare and inspector coverage rows, lines 42-45"
+            }
+          ],
+          "observable_test": "The Inspector section names all five views and the prompt privacy behavior.",
+          "pass_rule": "All five view names and the safe-evidence/no-hidden-prompt boundary are present.",
+          "fail_rule": "A required view is missing or hidden prompts are claimed to be displayed by default.",
+          "non_examples": [
+            "Calling Raw a view while saying it contains system prompts by default."
+          ]
+        },
+        {
+          "id": "M04",
+          "criterion": "States that Compare creates one shared Frozen Context Snapshot and runs Single, Fixed, Static, and Adaptive sequentially with frozen provider/model/settings.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Frozen Context fairness, lines 39-45"
+            },
+            {
+              "source_id": "state-v6.3",
+              "scope": "Verified architecture, lines 45-53"
+            }
+          ],
+          "observable_test": "The comparison section names one shared snapshot and the sequential top-level order constraint.",
+          "pass_rule": "Shared snapshot identity/provenance, frozen provider/model/settings, and sequential top-level runs are all stated.",
+          "fail_rule": "The answer permits per-strategy snapshots/settings or overlapping top-level strategy execution.",
+          "non_examples": [
+            "Distinguishing internal worker concurrency from top-level sequential Compare runs."
+          ]
+        },
+        {
+          "id": "M05",
+          "criterion": "Represents missing provider usage/cost as null or Unavailable and does not replace the runtime's Not evaluated quality label with an invented composite score.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Frozen Context fairness, lines 43-47"
+            },
+            {
+              "source_id": "state-v6.3",
+              "scope": "Verified architecture, lines 49-53 and 63-66"
+            }
+          ],
+          "observable_test": "The answer names both missingness and the quality label, and rejects invented scoring.",
+          "pass_rule": "Unavailable usage/cost is not zero and the runtime comparison label remains Not evaluated until scored human-quality results are actually attached.",
+          "fail_rule": "The answer imputes zero or reports a weighted/composite quality score.",
+          "non_examples": [
+            "Reporting a real cost when usage and a known price are present."
+          ]
+        }
+      ],
+      "critical_errors": [
+        {
+          "id": "C01",
+          "definition": "The answer invents a quality score or converts missing provider usage/cost into zero, thereby making an unsupported comparison claim.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Frozen Context fairness, lines 43-47"
+            }
+          ],
+          "trigger": "A numeric quality/composite result or zero-imputed usage/cost is presented as the comparison outcome.",
+          "non_examples": [
+            "Saying quality is Not evaluated and leaving cost null."
+          ]
+        },
+        {
+          "id": "C02",
+          "definition": "The answer breaks comparison fairness by allowing strategy-specific snapshots/settings or overlapping top-level strategy runs.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Frozen Context fairness, lines 39-42"
+            }
+          ],
+          "trigger": "Different context/provider/model/settings or parallel top-level Compare execution is asserted as valid evidence.",
+          "non_examples": [
+            "Mentioning concurrency inside a ready-set worker batch while preserving sequential top-level Compare."
+          ]
+        }
+      ],
+      "optional_criteria": [
+        {
+          "id": "O01",
+          "criterion": "Organizes the answer under snapshot, inspector, and comparison headings.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Frozen Context fairness, lines 28-47"
+            }
+          ],
+          "scoring_effect": "No effect on mandatory coverage or sufficient pass."
+        }
+      ],
+      "rubric_review_status": "QUALITY_REVIEWED"
+    },
+    {
+      "task_id": "PILOT-R2-05",
+      "benchmark_version": "pilot_benchmark_v1@1.1.0",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "rubric_version": "PILOT-RUBRIC-V1.0",
+      "task_packet_id": "PILOT-R2-05-PACKET-V1",
+      "task_wording_sha256": "4fd0e31f305d0c972eb9d54fe24774cb476d0a25d22b161872d1292e1b2393fb",
+      "immutable_reference_bindings_ref": "benchmarks/pilot/pilot_benchmark_v1.json#/tasks/PILOT-R2-05/reference_bindings",
+      "permitted_reference_scope": [
+        {
+          "source_id": "audit-v6.3",
+          "anchors": [
+            {
+              "heading": "Runtime evidence fixtures",
+              "lines": "27-49"
+            },
+            {
+              "heading": "4. Task decomposition",
+              "lines": "124-146"
+            },
+            {
+              "heading": "5. DAG construction",
+              "lines": "148-166"
+            },
+            {
+              "heading": "6. DAG validation",
+              "lines": "167-185"
+            },
+            {
+              "heading": "7. Kahn/ready-set scheduling",
+              "lines": "186-204"
+            },
+            {
+              "heading": "8. Concurrent Worker execution",
+              "lines": "205-226"
+            },
+            {
+              "heading": "9. Runtime Verifier",
+              "lines": "227-248"
+            },
+            {
+              "heading": "11. Early stopping",
+              "lines": "271-287"
+            }
+          ]
+        },
+        {
+          "source_id": "contract-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Rule-based Adaptive Controller",
+              "lines": "64-75"
+            },
+            {
+              "heading": "Verifier and terminal behavior",
+              "lines": "87-98"
+            }
+          ]
+        },
+        {
+          "source_id": "matrix-v0.6.3",
+          "anchors": [
+            {
+              "heading": "DAG, ready-set, and concurrent-worker rows",
+              "lines": "15-18"
+            }
+          ]
+        }
+      ],
+      "mandatory_criteria": [
+        {
+          "id": "M01",
+          "criterion": "Traces the fixture's dependency shape as independent S1 and S3 first, followed by S2 after both prerequisites complete.",
+          "source_support": [
+            {
+              "source_id": "audit-v6.3",
+              "scope": "Runtime evidence fixtures and DAG construction, lines 27-49 and 148-166"
+            }
+          ],
+          "observable_test": "The ordered trace names S1, S3, and S2 and states the prerequisite boundary.",
+          "pass_rule": "S1/S3 are the first ready nodes and S2 depends on their completion.",
+          "fail_rule": "The answer reverses the dependency or says S2 is independent.",
+          "non_examples": [
+            "Using a different label for the same three fixture nodes while preserving the source order."
+          ]
+        },
+        {
+          "id": "M02",
+          "criterion": "Places DAG validation before worker execution and names rejection of duplicate IDs, unknown dependencies, self-loops, and cycles.",
+          "source_support": [
+            {
+              "source_id": "audit-v6.3",
+              "scope": "6. DAG validation, lines 167-185"
+            }
+          ],
+          "observable_test": "The trace contains a validation checkpoint before the first ready set and all four invalid-plan cases.",
+          "pass_rule": "Validation precedes workers and all four explicit rejection classes are listed.",
+          "fail_rule": "Workers start before validation or an invalid topology is said to execute.",
+          "non_examples": [
+            "Mentioning only cycles while omitting duplicate/unknown/self validation."
+          ]
+        },
+        {
+          "id": "M03",
+          "criterion": "Describes Kahn-style ready-set scheduling as first [S1, S3], then [S2] after the first batch is complete.",
+          "source_support": [
+            {
+              "source_id": "audit-v6.3",
+              "scope": "7. Kahn/ready-set scheduling, lines 186-204"
+            },
+            {
+              "source_id": "audit-v6.3",
+              "scope": "Runtime evidence fixtures, lines 33-38"
+            }
+          ],
+          "observable_test": "The answer identifies both ready sets and their ordering.",
+          "pass_rule": "Both batches are present in the source order and are tied to done/prerequisite state.",
+          "fail_rule": "The answer gives one batch, the wrong nodes, or no dependency boundary.",
+          "non_examples": [
+            "Saying the ready set is an implementation detail while still giving the exact two batches."
+          ]
+        },
+        {
+          "id": "M04",
+          "criterion": "Distinguishes concurrency within a ready set from the prerequisite boundary: independent workers use asyncio.gather and S2 waits for S1/S3 completion.",
+          "source_support": [
+            {
+              "source_id": "audit-v6.3",
+              "scope": "8. Concurrent Worker execution, lines 205-225"
+            },
+            {
+              "source_id": "audit-v6.3",
+              "scope": "7. Kahn/ready-set scheduling, lines 193-203"
+            }
+          ],
+          "observable_test": "The trace says S1 and S3 overlap or run in one gather batch and S2 starts only after that batch returns.",
+          "pass_rule": "Both the overlap mechanism and wait boundary are explicit.",
+          "fail_rule": "The answer serializes independent nodes or runs S2 concurrently with unmet prerequisites.",
+          "non_examples": [
+            "Calling the two top-level comparison strategies sequential while describing internal worker overlap."
+          ]
+        },
+        {
+          "id": "M05",
+          "criterion": "Includes candidate synthesis/verification and states that a successful verifier PASS emits STOP_SUFFICIENT evidence.",
+          "source_support": [
+            {
+              "source_id": "audit-v6.3",
+              "scope": "9. Runtime Verifier and 11. Early stopping, lines 227-248 and 271-287"
+            },
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Verifier and terminal behavior, lines 87-98"
+            }
+          ],
+          "observable_test": "The final trace names a candidate, verifier result, stop event, and terminal state.",
+          "pass_rule": "Synthesis/verification is followed by PASS and STOP_SUFFICIENT, with evidence retained.",
+          "fail_rule": "The answer omits verification or makes PASS non-terminal.",
+          "non_examples": [
+            "Not naming a particular provider when the source trace only requires evidence events."
+          ]
+        }
+      ],
+      "critical_errors": [
+        {
+          "id": "C01",
+          "definition": "The answer allows S2 to execute before S1 and S3, or claims all three dependent/independent nodes run concurrently in one batch.",
+          "source_support": [
+            {
+              "source_id": "audit-v6.3",
+              "scope": "Runtime evidence fixtures and 7. Kahn/ready-set scheduling, lines 33-38 and 186-204"
+            }
+          ],
+          "trigger": "The prerequisite boundary is explicitly reversed or removed.",
+          "non_examples": [
+            "A missing timestamp while the two ready sets and ordering remain correct."
+          ]
+        },
+        {
+          "id": "C02",
+          "definition": "The answer says an invalid DAG is executed without validation, or treats a successful verifier PASS as requiring another pipeline round instead of STOP_SUFFICIENT.",
+          "source_support": [
+            {
+              "source_id": "audit-v6.3",
+              "scope": "6. DAG validation and 11. Early stopping, lines 167-185 and 271-287"
+            }
+          ],
+          "trigger": "Either pre-execution validation or the terminal PASS boundary is explicitly contradicted.",
+          "non_examples": [
+            "An incomplete but non-contradictory explanation of the verifier rationale."
+          ]
+        }
+      ],
+      "optional_criteria": [
+        {
+          "id": "O01",
+          "criterion": "Uses numbered transitions and cites each major fixture/scheduler transition.",
+          "source_support": [
+            {
+              "source_id": "audit-v6.3",
+              "scope": "All permitted headings for this task"
+            }
+          ],
+          "scoring_effect": "No effect on mandatory coverage or sufficient pass."
+        }
+      ],
+      "rubric_review_status": "QUALITY_REVIEWED"
+    },
+    {
+      "task_id": "PILOT-R2-06",
+      "benchmark_version": "pilot_benchmark_v1@1.1.0",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "rubric_version": "PILOT-RUBRIC-V1.0",
+      "task_packet_id": "PILOT-R2-06-PACKET-V1",
+      "task_wording_sha256": "9ddace08809c6a025a9e3c4c6ee8a12f65c60c86a0444a553c1f5821d8222d73",
+      "immutable_reference_bindings_ref": "benchmarks/pilot/pilot_benchmark_v1.json#/tasks/PILOT-R2-06/reference_bindings",
+      "permitted_reference_scope": [
+        {
+          "source_id": "contract-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Verifier and terminal behavior",
+              "lines": "87-98"
+            },
+            {
+              "heading": "Rule-based Adaptive Controller",
+              "lines": "64-75"
+            }
+          ]
+        },
+        {
+          "source_id": "audit-v6.3",
+          "anchors": [
+            {
+              "heading": "9. Runtime Verifier",
+              "lines": "227-248"
+            },
+            {
+              "heading": "10. Targeted escalation",
+              "lines": "249-270"
+            },
+            {
+              "heading": "11. Early stopping",
+              "lines": "271-287"
+            },
+            {
+              "heading": "12. Budget constraint",
+              "lines": "288-310"
+            }
+          ]
+        },
+        {
+          "source_id": "matrix-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Verifier, escalation, and FAIL rows",
+              "lines": "18-22"
+            }
+          ]
+        }
+      ],
+      "mandatory_criteria": [
+        {
+          "id": "M01",
+          "criterion": "For NEEDS_WORK with two actionable issues and budget headroom, creates one bounded repair subtask per reported issue.",
+          "source_support": [
+            {
+              "source_id": "audit-v6.3",
+              "scope": "10. Targeted escalation, lines 249-258"
+            }
+          ],
+          "observable_test": "The sequence names two issue-targeted repairs and preserves the bounded-round rule.",
+          "pass_rule": "Exactly one bounded repair is associated with each reported issue, subject to budget allowance.",
+          "fail_rule": "The answer creates unrelated repairs, an unbounded loop, or no issue-to-repair mapping.",
+          "non_examples": [
+            "Using different repair labels while retaining one per reported issue."
+          ]
+        },
+        {
+          "id": "M02",
+          "criterion": "Keeps the escalation targeted and does not rerun the unrelated full pipeline.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Verifier and terminal behavior, lines 89-98"
+            },
+            {
+              "source_id": "audit-v6.3",
+              "scope": "10. Targeted escalation, lines 256-269"
+            }
+          ],
+          "observable_test": "The answer explicitly excludes an unrelated full-pipeline rerun.",
+          "pass_rule": "Only the reported missing issues are repaired and linked to the verifier evidence.",
+          "fail_rule": "The answer restarts all original agents or changes unrelated work.",
+          "non_examples": [
+            "Re-running synthesis and verification after targeted repairs."
+          ]
+        },
+        {
+          "id": "M03",
+          "criterion": "Uses the sequence repair workers, then synthesis, then targeted re-verification.",
+          "source_support": [
+            {
+              "source_id": "audit-v6.3",
+              "scope": "10. Targeted escalation, lines 256-269"
+            }
+          ],
+          "observable_test": "The order is stated explicitly and the second verification is marked targeted.",
+          "pass_rule": "All three phases appear in the source order.",
+          "fail_rule": "Verification precedes repair, synthesis is omitted, or a full unregistered rerun replaces the sequence.",
+          "non_examples": [
+            "Describing the two repair workers as concurrent within the repair phase."
+          ]
+        },
+        {
+          "id": "M04",
+          "criterion": "Maps a verifier PASS after the candidate or targeted repair to STOP_SUFFICIENT with no further adaptive call.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Verifier and terminal behavior, lines 87-98"
+            },
+            {
+              "source_id": "audit-v6.3",
+              "scope": "11. Early stopping, lines 271-287"
+            }
+          ],
+          "observable_test": "The PASS branch names the terminal state and stop behavior.",
+          "pass_rule": "PASS is terminal and produces STOP_SUFFICIENT.",
+          "fail_rule": "PASS causes another escalation or remains non-terminal.",
+          "non_examples": [
+            "Not specifying whether PASS occurred before or after the targeted repair when both branches are described correctly."
+          ]
+        },
+        {
+          "id": "M05",
+          "criterion": "Maps FAIL to the applicable verification/budget terminal state without automatic escalation and keeps escalation bounded by call/request/escalation budgets.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Verifier and terminal behavior, lines 93-98"
+            },
+            {
+              "source_id": "audit-v6.3",
+              "scope": "10. Targeted escalation and 12. Budget constraint, lines 249-310"
+            }
+          ],
+          "observable_test": "The FAIL branch bypasses escalation and the budget gate is present in the sequence.",
+          "pass_rule": "FAIL does not automatically rerun/escalate; any escalation requires remaining budgets.",
+          "fail_rule": "FAIL is said to trigger the same repair flow automatically or budgets are ignored.",
+          "non_examples": [
+            "Saying a stopped run retains its evidence while still not escalating after FAIL."
+          ]
+        }
+      ],
+      "critical_errors": [
+        {
+          "id": "C01",
+          "definition": "The answer escalates after PASS or FAIL, or replaces targeted repair with an unrelated full-pipeline rerun.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Verifier and terminal behavior, lines 87-98"
+            },
+            {
+              "source_id": "audit-v6.3",
+              "scope": "10. Targeted escalation and 11. Early stopping, lines 249-287"
+            }
+          ],
+          "trigger": "A branch explicitly violates the PASS/FAIL gate or targeted-only rule.",
+          "non_examples": [
+            "A missing rationale for why one issue is selected when both issue repairs are still present."
+          ]
+        },
+        {
+          "id": "C02",
+          "definition": "The answer creates unbounded repair work or permits escalation after the configured logical, physical, request, or escalation budget is exhausted.",
+          "source_support": [
+            {
+              "source_id": "audit-v6.3",
+              "scope": "12. Budget constraint, lines 288-310"
+            }
+          ],
+          "trigger": "Budget headroom is treated as irrelevant or an unlimited repair loop is prescribed.",
+          "non_examples": [
+            "Not naming every budget counter while explicitly retaining the bounded budget gate."
+          ]
+        }
+      ],
+      "optional_criteria": [
+        {
+          "id": "O01",
+          "criterion": "Uses a small branch table for PASS, NEEDS_WORK, and FAIL.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Verifier and terminal behavior, lines 87-98"
+            }
+          ],
+          "scoring_effect": "No effect on mandatory coverage or sufficient pass."
+        }
+      ],
+      "rubric_review_status": "QUALITY_REVIEWED"
+    },
+    {
+      "task_id": "PILOT-R2-07",
+      "benchmark_version": "pilot_benchmark_v1@1.1.0",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "rubric_version": "PILOT-RUBRIC-V1.0",
+      "task_packet_id": "PILOT-R2-07-PACKET-V1",
+      "task_wording_sha256": "491207ef61c7c1842e492eb7e396acad20489a19fbde942cd8c43e5bd5f9121b",
+      "immutable_reference_bindings_ref": "benchmarks/pilot/pilot_benchmark_v1.json#/tasks/PILOT-R2-07/reference_bindings",
+      "permitted_reference_scope": [
+        {
+          "source_id": "contract-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Provider diagnostics",
+              "lines": "100-114"
+            }
+          ]
+        },
+        {
+          "source_id": "state-v6.3",
+          "anchors": [
+            {
+              "heading": "Providers and current safe status",
+              "lines": "88-107"
+            },
+            {
+              "heading": "Known discrepancies and environment limits",
+              "lines": "152-163"
+            }
+          ]
+        },
+        {
+          "source_id": "fixes-v0.6",
+          "anchors": [
+            {
+              "heading": "3. Provider test thất bại có thể khóa nhầm cả provider",
+              "lines": "19-22"
+            },
+            {
+              "heading": "7. Provider/API information chưa đủ rõ",
+              "lines": "39-42"
+            },
+            {
+              "heading": "10. A stale API-test badge could survive a changed key",
+              "lines": "79-82"
+            }
+          ]
+        },
+        {
+          "source_id": "readme-v0.6",
+          "anchors": [
+            {
+              "heading": "Provider",
+              "lines": "16-31"
+            }
+          ]
+        }
+      ],
+      "mandatory_criteria": [
+        {
+          "id": "M01",
+          "criterion": "Interprets unknown as configured without a current successful server-side check, not as provider failure.",
+          "source_support": [
+            {
+              "source_id": "state-v6.3",
+              "scope": "Providers and current safe status, lines 109-112"
+            },
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Provider diagnostics, lines 111-114"
+            }
+          ],
+          "observable_test": "The established/unverified section explicitly separates configuration from a successful live check.",
+          "pass_rule": "Unknown remains unverified and does not establish provider failure.",
+          "fail_rule": "Unknown is treated as a failed provider or application.",
+          "non_examples": [
+            "Saying the operator should run a fresh check to resolve unknown."
+          ]
+        },
+        {
+          "id": "M02",
+          "criterion": "States that a provider key or model change invalidates the stored badge and requires a fresh check, while no-key providers remain missing.",
+          "source_support": [
+            {
+              "source_id": "state-v6.3",
+              "scope": "Providers and current safe status, lines 114-118"
+            },
+            {
+              "source_id": "fixes-v0.6",
+              "scope": "10. A stale API-test badge could survive a changed key, lines 79-82"
+            },
+            {
+              "source_id": "readme-v0.6",
+              "scope": "Provider, lines 26-31"
+            }
+          ],
+          "observable_test": "The badge transition after the model change is explicit and no-key behavior is retained.",
+          "pass_rule": "The old badge becomes unknown/invalidated and a fresh check is required; no key is missing.",
+          "fail_rule": "The old ready badge remains valid after the change or no-key is treated as unknown/ready.",
+          "non_examples": [
+            "Calling the new diagnostic result upstream error while still invalidating the old badge."
+          ]
+        },
+        {
+          "id": "M03",
+          "criterion": "Classifies the upstream diagnostic error as a normalized provider incident/error category that does not by itself prove application failure.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Provider diagnostics, lines 102-109"
+            },
+            {
+              "source_id": "state-v6.3",
+              "scope": "Providers and current safe status, lines 109-118"
+            },
+            {
+              "source_id": "fixes-v0.6",
+              "scope": "3. Provider test thất bại có thể khóa nhầm cả provider and 7. Provider/API information chưa đủ rõ, lines 19-22 and 39-42"
+            }
+          ],
+          "observable_test": "The answer distinguishes provider-side category/incident from an application defect and names the safe operator implication.",
+          "pass_rule": "The error is normalized and scoped; no unsupported app-failure verdict is made.",
+          "fail_rule": "The answer treats the upstream error as conclusive application failure.",
+          "non_examples": [
+            "Saying the upstream error should be investigated or retried under the diagnostic policy."
+          ]
+        },
+        {
+          "id": "M04",
+          "criterion": "Keeps raw provider responses and credentials out of the answer, frontend, and logs.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Provider diagnostics, lines 111-114"
+            },
+            {
+              "source_id": "state-v6.3",
+              "scope": "Providers and current safe status, lines 109-118"
+            }
+          ],
+          "observable_test": "The privacy-boundary section names only safe normalized categories/messages as observable.",
+          "pass_rule": "No secret or raw response is exposed or requested.",
+          "fail_rule": "A credential, raw body, or key fingerprint is included as evidence.",
+          "non_examples": [
+            "Using the words upstream error without copying its raw body."
+          ]
+        }
+      ],
+      "critical_errors": [
+        {
+          "id": "C01",
+          "definition": "The answer asserts that unknown or the upstream diagnostic error establishes provider failure or application failure.",
+          "source_support": [
+            {
+              "source_id": "state-v6.3",
+              "scope": "Providers and current safe status, lines 109-118"
+            },
+            {
+              "source_id": "fixes-v0.6",
+              "scope": "3. Provider test thất bại có thể khóa nhầm cả provider, lines 19-22"
+            }
+          ],
+          "trigger": "A scoped/unverified diagnostic observation is promoted to a conclusive app/provider outage.",
+          "non_examples": [
+            "Recording a provider incident while leaving app health unverified."
+          ]
+        },
+        {
+          "id": "C02",
+          "definition": "The answer keeps a stale ready badge after the model change or exposes raw provider data/credentials.",
+          "source_support": [
+            {
+              "source_id": "state-v6.3",
+              "scope": "Providers and current safe status, lines 114-118"
+            },
+            {
+              "source_id": "fixes-v0.6",
+              "scope": "10. A stale API-test badge could survive a changed key, lines 79-82"
+            }
+          ],
+          "trigger": "Either the invalidated badge or the secret boundary is explicitly violated.",
+          "non_examples": [
+            "Saying the badge becomes unknown and the safe error category is shown."
+          ]
+        }
+      ],
+      "optional_criteria": [
+        {
+          "id": "O01",
+          "criterion": "Separates established observations, unverified conclusions, incident classification, and privacy boundaries with explicit labels.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Provider diagnostics, lines 100-114"
+            }
+          ],
+          "scoring_effect": "No effect on mandatory coverage or sufficient pass."
+        }
+      ],
+      "rubric_review_status": "QUALITY_REVIEWED"
+    },
+    {
+      "task_id": "PILOT-R2-08",
+      "benchmark_version": "pilot_benchmark_v1@1.1.0",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "rubric_version": "PILOT-RUBRIC-V1.0",
+      "task_packet_id": "PILOT-R2-08-PACKET-V1",
+      "task_wording_sha256": "85f7cd845838b0eb048a0193b39203defc12ec01f9d33a567a1701111231dc76",
+      "immutable_reference_bindings_ref": "benchmarks/pilot/pilot_benchmark_v1.json#/tasks/PILOT-R2-08/reference_bindings",
+      "permitted_reference_scope": [
+        {
+          "source_id": "contract-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Comparison strategies",
+              "lines": "14-26"
+            },
+            {
+              "heading": "Frozen Context fairness",
+              "lines": "28-47"
+            }
+          ]
+        },
+        {
+          "source_id": "state-v6.3",
+          "anchors": [
+            {
+              "heading": "Verified architecture",
+              "lines": "74-86"
+            },
+            {
+              "heading": "Tests verified in this audit",
+              "lines": "109-150"
+            },
+            {
+              "heading": "Known discrepancies and environment limits",
+              "lines": "152-163"
+            }
+          ]
+        },
+        {
+          "source_id": "audit-v6.3",
+          "anchors": [
+            {
+              "heading": "V6.3 baseline contract audit",
+              "lines": "405-449"
+            },
+            {
+              "heading": "Correctness conclusion and known limits",
+              "lines": "450-463"
+            }
+          ]
+        },
+        {
+          "source_id": "matrix-v0.6.3",
+          "anchors": [
+            {
+              "heading": "Fixed and Static baseline rows",
+              "lines": "51-57"
+            }
+          ]
+        }
+      ],
+      "mandatory_criteria": [
+        {
+          "id": "M01",
+          "criterion": "States that FIXED-TOPOLOGY-V1 freezes Planner presence, exactly three independent S1/S2/S3 Worker slots, an observational Verifier, and a Synthesizer, and that Planner text cannot alter topology, dependencies, or escalation.",
+          "source_support": [
+            {
+              "source_id": "state-v6.3",
+              "scope": "Verified architecture, lines 74-78"
+            },
+            {
+              "source_id": "audit-v6.3",
+              "scope": "V6.3 baseline contract audit / Fixed AFTER, lines 414-421"
+            }
+          ],
+          "observable_test": "The fixed-baseline section names the topology identity, three slots, observational verifier, and planner constraint.",
+          "pass_rule": "All fixed-topology invariants are stated and no planner-driven topology mutation is allowed.",
+          "fail_rule": "The answer leaves topology provider-selected or gives Planner authority to add/remove slots/dependencies/escalation.",
+          "non_examples": [
+            "Saying Planner supplies goal text while explicitly preserving the fixed slots."
+          ]
+        },
+        {
+          "id": "M02",
+          "criterion": "States that STATIC-PRESETS-V1 selects one versioned DIRECT/PARALLEL/PLANNED preset once after analysis and that NEEDS_WORK remains observational without switching presets or adding repair workers.",
+          "source_support": [
+            {
+              "source_id": "state-v6.3",
+              "scope": "Verified architecture, lines 79-82"
+            },
+            {
+              "source_id": "audit-v6.3",
+              "scope": "V6.3 baseline contract audit / Static AFTER, lines 430-439"
+            }
+          ],
+          "observable_test": "The static-baseline section includes one-time selection, version identity, and observational NEEDS_WORK behavior.",
+          "pass_rule": "The preset is frozen after initial selection and cannot adapt at runtime.",
+          "fail_rule": "The answer permits preset switching, Adaptive escalation, or added repair workers after NEEDS_WORK.",
+          "non_examples": [
+            "Saying a Verifier records NEEDS_WORK as evidence without changing the preset."
+          ]
+        },
+        {
+          "id": "M03",
+          "criterion": "Identifies persisted evidence identities: strategy/config versions plus shared snapshot, provider, model, settings, prompt/budget, and selected-preset identity where applicable.",
+          "source_support": [
+            {
+              "source_id": "state-v6.3",
+              "scope": "Verified architecture, lines 83-86"
+            },
+            {
+              "source_id": "audit-v6.3",
+              "scope": "Configuration identity evidence, lines 441-448"
+            },
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Frozen Context fairness, lines 39-47"
+            }
+          ],
+          "observable_test": "The memo names configuration identity and shared comparison evidence separately from answer content.",
+          "pass_rule": "The required identity classes are persisted and the shared snapshot/provider/model/settings constraint is retained.",
+          "fail_rule": "The answer says only an answer or route label is persisted, or allows per-strategy identity drift.",
+          "non_examples": [
+            "Omitting a cosmetic UI field while naming the research identity classes."
+          ]
+        },
+        {
+          "id": "M04",
+          "criterion": "Retains the source-bounded limitations: Fake/Scripted mechanics are not live LLM quality, Gemini/OpenAI generation and pixel-level visual review remain unverified, and V6.3 closure is not a production-readiness or Main Freeze claim.",
+          "source_support": [
+            {
+              "source_id": "state-v6.3",
+              "scope": "Known discrepancies and environment limits, lines 152-163"
+            },
+            {
+              "source_id": "audit-v6.3",
+              "scope": "Correctness conclusion and known limits, lines 450-463"
+            }
+          ],
+          "observable_test": "The memo ends with a bounded readiness statement containing all three caveats.",
+          "pass_rule": "Mechanics, live-quality limits, and no-production/Main-Freeze boundary are all explicit.",
+          "fail_rule": "The answer calls Fake evidence live quality or claims production readiness/Main Freeze.",
+          "non_examples": [
+            "Saying V6.3 closed topology gaps while still retaining the pilot-only limitation."
+          ]
+        }
+      ],
+      "critical_errors": [
+        {
+          "id": "C01",
+          "definition": "The answer gives Planner text or a Static NEEDS_WORK observation authority to change fixed topology, add dependencies/repair workers, switch presets, or escalate.",
+          "source_support": [
+            {
+              "source_id": "audit-v6.3",
+              "scope": "Fixed AFTER and Static AFTER, lines 414-439"
+            }
+          ],
+          "trigger": "A baseline is described as adaptive in a way that contradicts the frozen V6.3 controls.",
+          "non_examples": [
+            "Describing Adaptive escalation separately from the Fixed/Static baselines."
+          ]
+        },
+        {
+          "id": "C02",
+          "definition": "The answer promotes Fake mechanics or V6.3 topology closure to live quality, production readiness, or Main Freeze.",
+          "source_support": [
+            {
+              "source_id": "audit-v6.3",
+              "scope": "Correctness conclusion and known limits, lines 450-463"
+            },
+            {
+              "source_id": "state-v6.3",
+              "scope": "Known discrepancies and environment limits, lines 152-163"
+            }
+          ],
+          "trigger": "A production/Main Freeze or live-quality conclusion is explicit and unsupported by the cited limitations.",
+          "non_examples": [
+            "Calling the fixed/static topology audit closed while explicitly saying it remains a pilot configuration."
+          ]
+        }
+      ],
+      "optional_criteria": [
+        {
+          "id": "O01",
+          "criterion": "Uses the requested three-part reconciliation memo: contract baseline, V6.3 closure, and remaining limits.",
+          "source_support": [
+            {
+              "source_id": "contract-v0.6.3",
+              "scope": "Comparison strategies and Frozen Context fairness, lines 14-47"
+            },
+            {
+              "source_id": "audit-v6.3",
+              "scope": "V6.3 baseline contract audit and Correctness conclusion, lines 405-463"
+            }
+          ],
+          "scoring_effect": "No effect on mandatory coverage or sufficient pass."
+        }
+      ],
+      "rubric_review_status": "QUALITY_REVIEWED"
+    }
+  ],
+  "finalized_counts": {
+    "tasks_covered": 8,
+    "tasks_required": 8,
+    "mandatory_criteria_total": 36,
+    "critical_error_definitions_total": 16,
+    "optional_criteria_total": 8,
+    "mandatory_by_task": {
+      "PILOT-R2-01": 4,
+      "PILOT-R2-02": 5,
+      "PILOT-R2-03": 4,
+      "PILOT-R2-04": 5,
+      "PILOT-R2-05": 5,
+      "PILOT-R2-06": 5,
+      "PILOT-R2-07": 4,
+      "PILOT-R2-08": 4
+    },
+    "critical_errors_by_task": {
+      "PILOT-R2-01": 2,
+      "PILOT-R2-02": 2,
+      "PILOT-R2-03": 2,
+      "PILOT-R2-04": 2,
+      "PILOT-R2-05": 2,
+      "PILOT-R2-06": 2,
+      "PILOT-R2-07": 2,
+      "PILOT-R2-08": 2
+    }
+  },
+  "finalized_criteria": {
+    "status": "COMPLETE",
+    "mandatory_criteria": 36,
+    "critical_error_definitions": 16,
+    "optional_criteria": 8
+  },
+  "handoff": {
+    "destination": "integration",
+    "required_inputs": [
+      "evaluation/pilot/pilot_rubrics_v1.json",
+      "benchmarks/pilot/pilot_benchmark_v1.json",
+      "docs/QUALITY_EVALUATION_PROTOCOL.md"
+    ],
+    "runtime_action": "None. Integration may consume the public benchmark task projection only; this research manifest must remain evaluator-side.",
+    "remaining_gate": "Pilot execution still requires the separate integration preflight for order control, provider/config freeze, pricing verification, and staffing; this quality handoff does not authorize a live run."
+  }
+}

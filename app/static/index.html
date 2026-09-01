@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Adaptive Agent</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23232323'/%3E%3Cpath d='M9 23 15.2 8h2L23 23h-3l-1.3-3.5h-5.6L11.8 23H9Zm5.1-6h3.7L16 12.1 14.1 17Z' fill='white'/%3E%3C/svg%3E"/>
+<link rel="stylesheet" href="/static/styles.css?v=20"/>
+</head>
+<body>
+<svg class="icon-sprite" aria-hidden="true"><defs>
+  <symbol id="i-compose" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"></rect><path d="m13.5 7.5 3 3L10 17H7v-3z"></path></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19 15.2a1.8 1.8 0 0 0 .4 2l-2.2 2.2a1.8 1.8 0 0 0-2-.4 1.8 1.8 0 0 0-1.1 1.7V21h-3.2v-.3A1.8 1.8 0 0 0 9.8 19a1.8 1.8 0 0 0-2 .4l-2.2-2.2a1.8 1.8 0 0 0 .4-2A1.8 1.8 0 0 0 4.3 14H4v-4h.3A1.8 1.8 0 0 0 6 8.8a1.8 1.8 0 0 0-.4-2l2.2-2.2a1.8 1.8 0 0 0 2 .4 1.8 1.8 0 0 0 1.1-1.7V3h3.2v.3A1.8 1.8 0 0 0 15.2 5a1.8 1.8 0 0 0 2-.4l2.2 2.2a1.8 1.8 0 0 0-.4 2 1.8 1.8 0 0 0 1.7 1.2h.3v4h-.3a1.8 1.8 0 0 0-1.7 1.2z"></path></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M9.7 9a2.5 2.5 0 1 1 4.3 1.8c-1 .8-2 1.3-2 2.7M12 17h.01"></path></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2"></circle><circle cx="6" cy="12" r="2"></circle><circle cx="18" cy="19" r="2"></circle><path d="m8 11 8-5M8 13l8 5"></path></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1" fill="currentColor" stroke="none"></circle><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"></circle><circle cx="12" cy="19" r="1" fill="currentColor" stroke="none"></circle></symbol>
+  <symbol id="i-agent" viewBox="0 0 24 24"><rect x="5" y="7" width="14" height="12" rx="3"></rect><path d="M9 7V5h6v2M9 12h.01M15 12h.01M9 16h6"></path></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="12" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></symbol>
+  <symbol id="i-compare" viewBox="0 0 24 24"><path d="M7 3v14M4 14l3 3 3-3M17 21V7M14 10l3-3 3 3"></path></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="m4 12 16-8-6 16-2-6zM12 14l8-10"></path></symbol>
+  <symbol id="i-attach" viewBox="0 0 24 24"><path d="m20 12-8.5 8.5a6 6 0 0 1-8.5-8.5L13 2a4 4 0 0 1 5.7 5.7L8.7 17.7a2 2 0 0 1-2.8-2.8L15 5.8"></path></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"></path></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 6v5h-5M4 18v-5h5"></path><path d="M18.5 9A7 7 0 0 0 6 6.5L4 11M5.5 15A7 7 0 0 0 18 17.5l2-4.5"></path></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 2h8l4 4v16H6zM14 2v5h5"></path></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"></path></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m8 10 4 4 4-4"></path></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h13a4 4 0 0 1 4 4z"></path></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5M12 7v5l3 2"></path></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></symbol>
+</defs></svg>
+<a class="skip-link" href="#messages">Bỏ qua đến hội thoại</a>
+<div class="app ins-collapsed" id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand-row"><div class="brand"><h1>Adaptive Agent</h1></div></div>
+
+    <button class="new-chat" id="newChat"><svg class="ui-icon"><use href="#i-compose"></use></svg><span class="label-text">Cuộc trò chuyện mới</span></button>
+    <button class="sidebar-search" id="searchChat" aria-expanded="false" aria-controls="searchPopover"><svg class="ui-icon"><use href="#i-search"></use></svg><span>Tìm kiếm</span></button>
+    <div class="sidebar-popover search-pop" id="searchPopover" aria-hidden="true">
+      <label class="sr-only" for="searchInput">Tìm trong cuộc trò chuyện</label>
+      <input class="search-input" id="searchInput" placeholder="Tìm trong cuộc trò chuyện..." autocomplete="off"/>
+      <div class="search-results" id="searchResults" role="listbox"></div>
+    </div>
+    <div class="side-heading">LỊCH SỬ</div>
+    <div id="threads" class="threads"><div class="history-empty">Chưa có cuộc trò chuyện.</div></div>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-footer-item" id="settingsButton"><svg class="ui-icon"><use href="#i-settings"></use></svg><span>Cài đặt</span></button>
+      <button class="sidebar-footer-item" id="helpButton" aria-expanded="false" aria-controls="helpPopover"><svg class="ui-icon"><use href="#i-help"></use></svg><span>Trợ giúp</span></button>
+      <button class="profile" id="profile" aria-expanded="false" aria-controls="accountMenu"><span class="profile-avatar">VA</span><span><b>Việt Anh</b><small>Tài khoản local</small></span></button>
+      <div class="account-menu" id="accountMenu" aria-hidden="true"><button type="button" disabled>Tài khoản local · chưa có đăng nhập</button></div>
+      <div class="online"><span class="online-dot"></span><span class="label-text" id="serverStatus">Đang kiểm tra server…</span><span class="version">v0.6.3</span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="locked-topbar">
+      <button class="icon-button" id="sidebarToggle" title="Thu / mở thanh bên" aria-label="Thu / mở thanh bên" aria-expanded="true" aria-controls="sidebar"><span class="sidebar-glyph" aria-hidden="true"></span></button>
+      <button class="mobile-panel" id="mobileSidebar" title="Mở lịch sử" aria-label="Mở lịch sử" aria-expanded="false" aria-controls="sidebar">☰</button>
+      <span class="conversation-heading" id="chatTitle" hidden>Cuộc trò chuyện mới</span>
+      <div class="top-actions">
+        <button class="icon-button" id="shareButton" title="Chia sẻ" aria-label="Chia sẻ cuộc trò chuyện"><svg class="ui-icon"><use href="#i-share"></use></svg></button>
+        <details class="advanced-menu" id="advancedMenu">
+          <summary aria-label="Mở tùy chọn" title="Tùy chọn"><svg class="ui-icon"><use href="#i-more"></use></svg></summary>
+          <div class="advanced-popover">
+            <button class="quiet-btn" id="inspectorToggle" aria-expanded="false" aria-controls="inspector">Chi tiết xử lý</button>
+            <button class="quiet-btn" id="compareBtn">So sánh kết quả</button>
+            <button class="quiet-btn" id="exportBtn" disabled>Tải evidence</button>
+          </div>
+        </details>
+      </div>
+    </header>
+
+    <section class="messages" id="messages">
+      <div class="welcome locked-empty">
+        <div class="welcome-mark">✦</div>
+        <h1>Tôi có thể giúp gì cho bạn?</h1>
+        <p>Sẵn sàng hỗ trợ phân tích dữ liệu, soạn thảo văn bản hoặc giải quyết yêu cầu phức tạp. Chat luôn chạy Adaptive AUTO.</p>
+      </div>
+    </section>
+
+    <div class="composer-shell">
+      <div class="context-drawer" id="contextDrawer" aria-hidden="true" role="region" aria-labelledby="contextHeading">
+        <div class="drawer-top">
+          <div><b id="contextHeading">Ngữ cảnh tham chiếu (Reference context)</b><span>Nguồn thông tin được đóng băng thành Ngữ cảnh đã đóng băng (Frozen Context) trước mỗi lượt chạy.</span></div>
+          <div class="drawer-actions">
+            <label class="file-btn">↑ Tải tài liệu<input id="contextFile" type="file" accept=".txt,.md,.json,.csv"/></label>
+            <button id="clearContext">Xóa</button>
+            <button id="closeContext" aria-label="Đóng context">×</button>
+          </div>
+        </div>
+        <textarea id="context" maxlength="100000"># Ví dụ tài liệu API
+
+## Authentication (Xác thực)
+Mọi API request phải có header Authorization: Bearer &lt;token&gt;.
+Access token hết hạn sau 60 phút.
+Refresh token chỉ được dùng cho confidential client.
+Public client phải xác thực lại sau khi access token hết hạn.
+
+## Pagination (Phân trang)
+Collection endpoint dùng cursor pagination.
+Page size mặc định là 25 và tối đa là 100.
+
+## Errors (Lỗi)
+401 nghĩa là thiếu hoặc hết hạn xác thực.
+429 nghĩa là vượt rate limit.</textarea>
+      </div>
+
+      <div class="composer">
+        <div class="file-chip" id="chatFileChip"><span class="file-badge">TỆP</span><span class="file-info"><b class="file-name"></b><small class="file-status"></small></span><span class="file-actions"><button class="file-retry" type="button">Thử lại</button><button class="file-remove" type="button" aria-label="Bỏ tệp">×</button></span></div>
+        <textarea id="prompt" rows="1" maxlength="12000" placeholder="Nhắn cho Adaptive Agent…"></textarea>
+        <div class="composer-bottom">
+          <div class="composer-left">
+            <button class="small-icon-btn" id="attachButton" aria-label="Đính kèm tệp" title="Đính kèm tệp" aria-expanded="false" aria-controls="contextDrawer"><svg class="ui-icon"><use href="#i-attach"></use></svg></button>
+            <button class="model-btn" id="modelMenuButton" aria-expanded="false" aria-controls="modelMenu"><span id="modelName">Mô hình cho lượt tiếp theo</span> · <span id="modeName">Tự động</span>⌄</button>
+          </div>
+          <button class="send" id="send" aria-label="Gửi tin nhắn" title="Gửi tin nhắn"><svg class="ui-icon"><use href="#i-send"></use></svg></button>
+        </div>
+        <div class="model-menu" id="modelMenu" aria-hidden="true" role="dialog" aria-labelledby="modelMenuTitle">
+          <div class="model-menu-head"><div><b id="modelMenuTitle">Chọn mô hình</b><span>Dùng cho lượt chat tiếp theo</span></div><span class="model-auto-badge">AUTO</span></div>
+          <div class="provider-choices" id="providerChoices" role="tablist" aria-label="Nhà cung cấp"></div>
+          <div class="model-choices" id="modelChoices" role="listbox" aria-label="Mô hình khả dụng"></div>
+          <div class="model-native-fields" aria-hidden="true">
+            <label for="provider">Provider<select id="provider" tabindex="-1" aria-label="Nhà cung cấp (Provider)"></select></label>
+            <label for="model">Model<select id="model" tabindex="-1" aria-label="Mô hình (Model)"></select></label>
+          </div>
+          <div class="mode-note"><b>Tự động</b> là Adaptive AUTO. DIRECT, PARALLEL và PLANNED do controller chọn từ task, không phải strategy do người dùng ép.</div>
+          <div class="provider"><span id="providerState" role="status" aria-live="polite">Chưa kiểm tra</span><button class="provider-check" id="providerCheck" type="button">Kiểm tra</button></div>
+        </div>
+      </div>
+      <div class="composer-hint">Enter để gửi · Shift+Enter xuống dòng · Adaptive Agent có thể mắc lỗi; hãy kiểm tra thông tin quan trọng.</div>
+    </div>
+  </main>
+
+  <aside class="inspector" id="inspector">
+    <div class="panel-resizer" id="inspectorResizer" role="separator" aria-orientation="vertical" aria-label="Thay đổi độ rộng Chi tiết xử lý" tabindex="0"></div>
+    <div class="inspector-header">
+      <div><b>Chi tiết xử lý</b></div>
+      <div class="inspector-header-actions"><span class="run-state idle" id="runState">Chưa chạy</span><button class="inspector-close" id="inspectorClose" aria-label="Đóng chi tiết thực thi"><svg class="ui-icon"><use href="#i-close"></use></svg></button></div>
+    </div>
+
+    <div class="quick-detail-body" id="quickDetailBody">
+      <div class="quick-status-row"><div class="quick-status" id="quickStatus"><span class="quick-dot"></span><span>Chưa chạy</span></div><button class="quick-rerun" id="quickRerun" type="button" disabled><svg class="ui-icon small"><use href="#i-refresh"></use></svg>Chạy lại</button></div>
+      <div class="quick-metrics"><div><span>THỜI GIAN</span><b id="quickLatency">—</b></div><div><span>CHI PHÍ</span><b id="quickCost">—</b></div></div>
+      <section class="quick-section"><h3>Tóm tắt xử lý</h3><p id="quickSummary">Chọn một lượt chạy để xem cách Adaptive Agent đã xử lý yêu cầu.</p></section>
+      <section class="quick-section"><h3>Quy trình Agent</h3><div class="quick-timeline" id="quickTimeline"><div class="quick-empty">Chưa có bước thực thi.</div></div></section>
+      <section class="quick-section quick-sources"><h3>Nguồn đã sử dụng</h3><div id="quickSources">Không có nguồn hoặc tài liệu bổ sung.</div></section>
+      <details class="quick-technical"><summary>Dữ liệu kỹ thuật <svg class="ui-icon small"><use href="#i-chevron"></use></svg></summary><pre id="quickRaw">{}</pre></details>
+    </div>
+
+    <div class="run-summary">
+      <div><span>Chiến lược (Strategy)</span><b id="insStrategy">Adaptive AUTO</b></div>
+      <div><span>Chế độ (Mode)</span><b id="insMode">—</b></div>
+      <div><span>Nhà cung cấp (Provider)</span><b id="insProvider">—</b></div>
+    </div>
+    <div class="auto-explain" id="autoExplain"><b>Quyết định AUTO</b><span>Agent phân tích (Analyzer) sẽ tự chọn Trực tiếp (DIRECT), Song song (PARALLEL) hoặc Theo kế hoạch (PLANNED) sau khi nhận task.</span></div>
+    <details class="context-provenance" id="contextProvenance" hidden>
+      <summary>Ngữ cảnh đã đóng băng (Frozen Context)</summary>
+      <div id="contextSummary" class="context-summary"></div>
+      <div id="contextChunks" class="context-chunks"></div>
+    </details>
+
+    <div class="inspector-tabs" role="tablist" aria-label="Chi tiết thực thi">
+      <button class="ins-tab active" id="ins-tab-overview" data-tab="overview" role="tab" aria-selected="true" aria-controls="tab-overview">Tổng quan</button>
+      <button class="ins-tab" id="ins-tab-graph" data-tab="graph" role="tab" aria-selected="false" aria-controls="tab-graph">Sơ đồ</button>
+      <button class="ins-tab" id="ins-tab-agents" data-tab="agents" role="tab" aria-selected="false" aria-controls="tab-agents">Các Agent</button>
+      <button class="ins-tab" id="ins-tab-metrics" data-tab="metrics" role="tab" aria-selected="false" aria-controls="tab-metrics">Chỉ số</button>
+      <button class="ins-tab" id="ins-tab-raw" data-tab="raw" role="tab" aria-selected="false" aria-controls="tab-raw">Dữ liệu gốc</button>
+      <button class="ins-tab" id="ins-tab-context" data-tab="context" role="tab" aria-selected="false" aria-controls="tab-context">Frozen Context</button>
+    </div>
+
+    <div class="inspector-body">
+      <section class="ins-panel active" id="tab-overview" role="tabpanel" aria-labelledby="ins-tab-overview">
+        <div id="overviewContent" class="overview-content"><div class="panel-empty">Gửi task hoặc chọn “Xem quá trình xử lý” để xem bằng chứng cấu trúc.</div></div>
+        <div class="overview-flow"><div class="panel-section-head"><b>Luồng xử lý</b><span>Dòng thời gian của runtime thực tế</span></div><div id="trace" class="trace"><div class="empty">Chọn một lượt chạy hoặc gửi task để xem luồng.</div></div></div>
+      </section>
+      <section class="ins-panel" id="tab-graph" role="tabpanel" aria-labelledby="ins-tab-graph">
+        <div class="graph-panel-head"><div><b>DAG thực tế (Runtime DAG)</b><span>Cạnh và ready-set lấy từ evidence của lượt chạy</span></div><span id="graphMode" class="panel-badge">—</span></div>
+        <div id="executionGraph" class="execution-graph"><div class="panel-empty">Chưa có bằng chứng sơ đồ.</div></div>
+      </section>
+      <section class="ins-panel" id="tab-agents" role="tabpanel" aria-labelledby="ins-tab-agents">
+        <div class="agents-panel-head"><div><b>Lượt Agent thực thi (Agent Executions)</b><span>Vai trò có giới hạn · không hiển thị prompt ẩn</span></div><span id="agentCount" class="panel-badge">0</span></div>
+        <div id="agentList" class="agent-list"><div class="panel-empty">Chưa có lượt Agent thực thi.</div></div>
+      </section>
+      <section class="ins-panel" id="tab-metrics" role="tabpanel" aria-labelledby="ins-tab-metrics">
+        <dl class="metric-list">
+          <div><dt>Lượt Agent thực thi (Agent Executions)</dt><dd id="mAgents">0</dd></div>
+          <div><dt>Lượt gọi Model logic (Logical Calls)</dt><dd id="mCalls">0</dd></div>
+          <div><dt>Request API thực tế (Physical Requests)</dt><dd id="mRequests">0</dd></div>
+          <div><dt>Token đầu vào (Input Tokens)</dt><dd id="mInputTokens">—</dd></div>
+          <div><dt>Token đầu ra (Output Tokens)</dt><dd id="mOutputTokens">—</dd></div>
+          <div><dt>Tổng Token (Total Tokens)</dt><dd id="mTokens">—</dd></div>
+          <div><dt>Độ trễ E2E (E2E Latency)</dt><dd id="mLatency">—</dd></div>
+          <div><dt>Số lần thử lại (Retries)</dt><dd id="mRetries">—</dd></div>
+          <div><dt>Bổ sung xử lý (Escalations)</dt><dd id="mEsc">0</dd></div>
+          <div><dt>Chi phí API ước tính (Calculated Cost)</dt><dd id="mCost">—</dd></div>
+        </dl>
+        <div class="metric-note"><b id="metricTitle">Adaptive AUTO</b><p id="researchNote">Chế độ, số lượt Agent và bổ sung xử lý được quyết định từ task/runtime; không chọn tay ở chat chính.</p></div>
+      </section>
+      <section class="ins-panel" id="tab-raw" role="tabpanel" aria-labelledby="ins-tab-raw"><div class="raw-toolbar"><span>Evidence JSON của lượt chạy</span><div><button id="rawCopyBtn">Sao chép</button><button id="rawDownloadBtn">Tải JSON</button></div></div><pre id="rawEvents">[]</pre></section>
+      <section class="ins-panel" id="tab-context" role="tabpanel" aria-labelledby="ins-tab-context"><div class="context-screen-copy"><h3>Ngữ cảnh đã đóng băng (Frozen Context)</h3><p>Các đoạn nguồn đã được cung cấp cho lượt chạy này.</p></div><div id="evidenceContextMount"></div></section>
+    </div>
+    <div class="quick-detail-footer"><button id="detailCopy" type="button"><svg class="ui-icon small"><use href="#i-copy"></use></svg>Sao chép</button><button class="primary" id="openEvidence" type="button"><svg class="ui-icon small"><use href="#i-info"></use></svg>Mở evidence đầy đủ</button></div>
+  </aside>
+</div>
+
+<div class="modal-backdrop compare-split" id="compareModal" role="dialog" aria-modal="true" aria-labelledby="compareTitle" aria-hidden="true">
+  <div class="panel-resizer" id="compareResizer" role="separator" aria-orientation="vertical" aria-label="Thay đổi độ rộng So sánh kết quả" tabindex="0"></div>
+  <div class="modal" tabindex="-1">
+    <div class="modal-head"><div class="compare-title-row"><svg class="ui-icon"><use href="#i-compare"></use></svg><h2 id="compareTitle">So sánh kết quả</h2></div><button id="closeCompare" aria-label="Đóng bảng so sánh"><svg class="ui-icon"><use href="#i-close"></use></svg></button></div>
+    <div class="compare-progress" id="compareProgress">Chưa chạy.</div>
+    <p class="quick-compare-note" id="quickCompareNote">Cùng sử dụng một provider/model và Frozen Context. Khác biệt nằm ở cách hệ thống tổ chức xử lý yêu cầu.</p>
+    <div class="quick-compare-grid" id="quickCompareGrid">
+      <div class="quick-compare-head"><div></div><div>Cố định</div><div>Adaptive Agent</div></div>
+      <div class="quick-compare-row"><div>Câu trả lời</div><div class="quick-compare-answer" id="quickFixedAnswer">Chưa chạy</div><div class="quick-compare-answer" id="quickAdaptiveAnswer">Chưa chạy</div></div>
+      <div class="quick-compare-row"><div>Thời gian</div><div id="quickFixedLatency">—</div><div id="quickAdaptiveLatency">—</div></div>
+      <div class="quick-compare-row"><div>Chi phí</div><div id="quickFixedCost">—</div><div id="quickAdaptiveCost">—</div></div>
+      <div class="quick-compare-row"><div>Trạng thái</div><div id="quickFixedStatus">Chưa chạy</div><div id="quickAdaptiveStatus">Chưa chạy</div></div>
+      <div class="quick-compare-row"><div>Chất lượng</div><div>Chưa đánh giá</div><div>Chưa đánh giá</div></div>
+    </div>
+    <div class="compare-primary-note">Cặp chính: <b>Cố định (Fixed)</b> và <b>Adaptive Agent</b>. Single/Static vẫn được giữ vì endpoint hiện tại chạy bốn strategy trên cùng Frozen Context.</div>
+    <div class="compare-table-wrap">
+      <table class="compare-table"><thead><tr><th>Chiến lược</th><th>Câu trả lời</th><th>Trạng thái</th><th>Lý do dừng</th><th>Lượt Agent thực thi (Agent Executions)</th><th>Lượt gọi Model logic (Logical Calls)</th><th>Request API thực tế (Physical Requests)</th><th>Token đầu vào (Input Tokens)</th><th>Token đầu ra (Output Tokens)</th><th>Tổng Token (Total Tokens)</th><th>Độ trễ E2E (E2E Latency)</th><th>Chi phí API ước tính (Calculated Cost)</th><th>Chất lượng (Quality)</th><th>Evidence</th></tr></thead><tbody id="compareRows"></tbody></table>
+    </div>
+    <div class="compare-foot"><button class="compare-copy" id="compareCopy" type="button"><svg class="ui-icon small"><use href="#i-copy"></use></svg>Sao chép</button><button id="runCompare">Chạy so sánh</button><button class="open-report" id="openComparisonReport" type="button" disabled><svg class="ui-icon small"><use href="#i-compare"></use></svg>Mở báo cáo đầy đủ</button></div>
+  </div>
+</div>
+
+<section class="context-screen" id="executionEvidence" aria-hidden="true">
+  <header class="context-top"><div class="context-top-left"><button class="context-back" data-close-context type="button"><svg class="ui-icon small"><use href="#i-back"></use></svg>Quay lại</button><div class="context-title"><h1>Execution Evidence</h1><p>Chi tiết kỹ thuật của lượt xử lý hiện tại</p></div></div><div class="context-title"><p id="evidenceModelSummary">—</p></div></header>
+  <div class="context-body"><div class="context-inner">
+    <div class="context-summary-cards"><div><span>TRẠNG THÁI</span><b id="evStatus">Chưa chạy</b></div><div><span>THỜI GIAN</span><b id="evLatency">—</b></div><div><span>CHI PHÍ</span><b id="evCost">—</b></div><div><span>AGENT</span><b id="evAgents">0</b></div><div><span>NGUỒN</span><b id="evSources">0 tệp · 0 đoạn</b></div></div>
+    <div id="evidenceMount"></div>
+  </div></div>
+</section>
+
+<section class="context-screen" id="comparisonReport" aria-hidden="true">
+  <header class="context-top"><div class="context-top-left"><button class="context-back" data-close-context type="button"><svg class="ui-icon small"><use href="#i-back"></use></svg>Quay lại</button><div class="context-title"><h1>Comparison Report</h1><p id="comparisonModelSummary">Bốn strategy · cùng provider/model/Frozen Context · chạy tuần tự</p></div></div></header>
+  <div class="context-body"><div class="context-inner">
+    <div class="report-intro" data-quality-state="Not evaluated"><div><h2>Single / Fixed / Static / Adaptive</h2><p>So sánh cách tổ chức xử lý trên cùng cấu hình đã đóng băng. Trường không có dữ liệu provider được giữ là “—”; chất lượng không được suy diễn từ chỉ số tài nguyên.</p></div></div>
+    <div class="report-table-wrap"><table class="report-table"><thead><tr><th>Tiêu chí</th><th>Single</th><th>Fixed</th><th>Static</th><th>Adaptive</th></tr></thead><tbody id="comparisonMatrixBody"></tbody></table></div>
+    <div class="report-answers" id="comparisonAnswers"></div>
+  </div></div>
+</section>
+
+<div class="settings-overlay" id="settingsOverlay" aria-hidden="true">
+  <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" tabindex="-1">
+    <aside class="settings-side">
+      <h2 id="settingsTitle">Cài đặt</h2>
+      <nav class="settings-nav" aria-label="Mục cài đặt">
+        <button class="settings-tab active" data-settings-tab="general">Chung</button>
+        <button class="settings-tab" data-settings-tab="appearance">Giao diện</button>
+        <button class="settings-tab" data-settings-tab="ai">AI &amp; Model</button>
+        <button class="settings-tab" data-settings-tab="data">Dữ liệu</button>
+      </nav>
+      <div class="settings-side-foot">Cấu hình thật lấy từ backend local.<br/>Không hiển thị API key.</div>
+    </aside>
+    <section class="settings-content">
+      <header class="settings-head"><h3 id="settingsPaneTitle">Chung</h3><button id="settingsClose" aria-label="Đóng cài đặt">×</button></header>
+      <div class="settings-scroll">
+        <div class="settings-pane active" data-settings-pane="general"><h4>Tùy chọn chung</h4><div class="setting-group"><div class="setting-row"><span><b>Lưu lịch sử trò chuyện</b><small>Backend local lưu toàn bộ lượt trong cùng conversation.</small></span><button class="switch on" type="button" aria-pressed="true" aria-label="Lưu lịch sử trò chuyện"></button></div><div class="setting-row"><span><b>Thông báo khi hoàn thành</b><small>Hiển thị trạng thái hoàn thành trong giao diện.</small></span><button class="switch on" type="button" aria-pressed="true" aria-label="Thông báo khi hoàn thành"></button></div></div></div>
+        <div class="settings-pane" data-settings-pane="appearance"><h4>Giao diện</h4><div class="setting-group"><div class="setting-row"><span><b>Chủ đề</b><small>Thiết kế khóa hiện dùng giao diện sáng.</small></span><strong>Sáng</strong></div><div class="setting-row"><span><b>Mật độ</b><small>Mật độ gọn phù hợp chat desktop.</small></span><strong>Gọn gàng</strong></div></div></div>
+        <div class="settings-pane" data-settings-pane="ai"><h4>AI &amp; Model</h4><div class="setting-group"><div class="setting-row"><span><b>Provider / Model</b><small>Chọn trong menu ngay dưới composer; danh sách lấy từ `/api/config`.</small></span><strong id="settingsModelSummary">—</strong></div><div class="setting-row"><span><b>Chế độ mặc định</b><small>Chat chính luôn Adaptive AUTO; controller tự chọn DIRECT / PARALLEL / PLANNED.</small></span><strong>Tự động</strong></div></div></div>
+        <div class="settings-pane" data-settings-pane="data"><h4>Dữ liệu</h4><div class="setting-group"><div class="setting-row"><span><b>Tệp được hỗ trợ</b><small>Chỉ văn bản local: TXT, Markdown, JSON và CSV.</small></span><strong>.txt · .md · .json · .csv</strong></div><div class="setting-row"><span><b>Nguồn trong chi tiết xử lý</b><small>Hiển thị snapshot/chunk provenance có thật từ run evidence.</small></span><strong>Bật</strong></div></div></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="anchor-pop help-pop" id="helpPopover" aria-hidden="true"><b>Trợ giúp</b><button data-help="usage">Cách sử dụng Adaptive Agent</button><button data-help="files">Tệp được hỗ trợ</button><button data-help="modes">Các chế độ xử lý</button><button data-help="about">Giới thiệu Adaptive Agent</button></div>
+<div class="anchor-pop share-pop" id="sharePopover" aria-hidden="true"><b>Chia sẻ</b><p>Chưa có permalink bền vững. Cuộc trò chuyện hiện chỉ tồn tại trên máy local này.</p><button type="button" disabled>Sao chép liên kết · chưa khả dụng</button></div>
+
+<div class="confirm-overlay" id="renameDialog" aria-hidden="true"><form class="confirm-box" id="renameForm" role="dialog" aria-modal="true" aria-labelledby="renameTitle"><h3 id="renameTitle">Đổi tên cuộc trò chuyện</h3><label class="dialog-field" for="renameInput">Tên mới</label><input class="dialog-input" id="renameInput" maxlength="120" autocomplete="off"/><div class="confirm-actions"><button type="button" id="cancelRename">Hủy</button><button class="primary-solid" type="submit" id="confirmRename">Lưu</button></div></form></div>
+<div class="confirm-overlay" id="deleteConfirm" aria-hidden="true"><div class="confirm-box" role="alertdialog" aria-modal="true" aria-labelledby="deleteTitle"><h3 id="deleteTitle">Xóa cuộc trò chuyện này?</h3><p>Conversation và run evidence liên quan sẽ bị xóa khỏi máy local.</p><div class="confirm-actions"><button id="cancelDelete">Hủy</button><button class="danger-solid" id="confirmDelete">Xóa</button></div></div></div>
+
+<button class="panel-scrim" id="panelScrim" aria-label="Đóng panel đang mở"></button>
+<div class="toast-stack" id="toasts"></div>
+<script src="/static/app.js?v=20"></script>
+</body>
+</html>

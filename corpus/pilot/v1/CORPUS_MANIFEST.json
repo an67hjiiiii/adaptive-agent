@@ -1,0 +1,134 @@
+{
+  "corpus_version": "PILOT-CORPUS-V1",
+  "schema_version": "1.0.0",
+  "status": "FROZEN",
+  "snapshot_timestamp": "2026-08-30T13:33:12Z",
+  "immutability_rule": "Snapshots are never edited in place; any content change creates a new corpus version.",
+  "documents": [
+    {
+      "source_id": "contract-v0.6.3",
+      "path": "corpus/pilot/v1/PROJECT_CONTRACT.md",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "sha256": "42cfbe2fc0a7905951e69f45a328fedf275db7e878c033f951603467bf2f5a58",
+      "line_count": 130,
+      "origin": "docs/PROJECT_CONTRACT.md at benchmark-authoring revision; verified against the declared benchmark hash",
+      "origin_path": "docs/PROJECT_CONTRACT.md",
+      "origin_sha256": "42cfbe2fc0a7905951e69f45a328fedf275db7e878c033f951603467bf2f5a58",
+      "snapshot_timestamp": "2026-08-30T13:33:12Z",
+      "role": "stable research semantics and measurement contract",
+      "sections": [
+        {"section_id": "comparison-strategies", "heading": "Comparison strategies", "line_range": "14-26"},
+        {"section_id": "frozen-context-fairness", "heading": "Frozen Context fairness", "line_range": "28-47"},
+        {"section_id": "runtime-structural-signals", "heading": "Runtime structural signals", "line_range": "49-62"},
+        {"section_id": "rule-based-adaptive-controller", "heading": "Rule-based Adaptive Controller", "line_range": "64-75"},
+        {"section_id": "runtime-roles", "heading": "Runtime roles", "line_range": "77-85"},
+        {"section_id": "verifier-and-terminal-behavior", "heading": "Verifier and terminal behavior", "line_range": "87-98"},
+        {"section_id": "provider-diagnostics", "heading": "Provider diagnostics", "line_range": "100-114"},
+        {"section_id": "measurement-definitions", "heading": "Measurement definitions", "line_range": "116-130"}
+      ]
+    },
+    {
+      "source_id": "state-v6.3",
+      "path": "corpus/pilot/v1/CURRENT_STATE.md",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "sha256": "91c289335a266eda8f3025ec861fafe88b00dd5eb1d062bb77a7cf1db0e78594",
+      "line_count": 163,
+      "origin": "docs/CURRENT_STATE.md at benchmark-authoring revision; frozen before later living-document edits",
+      "origin_path": "docs/CURRENT_STATE.md",
+      "origin_sha256": "91c289335a266eda8f3025ec861fafe88b00dd5eb1d062bb77a7cf1db0e78594",
+      "snapshot_timestamp": "2026-08-30T13:33:12Z",
+      "role": "verified implementation facts and declared limits",
+      "sections": [
+        {"section_id": "build-and-runtime-identity", "heading": "Build and runtime identity", "line_range": "7-18"},
+        {"section_id": "verified-architecture", "heading": "Verified architecture", "line_range": "20-86"},
+        {"section_id": "providers-and-current-safe-status", "heading": "Providers and current safe status", "line_range": "88-107"},
+        {"section_id": "tests-verified-in-this-audit", "heading": "Tests verified in this audit", "line_range": "109-150"},
+        {"section_id": "known-discrepancies-and-environment-limits", "heading": "Known discrepancies and environment limits", "line_range": "152-163"}
+      ]
+    },
+    {
+      "source_id": "audit-v6.3",
+      "path": "corpus/pilot/v1/ORCHESTRATION_AUDIT.md",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "sha256": "67c6676a26b0cacb35d5f3bef1a7743dd45d656a5c4254b6d946431088d88884",
+      "line_count": 476,
+      "origin": "docs/ORCHESTRATION_AUDIT.md at benchmark-authoring revision; verified against the declared benchmark hash",
+      "origin_path": "docs/ORCHESTRATION_AUDIT.md",
+      "origin_sha256": "67c6676a26b0cacb35d5f3bef1a7743dd45d656a5c4254b6d946431088d88884",
+      "snapshot_timestamp": "2026-08-30T13:33:12Z",
+      "role": "component-level runtime and baseline evidence",
+      "sections": [
+        {"section_id": "runtime-evidence-fixtures", "heading": "Runtime evidence fixtures", "line_range": "27-49"},
+        {"section_id": "task-decomposition", "heading": "4. Task decomposition", "line_range": "124-146"},
+        {"section_id": "dag-construction", "heading": "5. DAG construction", "line_range": "148-166"},
+        {"section_id": "dag-validation", "heading": "6. DAG validation", "line_range": "167-185"},
+        {"section_id": "kahn-ready-set-scheduling", "heading": "7. Kahn/ready-set scheduling", "line_range": "186-204"},
+        {"section_id": "concurrent-worker-execution", "heading": "8. Concurrent Worker execution", "line_range": "205-226"},
+        {"section_id": "runtime-verifier", "heading": "9. Runtime Verifier", "line_range": "227-248"},
+        {"section_id": "targeted-escalation", "heading": "10. Targeted escalation", "line_range": "249-270"},
+        {"section_id": "early-stopping", "heading": "11. Early stopping", "line_range": "271-287"},
+        {"section_id": "budget-constraint", "heading": "12. Budget constraint", "line_range": "288-310"},
+        {"section_id": "retry", "heading": "14. Retry", "line_range": "333-353"},
+        {"section_id": "instrumentation", "heading": "16. Instrumentation", "line_range": "376-404"},
+        {"section_id": "v63-baseline-contract-audit", "heading": "V6.3 baseline contract audit", "line_range": "405-449"},
+        {"section_id": "correctness-conclusion-and-known-limits", "heading": "Correctness conclusion and known limits", "line_range": "450-463"}
+      ]
+    },
+    {
+      "source_id": "matrix-v0.6.3",
+      "path": "corpus/pilot/v1/TEST_MATRIX.md",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "sha256": "5deafd5bffc67eb1f5a53e5d2fef2f77b7248ac4d3e76fd3acd1c9f7a8eaf486",
+      "line_count": 92,
+      "origin": "docs/TEST_MATRIX.md at benchmark-authoring revision; frozen before later living-document edits",
+      "origin_path": "docs/TEST_MATRIX.md",
+      "origin_sha256": "5deafd5bffc67eb1f5a53e5d2fef2f77b7248ac4d3e76fd3acd1c9f7a8eaf486",
+      "snapshot_timestamp": "2026-08-30T13:33:12Z",
+      "role": "verified feature and regression coverage",
+      "sections": [
+        {"section_id": "dag-ready-set-and-concurrent-worker-rows", "heading": "DAG, ready-set, and concurrent-worker rows", "line_range": "15-18"},
+        {"section_id": "verifier-escalation-and-fail-rows", "heading": "Verifier, escalation, and FAIL rows", "line_range": "18-22"},
+        {"section_id": "compare-and-inspector-coverage-rows", "heading": "Compare and inspector coverage rows", "line_range": "28-45"},
+        {"section_id": "frozen-context-rows", "heading": "Frozen Context Snapshot rows", "line_range": "28-29"},
+        {"section_id": "compare-sequential-snapshot-rows", "heading": "Compare sequential/shared-snapshot rows", "line_range": "30-33"},
+        {"section_id": "fixed-static-baseline-rows", "heading": "Fixed and Static baseline rows", "line_range": "51-57"},
+        {"section_id": "provider-diagnostic-rows", "heading": "Provider diagnostic rows", "line_range": "58-69"},
+        {"section_id": "release-and-live-status-rows", "heading": "Release and live-status rows", "line_range": "70-80"}
+      ]
+    },
+    {
+      "source_id": "fixes-v0.6",
+      "path": "corpus/pilot/v1/AUDIT_FIXES.md",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "sha256": "40ff37df0c0b953b920eb0aa1f51cef7473c01fa241355defc4da96c734fcf8f",
+      "line_count": 87,
+      "origin": "AUDIT_FIXES.md at benchmark-authoring revision; verified against the declared benchmark hash",
+      "origin_path": "AUDIT_FIXES.md",
+      "origin_sha256": "40ff37df0c0b953b920eb0aa1f51cef7473c01fa241355defc4da96c734fcf8f",
+      "snapshot_timestamp": "2026-08-30T13:33:12Z",
+      "role": "documented safety fixes and research invariants",
+      "sections": [
+        {"section_id": "provider-test-failure-isolation", "heading": "3. Provider test thất bại có thể khóa nhầm cả provider", "line_range": "19-22"},
+        {"section_id": "provider-api-information", "heading": "7. Provider/API information chưa đủ rõ", "line_range": "39-42"},
+        {"section_id": "stale-api-test-badge-after-config-change", "heading": "10. A stale API-test badge could survive a changed key", "line_range": "79-82"}
+      ]
+    },
+    {
+      "source_id": "readme-v0.6",
+      "path": "corpus/pilot/v1/README.md",
+      "corpus_version": "PILOT-CORPUS-V1",
+      "sha256": "a9caf7c5e4a767b941be66c8f90bd585f0b68f3a576c629cf2367128c3475b43",
+      "line_count": 82,
+      "origin": "README.md at benchmark-authoring revision; frozen before later living-document edits",
+      "origin_path": "README.md",
+      "origin_sha256": "a9caf7c5e4a767b941be66c8f90bd585f0b68f3a576c629cf2367128c3475b43",
+      "snapshot_timestamp": "2026-08-30T13:33:12Z",
+      "role": "operator-facing flow and provider reference",
+      "sections": [
+        {"section_id": "provider", "heading": "Provider", "line_range": "16-31"},
+        {"section_id": "main-chat-flow", "heading": "Flow chat chính", "line_range": "33-49"},
+        {"section_id": "conversation-persistence", "heading": "Conversation persistence", "line_range": "51-62"}
+      ]
+    }
+  ]
+}
