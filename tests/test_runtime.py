@@ -1345,9 +1345,16 @@ class ApiContractTests(unittest.TestCase):
                           "context": "", "context_sources": [], "context_active": False},
                 )
                 self.assertEqual(old_response.status_code, 200)
+                # Case E: a new conversation cannot inherit the prior project's context.
+                isolated_response = self.client.post(
+                    "/api/chat/stream",
+                    json={"message": "hi", "provider": "fake", "context": "",
+                          "context_sources": [], "context_active": False},
+                )
+                self.assertEqual(isolated_response.status_code, 200)
                 stored = self.client.get(f"/api/conversations/{existing_id}").json()
 
-        self.assertEqual(len(calls), 3)
+        self.assertEqual(len(calls), 4)
         self.assertTrue(all(item["context"] == "No external reference context was supplied." for item in calls))
         self.assertTrue(all(historical_context not in item["context"] for item in calls))
         self.assertEqual(stored["context"], historical_context)
