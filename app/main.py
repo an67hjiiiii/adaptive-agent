@@ -93,6 +93,10 @@ class ContextSource(BaseModel):
 class ChatRequest(BaseModel):
     message:str=Field(min_length=1,max_length=12000)
     context:str=Field(default="",max_length=100000)
+    # ``False`` is sent by the browser after a conversation reload: persisted
+    # context remains historical metadata, not an active draft for this turn.
+    # ``None`` keeps the existing API omission semantics for trusted callers.
+    context_active:bool|None=Field(default=None)
     provider:str=Field(default="fake",pattern="^(fake|openai|gemini|groq|openrouter)$")
     model:str|None=Field(default=None,max_length=80)
     mode:str=Field(default="adaptive-auto",max_length=32)
@@ -397,7 +401,7 @@ def conversation_turns(data):
     if pending: turns.append(pending)
     return turns
 
-def append_turn(conversation_id,*,message,data,context,context_sources=None):
+def append_turn(conversation_id,*,message,data,context,context_sources=None,preserve_historical_context=False):
     now=int(time.time())
     conversation=read_conversation(conversation_id) or {
       "conversation_id":conversation_id,"title":message[:72],"created_at":now,"messages":[],"run_ids":[]}
@@ -405,8 +409,9 @@ def append_turn(conversation_id,*,message,data,context,context_sources=None):
     conversation["provider"]=data.get("provider")
     conversation["model"]=data.get("model")
     conversation["processing_mode"]=data.get("processing_mode") or run_mode(data)
-    conversation["context"]=context
-    conversation["context_sources"]=deepcopy(context_sources or data.get("sources") or [])
+    if not preserve_historical_context:
+      conversation["context"]=context
+      conversation["context_sources"]=deepcopy(context_sources or data.get("sources") or [])
     conversation["status"]=data.get("status")
     answer=data.get("answer","") or (
       f"Không thể nhận câu trả lời từ {data.get('provider','provider')}: "
@@ -425,7 +430,7 @@ def append_turn(conversation_id,*,message,data,context,context_sources=None):
     write_conversation(conversation)
     return conversation
 
-def append_failed_turn(conversation_id,*,message,provider,model,error,context,run_id,context_sources=None,processing_mode=None):
+def append_failed_turn(conversation_id,*,message,provider,model,error,context,run_id,context_sources=None,processing_mode=None,preserve_historical_context=False):
     """Persist failures that happen before Orchestrator can emit a final event.
 
     A failed provider request is still a turn in the user's conversation. Keeping
@@ -439,8 +444,9 @@ def append_failed_turn(conversation_id,*,message,provider,model,error,context,ru
     conversation["provider"]=provider
     conversation["model"]=model
     conversation["processing_mode"]=processing_mode
-    conversation["context"]=context
-    conversation["context_sources"]=deepcopy(context_sources or [])
+    if not preserve_historical_context:
+      conversation["context"]=context
+      conversation["context_sources"]=deepcopy(context_sources or [])
     conversation["status"]="failed"
     conversation["last_error"]=error
     conversation["messages"].extend([
@@ -725,20 +731,30 @@ async def chat(payload:ChatRequest):
         conversation_id=payload.conversation_id or new_conversation_id()
         existing=read_conversation(conversation_id)
         stored_history=history_from_conversation(existing) if existing else payload.history
-        # Preserve a conversation's context when an API client omits the field;
-        # an explicitly supplied empty string still intentionally clears it.
-        context = payload.context if "context" in payload.model_fields_set else (
-            (existing or {}).get("context", "")
-        )
-        if "context_sources" in payload.model_fields_set:
-            context_sources=provided_context_sources
+        # ``context_active=False`` is the browser's explicit lifecycle signal
+        # after reload: historical context stays persisted/displayable, but it
+        # must not be promoted into this new execution.  API callers that omit
+        # the signal retain the pre-existing omission/follow-up semantics.
+        preserve_historical_context = payload.context_active is False and existing is not None
+        if payload.context_active is False:
+            context = ""
+            context_sources = []
         else:
-            try:
-                context_sources=normalize_context_sources((existing or {}).get("context_sources", []))
-            except ContextFileError:
-                # Old or manually edited local history must never make the
-                # normal product request fail or leak raw persisted values.
-                context_sources=[]
+            # Preserve a conversation's context when an API client omits the
+            # field; an explicitly supplied empty string still intentionally
+            # clears it for callers using the legacy contract.
+            context = payload.context if "context" in payload.model_fields_set else (
+                (existing or {}).get("context", "")
+            )
+            if "context_sources" in payload.model_fields_set:
+                context_sources=provided_context_sources
+            else:
+                try:
+                    context_sources=normalize_context_sources((existing or {}).get("context_sources", []))
+                except ContextFileError:
+                    # Old or manually edited local history must never make the
+                    # normal product request fail or leak raw persisted values.
+                    context_sources=[]
         accepted_started=time.perf_counter()
         snapshot,meta=frozen_snapshot(payload.message,context)
         meta=deepcopy(meta)
@@ -753,7 +769,8 @@ async def chat(payload:ChatRequest):
                     history=stored_history,emit=emit,conversation_id=conversation_id,
                     e2e_started_at=accepted_started)
                 append_turn(conversation_id,message=payload.message,data=data,context=context,
-                            context_sources=context_sources)
+                            context_sources=context_sources,
+                            preserve_historical_context=preserve_historical_context)
             except Exception as exc:
                 incident=(safe_runtime_incident(
                     category="INVALID_INPUT_OR_SCOPE",
@@ -802,7 +819,8 @@ async def chat(payload:ChatRequest):
                     append_failed_turn(conversation_id,message=payload.message,
                         provider=payload.provider,model=payload.model,error=safe_error,
                         context=context,run_id=run_id,context_sources=context_sources,
-                        processing_mode=selected_mode)
+                        processing_mode=selected_mode,
+                        preserve_historical_context=preserve_historical_context)
                 except Exception:
                     # Never replace the original provider error with a storage
                     # error while streaming the fatal contract event.
