@@ -270,7 +270,7 @@ class ContextUiContractTests(unittest.TestCase):
         self.assertIn('source.filename', self.js)
         self.assertIn('meta.attached_sources', self.js)
         self.assertIn('retrieval.attached_sources', self.js)
-        self.assertIn('esc(source)', self.js)
+        self.assertIn('esc(entry.label)', self.js)
         self.assertIn('role="list"', self.html)
 
 

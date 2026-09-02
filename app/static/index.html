@@ -93,6 +93,7 @@
       <div class="composer">
         <div id="contextFileList" class="composer-attachments" role="list" aria-live="polite"></div>
         <input id="contextFile" type="file" multiple aria-hidden="true" tabindex="-1"/>
+        <input id="contextFolder" type="file" webkitdirectory directory multiple aria-hidden="true" tabindex="-1"/>
         <textarea id="context" class="context-source-input" maxlength="100000" aria-label="Ngữ cảnh tham chiếu" aria-hidden="true" tabindex="-1"># Ví dụ tài liệu API
 
 ## Authentication (Xác thực)
@@ -111,7 +112,11 @@ Page size mặc định là 25 và tối đa là 100.
         <textarea id="prompt" rows="1" maxlength="12000" aria-label="Nhập câu hỏi cho Adaptive Agent" placeholder="Nhắn cho Adaptive Agent…"></textarea>
         <div class="composer-bottom">
           <div class="composer-left">
-            <button class="small-icon-btn" id="attachButton" aria-label="Đính kèm tệp" title="Đính kèm tệp" aria-expanded="false" aria-controls="contextFileList"><svg class="ui-icon"><use href="#i-attach"></use></svg></button>
+            <button class="small-icon-btn" id="attachButton" aria-label="Đính kèm tệp" title="Đính kèm tệp" aria-expanded="false" aria-controls="attachmentMenu"><svg class="ui-icon"><use href="#i-attach"></use></svg></button>
+            <div class="attachment-menu" id="attachmentMenu" role="menu" aria-label="Đính kèm ngữ cảnh" aria-hidden="true">
+              <button type="button" role="menuitem" id="chooseFiles">Chọn tệp</button>
+              <button type="button" role="menuitem" id="chooseFolder">Chọn thư mục dự án</button>
+            </div>
             <button class="model-btn" id="modelMenuButton" aria-expanded="false" aria-controls="modelMenu"><span id="modelName">Mô hình cho lượt tiếp theo</span><svg class="ui-icon model-chevron" aria-hidden="true"><use href="#ui-chevron"></use></svg></button>
           </div>
           <button class="send" id="send" aria-label="Gửi tin nhắn" title="Gửi tin nhắn"><svg class="ui-icon"><use href="#i-send"></use></svg></button>

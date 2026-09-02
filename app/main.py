@@ -68,6 +68,7 @@ async def local_fresh_assets(request:Request,call_next):
 
 class ContextSource(BaseModel):
     filename:str=Field(min_length=1,max_length=255)
+    relative_path:str|None=Field(default=None,max_length=255)
     source_id:str|None=Field(default=None,max_length=32)
     format:str|None=Field(default=None,max_length=12)
     parser:str|None=Field(default=None,max_length=40)
@@ -83,10 +84,11 @@ class ChatRequest(BaseModel):
     mode:str=Field(default="adaptive-auto",max_length=32)
     conversation_id:str|None=Field(default=None,pattern="^chat_[A-Za-z0-9_-]+$")
     history:list[dict]=Field(default_factory=list)
-    context_sources:list[ContextSource] = Field(default_factory=list,max_length=16)
+    context_sources:list[ContextSource] = Field(default_factory=list,max_length=20)
 
 class ContextFileRequest(BaseModel):
     filename:str=Field(min_length=1,max_length=255)
+    relative_path:str|None=Field(default=None,max_length=255)
     content:str|None=Field(default=None,max_length=MAX_CONTEXT_FILE_BYTES)
     content_base64:str|None=Field(default=None,max_length=140000)
 
@@ -586,6 +588,7 @@ async def prepare_context(payload:ContextFileRequest):
             filename=payload.filename,
             content=payload.content,
             content_base64=payload.content_base64,
+            relative_path=payload.relative_path,
         )
     except ContextFileError as exc:
         raise HTTPException(

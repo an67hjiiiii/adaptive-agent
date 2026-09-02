@@ -1,0 +1,16 @@
+{
+  "version": "PROJECT-UNDERSTANDING-V1.1",
+  "manual_scoring": {
+    "PASS": "core fact correct, grounded correct source, no hallucination",
+    "PARTIAL": "main fact correct with incomplete grounding or minor omission",
+    "FAIL": "important wrong fact, wrong source, or invented file, framework, route, service, database, or auth"
+  },
+  "cases": [
+    {"id":"small-structure","fixture":"small","question":"Liệt kê cấu trúc project.","category":"STRUCTURE","expected_route":"DIRECT","expected_relevant_files":["README.md","app/main.py"],"ground_truth_notes":"Only describe files supplied by the fixture."},
+    {"id":"medium-admin-route","fixture":"medium","question":"Admin routes nằm ở đâu?","category":"LOCATE","expected_route":"DIRECT","expected_relevant_files":["admin/routes.py"],"ground_truth_notes":"Do not confuse api/routes.py with admin/routes.py."},
+    {"id":"medium-user-relation","fixture":"medium","question":"User route dùng service nào?","category":"RELATION","expected_route":"DIRECT","expected_relevant_files":["api/routes.py","services/user_service.py"],"ground_truth_notes":"The route imports fetch_user."},
+    {"id":"large-trace","fixture":"large","question":"Trace request từ route qua service tới response.","category":"TRACE","expected_route":"PLANNED","expected_relevant_files":["api/routes.py","services/user_service.py"],"ground_truth_notes":"Do not invent a database or auth layer."},
+    {"id":"large-summary","fixture":"large","question":"Đánh giá riêng frontend, backend và configuration.","category":"SUMMARY","expected_route":"PARALLEL","expected_relevant_files":["static/js/app.js","api/routes.py","config/settings.py"],"ground_truth_notes":"Only state observable source facts."},
+    {"id":"large-entry","fixture":"large","question":"Entry point nằm đâu?","category":"LOCATE","expected_route":"DIRECT","expected_relevant_files":["app/main.py"],"ground_truth_notes":"Twenty files must not escalate Product Auto by size."}
+  ]
+}

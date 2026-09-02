@@ -26,7 +26,7 @@ SUPPORTED_CONTEXT_EXTENSIONS = frozenset(PRODUCT_CONTEXT_EXTENSIONS)
 CONTEXT_FILE_PARSER = "utf-8-text-v1"
 MAX_CONTEXT_FILE_BYTES = 100_000
 MAX_CONTEXT_FILENAME_CHARS = 255
-MAX_CONTEXT_FILES = 16
+MAX_CONTEXT_FILES = 20
 _SOURCE_ID_RE = re.compile(r"^ctx_[0-9a-f]{16}$")
 _INVALID_FILENAME_CHARS = set('<>:"/\\|?*')
 _WINDOWS_RESERVED_NAMES = {
@@ -77,6 +77,28 @@ def _safe_filename(value: Any, *, require_supported: bool) -> str:
             status_code=415,
         )
     return filename
+
+
+def normalize_relative_path(value: Any) -> str:
+    """Return a safe project-relative source identity, never a local path."""
+
+    if not isinstance(value, str):
+        raise ContextFileError("INVALID_RELATIVE_PATH", "Đường dẫn tương đối không hợp lệ.", status_code=400)
+    path = unicodedata.normalize("NFC", value).strip().replace("\\", "/")
+    if (
+        not path
+        or len(path) > MAX_CONTEXT_FILENAME_CHARS
+        or path.startswith("/")
+        or re.match(r"^[A-Za-z]:", path)
+        or any(unicodedata.category(char).startswith("C") for char in path)
+    ):
+        raise ContextFileError("INVALID_RELATIVE_PATH", "Đường dẫn tương đối không an toàn.", status_code=400)
+    parts = path.split("/")
+    if any(not part or part in {".", ".."} or any(char in _INVALID_FILENAME_CHARS for char in part) for part in parts):
+        raise ContextFileError("INVALID_RELATIVE_PATH", "Đường dẫn tương đối không an toàn.", status_code=400)
+    if _safe_filename(parts[-1], require_supported=True) != parts[-1]:
+        raise ContextFileError("INVALID_RELATIVE_PATH", "Đường dẫn tương đối không an toàn.", status_code=400)
+    return "/".join(parts)
 
 
 def _decode_content(*, content: str | None, content_base64: str | None) -> bytes:
@@ -139,7 +161,8 @@ def _normalize_text(raw: bytes) -> str:
 
 
 def prepare_context_file(
-    *, filename: str, content: str | None = None, content_base64: str | None = None
+    *, filename: str, content: str | None = None, content_base64: str | None = None,
+    relative_path: str | None = None,
 ) -> dict[str, Any]:
     """Validate one small text file and return context-safe metadata."""
 
@@ -147,8 +170,11 @@ def prepare_context_file(
     raw = _decode_content(content=content, content_base64=content_base64)
     text = _normalize_text(raw)
     extension = Path(safe_name).suffix.lower()
+    safe_relative_path = normalize_relative_path(relative_path) if relative_path is not None else None
+    if safe_relative_path is not None and safe_relative_path.rsplit("/", 1)[-1] != safe_name:
+        raise ContextFileError("INVALID_RELATIVE_PATH", "Tên tệp không khớp đường dẫn tương đối.", status_code=400)
     source_id = "ctx_" + hashlib.sha256(
-        f"{safe_name}\0{text}".encode("utf-8")
+        f"{safe_relative_path or safe_name}\0{text}".encode("utf-8")
     ).hexdigest()[:16]
     source = {
         "source_id": source_id,
@@ -159,6 +185,8 @@ def prepare_context_file(
         "byte_count": len(text.encode("utf-8")),
         "line_count": text.count("\n") + 1,
     }
+    if safe_relative_path is not None:
+        source["relative_path"] = safe_relative_path
     return {
         "status": "ready",
         "filename": safe_name,
@@ -185,14 +213,22 @@ def normalize_context_sources(sources: list[Any] | None) -> list[dict[str, Any]]
         if not isinstance(raw, dict):
             raise ContextFileError("INVALID_SOURCE", "Thông tin source không hợp lệ.", status_code=400)
         filename = _safe_filename(raw.get("filename"), require_supported=True)
-        if filename in seen:
+        relative_path = raw.get("relative_path")
+        if relative_path is not None:
+            relative_path = normalize_relative_path(relative_path)
+            if relative_path.rsplit("/", 1)[-1] != filename:
+                raise ContextFileError("INVALID_RELATIVE_PATH", "Tên tệp không khớp đường dẫn tương đối.", status_code=400)
+        identity = relative_path or filename
+        if identity in seen:
             continue
-        seen.add(filename)
+        seen.add(identity)
         source: dict[str, Any] = {
             "filename": filename,
             "format": Path(filename).suffix.lower().removeprefix("."),
             "parser": CONTEXT_FILE_PARSER,
         }
+        if relative_path is not None:
+            source["relative_path"] = relative_path
         source_id = raw.get("source_id")
         if isinstance(source_id, str) and _SOURCE_ID_RE.fullmatch(source_id):
             source["source_id"] = source_id
