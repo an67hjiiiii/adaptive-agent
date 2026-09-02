@@ -1491,8 +1491,8 @@ class FrontendV6Tests(unittest.TestCase):
         self.assertIn('summary.className="run-summary-line"', self.js)
         self.assertIn("m.total_tokens", self.js)
         self.assertIn('class="context-provenance"', self.html)
-        self.assertIn('styles.css?v=31', self.html)
-        self.assertIn('app.js?v=31', self.html)
+        self.assertIn('styles.css?v=32', self.html)
+        self.assertIn('app.js?v=32', self.html)
 
     def test_compare_headers_and_result_cells_have_exact_metric_mapping(self):
         head = self.html.split('<table class="compare-table"><thead><tr>', 1)[1].split("</tr>", 1)[0]

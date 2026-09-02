@@ -1,8 +1,8 @@
 *{box-sizing:border-box}
 :root{
   --canvas:#f7f7f5;--surface:#fff;--surface-subtle:#f4f4f5;--surface-selected:#ededee;
-  --text-primary:#18181b;--text-secondary:#3f3f46;--text-muted:#71717a;--text-subtle:#a1a1aa;
-  --icon-primary:#3f3f46;--icon-secondary:#71717a;--border-neutral:#e4e4e7;
+  --text-primary:#18181b;--text-secondary:#3f3f46;--text-muted:#52525b;--text-subtle:#71717a;
+  --icon-primary:#27272a;--icon-secondary:#52525b;--border-neutral:#e4e4e7;
   --ink:var(--text-primary);--ink-soft:var(--text-secondary);--muted:var(--text-muted);--faint:var(--text-subtle);
   --line:var(--border-neutral);--line-strong:#d4d4d8;--accent:#2563eb;--accent-ink:#1d4ed8;--accent-soft:#eff6ff;
   --good:#157154;--good-soft:#edf8f3;--warn:#9a5b13;--warn-soft:#fff7e8;--bad:#b23a3a;--bad-soft:#fff1f1;
@@ -353,3 +353,27 @@ body{font-size:15px}
 .footer-icon-action.retry-turn{color:var(--text-secondary)}
 @media(max-width:900px){.turn-footer{margin-left:0}.turn-footer-row{align-items:flex-start;flex-wrap:wrap;gap:8px}.run-summary-line{flex:1 1 100%;order:1}.run-summary-metrics{gap:7px 10px}}
 @media(prefers-reduced-motion:reduce){.footer-icon-action{transition:none}}
+
+/* V1.0.5 footer alignment and normal-product contrast. */
+.turn-footer{align-items:stretch}
+.turn-sources{width:100%;align-self:stretch;justify-content:flex-start;align-items:center;flex-wrap:wrap;gap:5px;color:var(--text-secondary)}
+.turn-source-group{min-width:0;max-width:100%;display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+.source-label{color:var(--text-primary)}
+.source-chip{color:var(--text-primary)}
+.source-chip .ui-icon{color:var(--icon-secondary)}
+.turn-attachment-chip{color:var(--text-primary)}
+.turn-attachment-chip .ui-icon{color:var(--icon-secondary)}
+.run-summary-line{color:var(--text-secondary)}
+.run-metric{color:var(--text-secondary)}
+.run-metric-value{color:var(--text-primary);font-weight:600}
+.footer-icon-action{color:var(--icon-primary)}
+.sidebar .thread-main .sidebar-icon .ui-icon{color:var(--icon-secondary)}
+.sidebar .thread-card.active .thread-main .sidebar-icon .ui-icon{color:var(--icon-primary)}
+.select-box label,.run-summary span,.overview-facts dt,.overview-field>b,.agent-facts dt,.agent-goal>b,.agent-deps>b,.agent-output>b,.agent-escalation>b{color:var(--text-secondary)}
+@media(max-width:900px){.answer-body,.turn-footer{margin-left:0}}
+.quick-metrics span,.context-summary-cards span{color:var(--text-secondary)}
+.quick-section h3{color:var(--text-primary)}
+.quick-step-time,.quick-step-body span,.quick-technical summary{color:var(--text-secondary)}
+.quick-source{color:var(--text-primary)}
+.quick-sources small{color:var(--text-secondary)}
+#evidenceMount .ins-tab,.context-screen-copy p{color:var(--text-secondary)}
