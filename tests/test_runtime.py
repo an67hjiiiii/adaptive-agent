@@ -4,6 +4,7 @@ import asyncio
 import json
 import os
 import socket
+import subprocess
 import tempfile
 import time
 import unittest
@@ -1747,8 +1748,8 @@ class FrontendV6Tests(unittest.TestCase):
         self.assertIn('summary.className="run-summary-line"', self.js)
         self.assertIn("m.total_tokens", self.js)
         self.assertIn('class="context-provenance"', self.html)
-        self.assertIn('styles.css?v=35', self.html)
-        self.assertIn('app.js?v=35', self.html)
+        self.assertIn('styles.css?v=36', self.html)
+        self.assertIn('app.js?v=36', self.html)
 
     def test_compare_headers_and_result_cells_have_exact_metric_mapping(self):
         head = self.html.split('<table class="compare-table"><thead><tr>', 1)[1].split("</tr>", 1)[0]
@@ -1778,6 +1779,29 @@ class FrontendV6Tests(unittest.TestCase):
         self.assertIn("Không thể chạy với mô hình này", self.js)
         self.assertIn("Không thể kết nối tới server local", self.js)
         self.assertIn('body.classList.toggle("error-answer",meta.status==="failed")', self.js)
+
+    def test_upstream_html_errors_are_replaced_before_markdown(self):
+        helper = self.js.split("const UPSTREAM_ERROR_MESSAGES", 1)[1].split("function cap", 1)[0]
+        script = "const UPSTREAM_ERROR_MESSAGES" + helper + r'''
+const cases = [
+  ["html502", "<!DOCTYPE html><html><head><title>502</title></head><body>Bad Gateway</body></html>", 502, "text/html; charset=utf-8", "Máy chủ tạm thời không phản hồi"],
+  ["html503", "<html><head><title>503</title></head><body>Service Unavailable</body></html>", 503, "text/html", "Dịch vụ hiện tạm thời không khả dụng"],
+  ["html504", "<html><body>504 Gateway Timeout</body></html>", 504, "", "Yêu cầu mất quá nhiều thời gian phản hồi"],
+  ["stack", "Traceback (most recent call last):\\n  File \\\"/srv/app/main.py\\\", line 42, in handle\\nRuntimeError: upstream failed", null, "text/plain", "Không thể kết nối tới dịch vụ"],
+  ["structured", JSON.stringify({detail: "Unsupported model selection"}), 400, "application/json", "Unsupported model selection"],
+  ["plain", "Provider rate limit reached; wait before retrying.", null, "text/plain", "Provider rate limit reached; wait before retrying."],
+];
+for (const [name, body, status, contentType, expected] of cases) {
+  const actual = safeErrorDetail(body, status, contentType);
+  if (!actual.includes(expected) || actual.includes("<!DOCTYPE") || actual.includes("<html")) {
+    throw new Error(`${name}: ${actual}`);
+  }
+}
+const friendly = friendlyRunError(cases[0][1], "groq", "model", 502, "text/html");
+if (!friendly.includes("Máy chủ tạm thời không phản hồi") || friendly.includes("<html")) throw new Error(friendly);
+'''
+        result = subprocess.run(["node", "-e", script], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
 
     def test_readable_type_and_collapsible_responsive_layout_contract(self):
         self.assertIn(".answer-body{max-width:920px", self.css)
