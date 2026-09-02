@@ -32,6 +32,7 @@ from app.core.incidents import (
 )
 from app.core.rag import frozen_snapshot
 from app.core.types import Budget, ProviderResult, RunState, Usage
+from app.core.conversation_repository import JsonConversationRepository
 from app.providers.base import Provider
 from app.providers.fake import FakeProvider
 import app.main as main_module
@@ -1241,6 +1242,179 @@ class ApiContractTests(unittest.TestCase):
         self.assertEqual(seen_histories[0], [])
         self.assertEqual([item["content"] for item in seen_histories[1]], ["first", "answer 1"])
 
+    def test_reloaded_historical_context_is_not_active_for_unrelated_turn(self):
+        calls = []
+        source = {
+            "filename": "api_reference.txt",
+            "source_id": "ctx_0123456789abcdef",
+            "format": "txt",
+            "parser": "utf-8-text-v1",
+            "char_count": 24,
+            "line_count": 1,
+        }
+        historical_context = "SECRET_API_REFERENCE_MARKER"
+
+        async def fake_execute_once(**kwargs):
+            calls.append({
+                "message": kwargs["message"],
+                "context": kwargs["frozen_context"],
+                "retrieval_meta": kwargs["retrieval_meta"],
+            })
+            run_id = f"run_context_{len(calls)}"
+            data = {
+                "run_id": run_id,
+                "strategy": "adaptive",
+                "provider": "fake",
+                "model": "fake-research-v2",
+                "processing_mode": "adaptive-auto",
+                "answer": "hello",
+                "status": "completed",
+                "stop_reason": "STOP_SUFFICIENT",
+                "metrics": {},
+                "sources": [],
+            }
+            await kwargs["emit"]({
+                "type": "final", "answer": data["answer"], "status": data["status"],
+                "stop_reason": data["stop_reason"], "metrics": data["metrics"],
+                "run_id": run_id, "conversation_id": kwargs["conversation_id"],
+                "provider": data["provider"], "model": data["model"],
+            })
+            return data
+
+        def historical_record(conversation_id):
+            return {
+                "conversation_id": conversation_id,
+                "title": "Historical reference",
+                "created_at": 1,
+                "updated_at": 2,
+                "provider": "fake",
+                "model": "fake-research-v2",
+                "processing_mode": "adaptive-auto",
+                "status": "completed",
+                "context": historical_context,
+                "context_sources": [source],
+                "run_ids": ["run_old"],
+                "messages": [
+                    {"role": "user", "content": "summarize the file", "run_id": "run_old",
+                     "created_at": 1, "context_sources": [source]},
+                    {"role": "assistant", "content": "old answer", "run_id": "run_old",
+                     "created_at": 2, "sources": [source]},
+                ],
+            }
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            conversation_dir = root / "conversations"
+            conversation_dir.mkdir()
+            repository = JsonConversationRepository(conversation_dir)
+            existing_id = "chat_historical_context"
+            no_file_id = "chat_no_file_context"
+            repository.write(historical_record(existing_id))
+            repository.write({
+                "conversation_id": no_file_id, "title": "No files", "created_at": 1,
+                "updated_at": 2, "provider": "fake", "model": "fake-research-v2",
+                "processing_mode": "adaptive-auto", "status": "completed", "context": "",
+                "context_sources": [], "run_ids": [], "messages": [],
+            })
+            with (
+                patch.object(main_module, "RUNS", root),
+                patch.object(main_module, "CONVERSATIONS", conversation_dir),
+                patch.object(main_module, "execute_once", new=fake_execute_once),
+            ):
+                # Case A: a new conversation has no active reference context.
+                new_response = self.client.post(
+                    "/api/chat/stream",
+                    json={"message": "hi", "provider": "fake", "context": "",
+                          "context_sources": [], "context_active": False},
+                )
+                self.assertEqual(new_response.status_code, 200)
+                # Case B: a reloaded conversation that never used files stays empty.
+                no_file_response = self.client.post(
+                    "/api/chat/stream",
+                    json={"message": "hi", "provider": "fake", "conversation_id": no_file_id,
+                          "context": "", "context_sources": [], "context_active": False},
+                )
+                self.assertEqual(no_file_response.status_code, 200)
+                # Case C: reload preserves history, but the new unrelated turn is context-free.
+                reloaded = self.client.get(f"/api/conversations/{existing_id}")
+                self.assertEqual(reloaded.status_code, 200)
+                self.assertEqual(reloaded.json()["context_sources"][0]["filename"], source["filename"])
+                old_response = self.client.post(
+                    "/api/chat/stream",
+                    json={"message": "hi", "provider": "fake", "conversation_id": existing_id,
+                          "context": "", "context_sources": [], "context_active": False},
+                )
+                self.assertEqual(old_response.status_code, 200)
+                # Case E: a new conversation cannot inherit the prior project's context.
+                isolated_response = self.client.post(
+                    "/api/chat/stream",
+                    json={"message": "hi", "provider": "fake", "context": "",
+                          "context_sources": [], "context_active": False},
+                )
+                self.assertEqual(isolated_response.status_code, 200)
+                stored = self.client.get(f"/api/conversations/{existing_id}").json()
+
+        self.assertEqual(len(calls), 4)
+        self.assertTrue(all(item["context"] == "No external reference context was supplied." for item in calls))
+        self.assertTrue(all(historical_context not in item["context"] for item in calls))
+        self.assertEqual(stored["context"], historical_context)
+        self.assertEqual(stored["context_sources"][0]["relative_path"] if "relative_path" in stored["context_sources"][0] else stored["context_sources"][0]["filename"], source["filename"])
+        self.assertEqual(stored["messages"][0]["context_sources"][0]["filename"], source["filename"])
+        self.assertEqual(stored["messages"][-2]["content"], "hi")
+        self.assertEqual(stored["messages"][-2].get("context_sources"), [])
+
+    def test_explicit_context_remains_available_after_historical_reload(self):
+        calls = []
+        source = {
+            "filename": "api_reference.txt", "source_id": "ctx_0123456789abcdef",
+            "format": "txt", "parser": "utf-8-text-v1", "char_count": 24,
+        }
+        historical_context = "EXPLICIT_API_FOLLOWUP_MARKER"
+
+        async def fake_execute_once(**kwargs):
+            calls.append((kwargs["frozen_context"], kwargs["retrieval_meta"].get("attached_sources", [])))
+            run_id = "run_explicit_context"
+            await kwargs["emit"]({"type": "final", "answer": "auth", "status": "completed",
+                                    "stop_reason": "STOP_SUFFICIENT", "metrics": {}, "run_id": run_id,
+                                    "conversation_id": kwargs["conversation_id"], "provider": "fake",
+                                    "model": "fake-research-v2"})
+            return {"run_id": run_id, "provider": "fake", "model": "fake-research-v2",
+                    "processing_mode": "adaptive-auto", "answer": "auth", "status": "completed",
+                    "stop_reason": "STOP_SUFFICIENT", "metrics": {}, "sources": [source]}
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            conversation_dir = root / "conversations"
+            conversation_dir.mkdir()
+            JsonConversationRepository(conversation_dir).write({
+                "conversation_id": "chat_explicit_context", "title": "Reference", "created_at": 1,
+                "updated_at": 2, "provider": "fake", "model": "fake-research-v2",
+                "processing_mode": "adaptive-auto", "status": "completed", "context": historical_context,
+                "context_sources": [source], "run_ids": [], "messages": [],
+            })
+            with (
+                patch.object(main_module, "RUNS", root),
+                patch.object(main_module, "CONVERSATIONS", conversation_dir),
+                patch.object(main_module, "execute_once", new=fake_execute_once),
+            ):
+                response = self.client.post(
+                    "/api/chat/stream",
+                    json={"message": "API auth dùng gì?", "provider": "fake",
+                          "conversation_id": "chat_explicit_context", "context": historical_context,
+                          "context_sources": [source], "context_active": True},
+                )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(calls), 1)
+        self.assertIn(historical_context, calls[0][0])
+        self.assertEqual(calls[0][1][0]["filename"], source["filename"])
+
+    def test_reload_context_lifecycle_does_not_rehydrate_the_composer(self):
+        js = (ROOT / "app" / "static" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("context_active:activeContext", js)
+        self.assertIn("function activeContextForRequest()", js)
+        self.assertIn("/* Persisted context is historical metadata; reload never activates it in the draft. */", js)
+        self.assertNotIn('if(typeof conversation.context==="string")$("#context").value=conversation.context', js)
+
     def test_fatal_stream_has_conversation_metadata_and_persists_failed_turn(self):
         async def failing_execute_once(**kwargs):
             raise ValueError("provider unavailable")
@@ -1491,8 +1665,8 @@ class FrontendV6Tests(unittest.TestCase):
         self.assertIn('summary.className="run-summary-line"', self.js)
         self.assertIn("m.total_tokens", self.js)
         self.assertIn('class="context-provenance"', self.html)
-        self.assertIn('styles.css?v=33', self.html)
-        self.assertIn('app.js?v=33', self.html)
+        self.assertIn('styles.css?v=34', self.html)
+        self.assertIn('app.js?v=34', self.html)
 
     def test_compare_headers_and_result_cells_have_exact_metric_mapping(self):
         head = self.html.split('<table class="compare-table"><thead><tr>', 1)[1].split("</tr>", 1)[0]
