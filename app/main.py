@@ -372,13 +372,24 @@ _PROJECT_RELEVANCE_TERMS=(
     "project", "dự án", "repo", "repository", "app", "ứng dụng",
 )
 _PROJECT_FOLLOWUP_TERMS=("file này", "tệp này", "đoạn này", "route đó", "api đó", "hàm đó", "nó gọi gì")
-_PROJECT_GREETING_RE=re.compile(r"^\s*(?:hi|hello|hey|chào(?: bạn)?|bạn là ai|nói tiếng việt đi)\s*[!?.,]*\s*$",re.I)
+_PRODUCT_HISTORY_MAX_CHARS=2400
+_PRODUCT_GREETING_RE=re.compile(r"^\s*(?:hi|hello|hey|chào(?: bạn)?|bạn là ai|nói tiếng việt đi|speak english|thanks|thank you|cảm ơn)\s*[!?.,]*\s*$",re.I)
+_PRODUCT_FOLLOWUP_RE=re.compile(
+    r"\b(?:route đó|api đó|hàm đó|file đó|tệp đó|cái đó|nó|phần trên|"
+    r"giải thích rõ hơn|nói rõ hơn|tiếp tục|render file nào|gọi ở đâu|follow[ -]?up)\b",
+    re.I,
+)
+_LANGUAGE_PREFERENCE_RE=re.compile(
+    r"^\s*(?:nói|trả lời|viết)\s+(?:bằng\s+)?tiếng\s+(việt|anh)\s*(?:đi|nhé)?\s*[!.]*\s*$|"
+    r"^\s*(?:speak|reply|answer)\s+in\s+(vietnamese|english)\s*[!.]*\s*$",
+    re.I,
+)
 
 
 def project_relevance_gate(message,history):
     """Cheap Product gate: project retrieval is independent from AUTO topology."""
     text=re.sub(r"\s+"," ",str(message or "").casefold()).strip()
-    if not text or _PROJECT_GREETING_RE.fullmatch(text): return False
+    if not text or _PRODUCT_GREETING_RE.fullmatch(text): return False
     if re.fullmatch(r"[\d\s+\-*/().,=]+",text): return False
     if "chỉ trả lời dựa trên project" in text or "chỉ trả lời dựa trên file" in text: return True
     if any(term in text for term in _PROJECT_RELEVANCE_TERMS): return True
@@ -386,6 +397,52 @@ def project_relevance_gate(message,history):
         recent=" ".join(str(item.get("content","")).casefold() for item in (history or [])[-6:])
         return any(term in recent for term in _PROJECT_RELEVANCE_TERMS)
     return False
+
+
+def _product_language_preference(history):
+    """Return one explicit, safe language preference without general memory."""
+    for item in reversed(history or []):
+        if item.get("role") != "user":
+            continue
+        content=re.sub(r"\s+", " ", str(item.get("content") or "")).strip()
+        if _LANGUAGE_PREFERENCE_RE.fullmatch(content):
+            return {"role":"user", "content":content[:120]}
+    return None
+
+
+def product_history_for_turn(message,history):
+    """Select the tiny Product prompt history needed for this one chat turn.
+
+    Durable conversations retain their complete transcript.  This selector only
+    bounds what normal Product chat sends into the runtime prompt; research
+    baselines continue to call ``format_history`` with their own full history.
+    """
+    stored=[
+        {"role":item.get("role"), "content":str(item.get("content") or "").strip()}
+        for item in (history or [])
+        if item.get("role") in {"user", "assistant"} and str(item.get("content") or "").strip()
+    ]
+    preference=_product_language_preference(stored)
+    text=re.sub(r"\s+", " ", str(message or "")).strip()
+    if _PRODUCT_GREETING_RE.fullmatch(text):
+        return [preference] if preference else []
+    if not _PRODUCT_FOLLOWUP_RE.search(text):
+        return [preference] if preference else []
+
+    # A genuine follow-up gets only the immediately useful last user/assistant
+    # exchange.  Do not append older project answers merely to fill a window.
+    selected=[]
+    for item in reversed(stored):
+        limit=1500 if item["role"]=="assistant" else 800
+        selected.append({"role":item["role"], "content":item["content"][:limit]})
+        if len(selected)>=2:
+            break
+    selected=list(reversed(selected))
+    if preference and not any(item["content"]==preference["content"] for item in selected):
+        selected.insert(0,preference)
+    while selected and len(format_history(selected,max_chars=_PRODUCT_HISTORY_MAX_CHARS))>_PRODUCT_HISTORY_MAX_CHARS:
+        selected.pop(0)
+    return selected
 
 
 def workspace_context(workspace):
@@ -886,6 +943,10 @@ async def chat(payload:ChatRequest):
         timings["request_received_ms"]=round((conversation_load_started-request_started)*1000)
         timings["conversation_load_ms"]=round((time.perf_counter()-conversation_load_started)*1000)
         stored_history=history_from_conversation(existing) if existing else payload.history
+        # Product chat keeps the durable transcript for the UI, but only sends
+        # a deterministic, relevant slice into the provider prompt.  Compare
+        # and research execution do not use this endpoint or this selector.
+        effective_history=product_history_for_turn(payload.message,stored_history)
         # ``context_active=False`` is the browser's explicit lifecycle signal
         # after reload: historical context stays persisted/displayable, but it
         # must not be promoted into this new execution.  API callers that omit
@@ -913,7 +974,7 @@ async def chat(payload:ChatRequest):
         execution_context=context
         execution_sources=list(context_sources)
         project_workspace=None
-        if project_relevance_gate(payload.message,stored_history):
+        if project_relevance_gate(payload.message,effective_history):
             project_workspace=get_project_workspace(conversation_id,include_content=True)
             if project_workspace:
                 project_context=workspace_context(project_workspace)
@@ -938,11 +999,11 @@ async def chat(payload:ChatRequest):
                 data=await execute_once(strategy="adaptive",provider_name=payload.provider,model_name=payload.model,
                     mode=selected_mode,
                     message=payload.message,frozen_context=snapshot,retrieval_meta=meta,
-                    history=stored_history,emit=emit,conversation_id=conversation_id,
+                    history=effective_history,emit=emit,conversation_id=conversation_id,
                     e2e_started_at=accepted_started,performance_timings=timings)
                 persistence_started=time.perf_counter()
                 append_turn(conversation_id,message=payload.message,data=data,context=context,
-                            context_sources=execution_sources,
+                            context_sources=context_sources,
                             preserve_historical_context=preserve_historical_context,
                             existing=existing)
                 persistence_ms=round((time.perf_counter()-persistence_started)*1000)
@@ -976,7 +1037,7 @@ async def chat(payload:ChatRequest):
                         "model":payload.model,"processing_mode":selected_mode,
                         "conversation_id":conversation_id,
                         "user_message":payload.message,"created_at":int(time.time()),
-                        "task":payload.message,"chat_history":format_history(stored_history),
+                        "task":payload.message,"chat_history":format_history(effective_history),
                         "context":snapshot,"retrieval_meta":meta,"events":[],"answer":"",
                         "snapshot_id":meta.get("snapshot_id"),"snapshot_hash":meta.get("snapshot_hash"),
                         "context_hash":meta.get("context_hash"),
@@ -1006,7 +1067,7 @@ async def chat(payload:ChatRequest):
                     persistence_started=time.perf_counter()
                     append_failed_turn(conversation_id,message=payload.message,
                         provider=payload.provider,model=payload.model,error=safe_error,
-                        context=context,run_id=run_id,context_sources=execution_sources,
+                        context=context,run_id=run_id,context_sources=context_sources,
                         processing_mode=selected_mode,
                         preserve_historical_context=preserve_historical_context,
                         existing=existing)

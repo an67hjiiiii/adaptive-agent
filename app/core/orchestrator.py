@@ -399,19 +399,25 @@ class Orchestrator:
             r"\b(?:entry\s*point|route(?:s)?|công\s+nghệ|technology|framework|file(?:s)?\s+nào|nằm\s+ở\s+đâu|vai\s+trò)\b",
             r"\b(?:what|which|where|compare|so\s+sánh)\b",
         )
+        conversational_patterns=(
+            r"^(?:hi|hello|hey|chào(?:\s+bạn)?|thanks?|thank\s+you|cảm\s+ơn)[!?.,\s]*$",
+            r"^(?:nói|trả\s+lời|viết)\s+(?:bằng\s+)?tiếng\s+(?:việt|anh)\s*(?:đi|nhé)?[!?.,\s]*$",
+            r"^(?:speak|reply|answer)\s+in\s+(?:vietnamese|english)[!?.,\s]*$",
+        )
         planned=any(re.search(pattern,text) for pattern in planned_patterns)
         parallel=any(re.search(pattern,text) for pattern in parallel_patterns)
         simple=any(re.search(pattern,text) for pattern in simple_patterns)
+        conversational=any(re.fullmatch(pattern,text) for pattern in conversational_patterns)
         parts=[part.strip() for part in re.split(r",|\bvà\b|\band\b|&",text) if part.strip()]
         action=bool(re.search(r"\b(?:analy[sz]e|phân\s+tích|đánh\s+giá|kiểm\s+tra|compare|so\s+sánh)\b",text))
         multi_goal=len(parts)>=3 or (len(parts)>=2 and action)
-        return {"simple":simple,"parallel":parallel,"planned":planned,
+        return {"simple":simple,"conversational":conversational,"parallel":parallel,"planned":planned,
                 "multi_goal":multi_goal,"text":text}
 
     def product_auto_fast_path(self,task):
         """Return a conservative no-analyzer route for obvious simple asks."""
         signals=self._product_task_signals(task)
-        if signals["simple"] and not signals["parallel"] and not signals["planned"]:
+        if (signals["simple"] or signals["conversational"]) and not signals["parallel"] and not signals["planned"]:
             return ("DIRECT","Yêu cầu có một mục tiêu rõ ràng và không cần chia nhánh.",signals)
         return None
 

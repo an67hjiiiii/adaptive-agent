@@ -139,16 +139,19 @@ class ProjectUiContractTests(unittest.TestCase):
         self.assertIn('id="contextFolder" type="file" webkitdirectory directory multiple', html)
         self.assertIn("Chọn thư mục dự án", html)
         self.assertIn("Chọn tệp", html)
-        self.assertIn("MAX_PROJECT_FILES_V11 = 20", js)
-        self.assertIn("hỗ trợ tối đa 20 tệp mã nguồn trong một dự án.", js)
-        self.assertIn("PROJECT_NOISE_V11", js)
+        self.assertIn("MAX_PROJECT_FILES = 20", js)
+        self.assertIn("Hỗ trợ tối đa 20 tệp mã nguồn trong một dự án.", js)
+        self.assertIn("PROJECT_NOISE_DIRECTORIES", js)
+        folder_filter = js.split("function supportedProjectFiles", 1)[1].split("async function importProjectFolder", 1)[0]
+        self.assertIn("cfg?.context_file_extensions", folder_filter)
+        self.assertNotIn("new Set((extensions||[])", folder_filter)
         self.assertIn("relative_path:item.relativePath", js)
         self.assertIn("[PROJECT STRUCTURE]", js)
         self.assertIn("SOURCE: ${safeContextFilename", js)
         self.assertIn("clearDraftAttachments()", js)
         self.assertIn(".attachment-menu", css)
-        self.assertIn("styles.css?v=37", html)
-        self.assertIn("app.js?v=37", html)
+        self.assertIn("styles.css?v=38", html)
+        self.assertIn("app.js?v=38", html)
 
 
 if __name__ == "__main__":
