@@ -31,8 +31,8 @@ class _RecordingCursor:
 
 
 class _RecordingConnection:
-    def __init__(self):
-        self.cursor_instance = _RecordingCursor()
+    def __init__(self, *, rowcount: int = 1):
+        self.cursor_instance = _RecordingCursor(rowcount=rowcount)
 
     def cursor(self, **_):
         return self.cursor_instance

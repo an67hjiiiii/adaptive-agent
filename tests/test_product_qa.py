@@ -355,7 +355,7 @@ class ProductQATests(unittest.TestCase):
         )
         self.assertIn("context_sources:contextSourcesForRequest()", compare_line)
         self.assertIn("activeContextFile=file", js)
-        self.assertIn("processContextFile(activeContextFile)", js)
+        self.assertIn("processContextFile(file)", js)
         self.assertIn('$("#context").value="";clearContextFile()', js)
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -411,7 +411,9 @@ class ProductQATests(unittest.TestCase):
         root = Path(main_module.__file__).resolve().parent / "static"
         html = (root / "index.html").read_text(encoding="utf-8")
         self.assertIn('id="prompt" rows="1" maxlength="12000" aria-label=', html)
-        self.assertIn('id="context" maxlength="100000" aria-label=', html)
+        context_control = next(line for line in html.splitlines() if 'id="context"' in line)
+        self.assertIn('maxlength="100000"', context_control)
+        self.assertIn('aria-label=', context_control)
         self.assertIn('id="toasts" role="status" aria-live="polite" aria-atomic="true"', html)
 
     def test_provider_failure_is_safe_and_persisted_as_structured_fatal(self):

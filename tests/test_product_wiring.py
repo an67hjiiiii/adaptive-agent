@@ -243,7 +243,7 @@ class ProductUiContractTests(unittest.TestCase):
         for mode in ("adaptive-auto", "DIRECT", "PARALLEL", "PLANNED"):
             self.assertIn(mode, js)
         self.assertIn("mode,conversation_id", js)
-        self.assertIn("modeText(requestedMode)", js)
+        self.assertIn("modeText(mode)", js)
 
 
 if __name__ == "__main__":
