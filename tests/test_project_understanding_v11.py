@@ -147,8 +147,8 @@ class ProjectUiContractTests(unittest.TestCase):
         self.assertIn("SOURCE: ${safeContextFilename", js)
         self.assertIn("clearDraftAttachments()", js)
         self.assertIn(".attachment-menu", css)
-        self.assertIn("styles.css?v=34", html)
-        self.assertIn("app.js?v=34", html)
+        self.assertIn("styles.css?v=35", html)
+        self.assertIn("app.js?v=35", html)
 
 
 if __name__ == "__main__":
