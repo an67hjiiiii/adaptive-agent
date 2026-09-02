@@ -1,5 +1,5 @@
 from __future__ import annotations
-import asyncio,hashlib,json,os,re,time,uuid
+import asyncio,hashlib,json,logging,os,re,time,uuid
 from copy import deepcopy
 from pathlib import Path
 from fastapi import FastAPI,HTTPException,Request
@@ -52,6 +52,9 @@ from app.core.conversation_repository import (
     JsonConversationRepository,
     repository_from_environment,
 )
+
+
+LOGGER = logging.getLogger(__name__)
 
 BASE=Path(__file__).resolve().parent
 RUNS=BASE.parent/"runs"; RUNS.mkdir(exist_ok=True)
@@ -352,6 +355,18 @@ def save_failed_run_evidence(*,strategy,provider,model,message,context,retrieval
 
 def new_conversation_id(): return f"chat_{uuid.uuid4().hex[:12]}"
 
+
+_CONVERSATION_UNSET = object()
+PRODUCT_TIMING_FIELDS = (
+    "request_received_ms", "conversation_load_ms", "user_message_persist_ms",
+    "routing_ms", "provider_start_ms", "provider_first_response_ms",
+    "assistant_persist_ms", "total_ms",
+)
+
+
+def _timing_snapshot(timings):
+    return {key: timings.get(key) for key in PRODUCT_TIMING_FIELDS}
+
 def conversation_repository():
     """Return the process-selected backend (with a JSON test-directory seam)."""
     # Existing focused tests patch CONVERSATIONS to a temporary directory.  This
@@ -372,6 +387,26 @@ def read_conversation(conversation_id):
 def write_conversation(data):
     try:
         conversation_repository().write(data)
+    except ValueError as exc:
+        raise HTTPException(400,"Invalid conversation id") from exc
+    except ConversationStorageError as exc:
+        raise HTTPException(503,"Conversation storage is unavailable") from exc
+
+
+def append_conversation(data, *, messages, preserve_historical_context=False):
+    """Persist one completed turn with the repository's bounded append path."""
+    repository = conversation_repository()
+    try:
+        append = getattr(repository, "append", None)
+        if callable(append):
+            append(
+                data,
+                messages=messages,
+                preserve_historical_context=preserve_historical_context,
+            )
+        else:
+            # Compatibility seam for narrow test doubles and older local repos.
+            repository.write(data)
     except ValueError as exc:
         raise HTTPException(400,"Invalid conversation id") from exc
     except ConversationStorageError as exc:
@@ -401,9 +436,11 @@ def conversation_turns(data):
     if pending: turns.append(pending)
     return turns
 
-def append_turn(conversation_id,*,message,data,context,context_sources=None,preserve_historical_context=False):
+def append_turn(conversation_id,*,message,data,context,context_sources=None,
+                preserve_historical_context=False,existing=_CONVERSATION_UNSET):
     now=int(time.time())
-    conversation=read_conversation(conversation_id) or {
+    loaded=(read_conversation(conversation_id) if existing is _CONVERSATION_UNSET else existing)
+    conversation=deepcopy(loaded) if loaded else {
       "conversation_id":conversation_id,"title":message[:72],"created_at":now,"messages":[],"run_ids":[]}
     conversation["updated_at"]=now
     conversation["provider"]=data.get("provider")
@@ -417,7 +454,7 @@ def append_turn(conversation_id,*,message,data,context,context_sources=None,pres
       f"Không thể nhận câu trả lời từ {data.get('provider','provider')}: "
       f"{data.get('error') or 'provider request failed'}"
     )
-    conversation["messages"].extend([
+    new_messages=[
       {"conversation_id":conversation_id,"role":"user","content":message,
        "run_id":data.get("run_id"),"context_sources":deepcopy(context_sources or []),"created_at":now},
       {"conversation_id":conversation_id,"role":"assistant","content":answer,
@@ -425,12 +462,19 @@ def append_turn(conversation_id,*,message,data,context,context_sources=None,pres
        "provider":data.get("provider"),"model":data.get("model"),"mode":run_mode(data),
        "requested_mode":data.get("processing_mode"),
        "metrics":data.get("metrics") or {},"sources":deepcopy(data.get("sources") or context_sources or []),"created_at":now},
-    ])
+    ]
+    conversation["messages"].extend(new_messages)
     conversation["run_ids"].append(data.get("run_id"))
-    write_conversation(conversation)
+    append_conversation(
+        conversation,
+        messages=new_messages,
+        preserve_historical_context=preserve_historical_context,
+    )
     return conversation
 
-def append_failed_turn(conversation_id,*,message,provider,model,error,context,run_id,context_sources=None,processing_mode=None,preserve_historical_context=False):
+def append_failed_turn(conversation_id,*,message,provider,model,error,context,run_id,
+                       context_sources=None,processing_mode=None,
+                       preserve_historical_context=False,existing=_CONVERSATION_UNSET):
     """Persist failures that happen before Orchestrator can emit a final event.
 
     A failed provider request is still a turn in the user's conversation. Keeping
@@ -438,7 +482,8 @@ def append_failed_turn(conversation_id,*,message,provider,model,error,context,ru
     the same transcript instead of silently starting a new chat.
     """
     now=int(time.time())
-    conversation=read_conversation(conversation_id) or {
+    loaded=(read_conversation(conversation_id) if existing is _CONVERSATION_UNSET else existing)
+    conversation=deepcopy(loaded) if loaded else {
       "conversation_id":conversation_id,"title":message[:72],"created_at":now,"messages":[],"run_ids":[]}
     conversation["updated_at"]=now
     conversation["provider"]=provider
@@ -449,16 +494,21 @@ def append_failed_turn(conversation_id,*,message,provider,model,error,context,ru
       conversation["context_sources"]=deepcopy(context_sources or [])
     conversation["status"]="failed"
     conversation["last_error"]=error
-    conversation["messages"].extend([
+    new_messages=[
       {"conversation_id":conversation_id,"role":"user","content":message,
        "run_id":run_id,"context_sources":deepcopy(context_sources or []),"created_at":now},
       {"conversation_id":conversation_id,"role":"assistant",
        "content":f"Không thể nhận câu trả lời từ {provider}: {error or 'provider request failed'}.","run_id":run_id,
        "status":"failed","stop_reason":"STOP_FAILURE","provider":provider,"model":model,
        "error":error,"mode":processing_mode,"metrics":{},"sources":deepcopy(context_sources or []),"created_at":now},
-    ])
+    ]
+    conversation["messages"].extend(new_messages)
     conversation["run_ids"].append(run_id)
-    write_conversation(conversation)
+    append_conversation(
+        conversation,
+        messages=new_messages,
+        preserve_historical_context=preserve_historical_context,
+    )
     return conversation
 
 def provider_configured(name):
@@ -518,7 +568,8 @@ def write_provider_status(name,status=None,model=None,error=None,diagnostic=None
 
 async def execute_once(*,strategy,provider_name,model_name=None,mode=None,message,frozen_context,retrieval_meta,history,emit,
                        conversation_id=None,budget_config=None,comparison_meta=None,run_id=None,
-                       run_metadata=None,generation_settings=None,e2e_started_at=None,request_gate=None):
+                       run_metadata=None,generation_settings=None,e2e_started_at=None,request_gate=None,
+                       performance_timings=None):
     accepted_started = float(e2e_started_at) if e2e_started_at is not None else time.perf_counter()
     model=validated_model(provider_name,model_name)
     product_mode = validated_processing_mode(mode) if mode is not None else None
@@ -585,6 +636,8 @@ async def execute_once(*,strategy,provider_name,model_name=None,mode=None,messag
             metadata["outcome_category"] = state.outcome_category
         _apply_run_metadata(data,metadata)
     if comparison_meta is not None: data["comparison"]=deepcopy(comparison_meta)
+    if performance_timings is not None:
+        data["performance_timings"] = _timing_snapshot(performance_timings)
     save(data); return data
 
 @app.get("/")
@@ -726,10 +779,26 @@ async def chat(payload:ChatRequest):
             detail={"code":exc.code,"message":exc.message},
         ) from None
     async def gen():
+        request_started=time.perf_counter()
+        timings={key:None for key in PRODUCT_TIMING_FIELDS}
         q=asyncio.Queue()
-        async def emit(x): await q.put(x)
+        async def emit(x):
+            if x.get("type")=="trace":
+                event=x.get("event") or {}
+                event_ms=event.get("t_ms")
+                if event_ms is not None:
+                    if event.get("kind")=="decision" and timings["routing_ms"] is None:
+                        timings["routing_ms"]=event_ms
+                    elif event.get("kind")=="provider_request" and timings["provider_start_ms"] is None:
+                        timings["provider_start_ms"]=event_ms
+                    elif event.get("kind")=="agent_end" and timings["provider_first_response_ms"] is None:
+                        timings["provider_first_response_ms"]=event_ms
+            await q.put(x)
         conversation_id=payload.conversation_id or new_conversation_id()
+        conversation_load_started=time.perf_counter()
         existing=read_conversation(conversation_id)
+        timings["request_received_ms"]=round((conversation_load_started-request_started)*1000)
+        timings["conversation_load_ms"]=round((time.perf_counter()-conversation_load_started)*1000)
         stored_history=history_from_conversation(existing) if existing else payload.history
         # ``context_active=False`` is the browser's explicit lifecycle signal
         # after reload: historical context stays persisted/displayable, but it
@@ -767,10 +836,24 @@ async def chat(payload:ChatRequest):
                     mode=selected_mode,
                     message=payload.message,frozen_context=snapshot,retrieval_meta=meta,
                     history=stored_history,emit=emit,conversation_id=conversation_id,
-                    e2e_started_at=accepted_started)
+                    e2e_started_at=accepted_started,performance_timings=timings)
+                persistence_started=time.perf_counter()
                 append_turn(conversation_id,message=payload.message,data=data,context=context,
                             context_sources=context_sources,
-                            preserve_historical_context=preserve_historical_context)
+                            preserve_historical_context=preserve_historical_context,
+                            existing=existing)
+                persistence_ms=round((time.perf_counter()-persistence_started)*1000)
+                timings["user_message_persist_ms"]=persistence_ms
+                timings["assistant_persist_ms"]=persistence_ms
+                timings["total_ms"]=round((time.perf_counter()-request_started)*1000)
+                data["performance_timings"]=_timing_snapshot(timings)
+                # execute_once persists the run before the conversation append;
+                # update the same local evidence with the completed write timing.
+                try:
+                    save(data)
+                except Exception:
+                    LOGGER.debug("product_hot_path_evidence_timing_save_failed")
+                LOGGER.info("product_chat_timing %s", _timing_snapshot(timings))
             except Exception as exc:
                 incident=(safe_runtime_incident(
                     category="INVALID_INPUT_OR_SCOPE",
@@ -801,6 +884,7 @@ async def chat(payload:ChatRequest):
                         "metrics":{"e2e_ms":round((time.perf_counter()-accepted_started)*1000),
                                    "e2e_boundary_version":"E2E-MEASURE-V2",
                                    "context_prep_ms":meta.get("context_prep_ms")},
+                        "performance_timings":_timing_snapshot(timings),
                         "incident":incident,"incidents":[incident],
                         "incident_category":incident.get("category"),
                         "incident_origin":incident.get("origin"),
@@ -816,11 +900,23 @@ async def chat(payload:ChatRequest):
                 })
                 try:
                     save(failed)
+                    persistence_started=time.perf_counter()
                     append_failed_turn(conversation_id,message=payload.message,
                         provider=payload.provider,model=payload.model,error=safe_error,
                         context=context,run_id=run_id,context_sources=context_sources,
                         processing_mode=selected_mode,
-                        preserve_historical_context=preserve_historical_context)
+                        preserve_historical_context=preserve_historical_context,
+                        existing=existing)
+                    persistence_ms=round((time.perf_counter()-persistence_started)*1000)
+                    timings["user_message_persist_ms"]=persistence_ms
+                    timings["assistant_persist_ms"]=persistence_ms
+                    timings["total_ms"]=round((time.perf_counter()-request_started)*1000)
+                    failed["performance_timings"]=_timing_snapshot(timings)
+                    try:
+                        save(failed)
+                    except Exception:
+                        LOGGER.debug("product_hot_path_failed_evidence_timing_save_failed")
+                    LOGGER.info("product_chat_timing %s", _timing_snapshot(timings))
                 except Exception:
                     # Never replace the original provider error with a storage
                     # error while streaming the fatal contract event.

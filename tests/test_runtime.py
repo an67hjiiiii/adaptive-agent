@@ -1242,6 +1242,62 @@ class ApiContractTests(unittest.TestCase):
         self.assertEqual(seen_histories[0], [])
         self.assertEqual([item["content"] for item in seen_histories[1]], ["first", "answer 1"])
 
+    def test_product_chat_reads_once_then_uses_bounded_append(self):
+        class CountingRepository:
+            def __init__(self):
+                self.read_calls = 0
+                self.append_calls = 0
+
+            def read(self, _conversation_id):
+                self.read_calls += 1
+                return None
+
+            def append(self, _data, *, messages, preserve_historical_context=False):
+                self.append_calls += 1
+                self.last_message_count = len(messages)
+                self.last_preserve = preserve_historical_context
+
+            def write(self, _data):
+                raise AssertionError("normal chat must not use full repository write")
+
+            def list(self, *, limit, query=""):
+                return []
+
+            def delete(self, _conversation_id):
+                return False
+
+        repository = CountingRepository()
+
+        async def fake_execute_once(**kwargs):
+            run_id = "run_bounded_append"
+            await kwargs["emit"]({
+                "type": "final", "answer": "ok", "status": "completed",
+                "stop_reason": "STOP_SUFFICIENT", "metrics": {}, "run_id": run_id,
+                "conversation_id": kwargs["conversation_id"], "provider": "fake",
+                "model": "fake-research-v2",
+            })
+            return {
+                "run_id": run_id, "strategy": "adaptive", "provider": "fake",
+                "model": "fake-research-v2", "processing_mode": "adaptive-auto",
+                "answer": "ok", "status": "completed", "stop_reason": "STOP_SUFFICIENT",
+                "metrics": {}, "sources": [],
+            }
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with (
+                patch.object(main_module, "RUNS", Path(temp_dir)),
+                patch.object(main_module, "conversation_repository", return_value=repository),
+                patch.object(main_module, "execute_once", new=fake_execute_once),
+            ):
+                response = self.client.post(
+                    "/api/chat/stream",
+                    json={"message": "hi", "provider": "fake"},
+                )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(repository.read_calls, 1)
+        self.assertEqual(repository.append_calls, 1)
+        self.assertEqual(repository.last_message_count, 2)
+
     def test_reloaded_historical_context_is_not_active_for_unrelated_turn(self):
         calls = []
         source = {
@@ -1414,6 +1470,32 @@ class ApiContractTests(unittest.TestCase):
         self.assertIn("function activeContextForRequest()", js)
         self.assertIn("/* Persisted context is historical metadata; reload never activates it in the draft. */", js)
         self.assertNotIn('if(typeof conversation.context==="string")$("#context").value=conversation.context', js)
+
+    def test_product_hot_path_does_not_wait_for_optional_evidence_or_sidebar_refresh(self):
+        js = (ROOT / "app" / "static" / "app.js").read_text(encoding="utf-8")
+        switch = js.split("async function loadConversation(id)", 1)[1].split("async function loadRunInspector", 1)[0]
+        self.assertNotIn("await loadRunInspector", switch)
+        self.assertNotIn("await loadConversations", switch)
+        self.assertIn("resetInspector(\"idle\")", switch)
+        self.assertIn("conversation_switch_timing", switch)
+        chat = js.split("async function runChat", 1)[1].split("async function testProvider", 1)[0]
+        self.assertNotIn("await loadConversations", chat)
+        self.assertIn("updateConversationSidebar", chat)
+
+    def test_product_chat_uses_bounded_repository_append_and_timing_identity(self):
+        source = (ROOT / "app" / "main.py").read_text(encoding="utf-8")
+        repository = (ROOT / "app" / "core" / "conversation_repository.py").read_text(encoding="utf-8")
+        for field in (
+            "request_received_ms", "conversation_load_ms", "user_message_persist_ms",
+            "routing_ms", "provider_start_ms", "provider_first_response_ms",
+            "assistant_persist_ms", "total_ms",
+        ):
+            self.assertIn(field, source)
+        self.assertIn("existing=existing", source)
+        self.assertIn("def append(", repository)
+        self.assertIn("conversation_append_timing", repository)
+        postgres_append = repository.split("class PostgresConversationRepository", 1)[1].split("def append(", 1)[1].split("def list(", 1)[0]
+        self.assertNotIn('DELETE FROM conversation_messages WHERE conversation_id = %s', postgres_append)
 
     def test_fatal_stream_has_conversation_metadata_and_persists_failed_turn(self):
         async def failing_execute_once(**kwargs):
@@ -1665,8 +1747,8 @@ class FrontendV6Tests(unittest.TestCase):
         self.assertIn('summary.className="run-summary-line"', self.js)
         self.assertIn("m.total_tokens", self.js)
         self.assertIn('class="context-provenance"', self.html)
-        self.assertIn('styles.css?v=34', self.html)
-        self.assertIn('app.js?v=34', self.html)
+        self.assertIn('styles.css?v=35', self.html)
+        self.assertIn('app.js?v=35', self.html)
 
     def test_compare_headers_and_result_cells_have_exact_metric_mapping(self):
         head = self.html.split('<table class="compare-table"><thead><tr>', 1)[1].split("</tr>", 1)[0]

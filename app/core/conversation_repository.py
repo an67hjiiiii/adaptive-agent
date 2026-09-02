@@ -9,16 +9,22 @@ falls back to a local file.
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
+import threading
 import time
 import uuid
 from copy import deepcopy
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Protocol
 
 from app.core.context_files import ContextFileError, normalize_context_sources
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 CONVERSATION_ID_RE = re.compile(r"chat_[A-Za-z0-9_-]+$")
@@ -31,6 +37,13 @@ class ConversationStorageError(RuntimeError):
 class ConversationRepository(Protocol):
     def read(self, conversation_id: str) -> dict[str, Any] | None: ...
     def write(self, data: dict[str, Any]) -> None: ...
+    def append(
+        self,
+        data: dict[str, Any],
+        *,
+        messages: list[dict[str, Any]],
+        preserve_historical_context: bool = False,
+    ) -> None: ...
     def list(self, *, limit: int, query: str = "") -> list[dict[str, Any]]: ...
     def delete(self, conversation_id: str) -> bool: ...
 
@@ -148,6 +161,17 @@ class JsonConversationRepository:
         temporary.write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
         os.replace(temporary, path)
 
+    def append(
+        self,
+        data: dict[str, Any],
+        *,
+        messages: list[dict[str, Any]],
+        preserve_historical_context: bool = False,
+    ) -> None:
+        # JSON is the local fallback and has no row-level append primitive. Its
+        # existing atomic file replacement remains the compatible behavior.
+        self.write(data)
+
     def list(self, *, limit: int, query: str = "") -> list[dict[str, Any]]:
         needle = query.strip().casefold()
         rows: list[dict[str, Any]] = []
@@ -201,15 +225,53 @@ class PostgresConversationRepository:
             ) from exc
         self._connect = connect
         self._dict_row = dict_row
+        self._connection_handle = None
+        self._connection_lock = threading.RLock()
         self._initialize_schema()
 
+    @staticmethod
+    def _closed(connection: Any) -> bool:
+        value = getattr(connection, "closed", False)
+        if callable(value):
+            value = value()
+        return isinstance(value, (bool, int)) and bool(value)
+
+    @contextmanager
     def _connection(self):
-        try:
-            return self._connect(self._database_url, connect_timeout=5)
-        except Exception as exc:
-            raise ConversationStorageError(
-                "DATABASE_URL is configured but PostgreSQL conversation storage could not initialize."
-            ) from exc
+        lock = getattr(self, "_connection_lock", None)
+        if lock is None:
+            lock = threading.RLock()
+            self._connection_lock = lock
+        with lock:
+            connection = getattr(self, "_connection_handle", None)
+            if connection is None or self._closed(connection):
+                try:
+                    connection = self._connect(self._database_url, connect_timeout=5)
+                except Exception as exc:
+                    raise ConversationStorageError(
+                        "DATABASE_URL is configured but PostgreSQL conversation storage could not initialize."
+                    ) from exc
+                self._connection_handle = connection
+            try:
+                yield connection
+                commit = getattr(connection, "commit", None)
+                if callable(commit):
+                    commit()
+            except Exception:
+                rollback = getattr(connection, "rollback", None)
+                if callable(rollback):
+                    try:
+                        rollback()
+                    except Exception:
+                        pass
+                self._connection_handle = None
+                close = getattr(connection, "close", None)
+                if callable(close):
+                    try:
+                        close()
+                    except Exception:
+                        pass
+                raise
 
     def _initialize_schema(self) -> None:
         statements = (
@@ -248,18 +310,28 @@ class PostgresConversationRepository:
 
     def read(self, conversation_id: str) -> dict[str, Any] | None:
         conversation_id = validate_conversation_id(conversation_id)
+        started = time.perf_counter()
+        sql_calls = 0
+        conversation_query_ms = None
+        message_query_ms = None
         try:
             with self._connection() as connection:
                 with connection.cursor(row_factory=self._dict_row) as cursor:
+                    query_started = time.perf_counter()
                     cursor.execute("SELECT * FROM conversations WHERE conversation_id = %s", (conversation_id,))
+                    sql_calls += 1
+                    conversation_query_ms = round((time.perf_counter() - query_started) * 1000)
                     row = cursor.fetchone()
                     if row is None:
                         return None
+                    query_started = time.perf_counter()
                     cursor.execute(
                         "SELECT position, role, content, run_id, created_at, metadata "
                         "FROM conversation_messages WHERE conversation_id = %s ORDER BY position ASC",
                         (conversation_id,),
                     )
+                    sql_calls += 1
+                    message_query_ms = round((time.perf_counter() - query_started) * 1000)
                     messages = []
                     for message_row in cursor.fetchall():
                         message = {
@@ -290,6 +362,16 @@ class PostgresConversationRepository:
             raise
         except Exception as exc:
             raise ConversationStorageError("PostgreSQL conversation storage is unavailable.") from exc
+        finally:
+            LOGGER.info(
+                "conversation_read_timing %s",
+                {
+                    "conversation_query_ms": conversation_query_ms,
+                    "message_query_ms": message_query_ms,
+                    "sql_calls": sql_calls,
+                    "total_ms": round((time.perf_counter() - started) * 1000),
+                },
+            )
 
     def write(self, data: dict[str, Any]) -> None:
         record = _conversation_record(data)
@@ -332,6 +414,98 @@ class PostgresConversationRepository:
         except Exception as exc:
             raise ConversationStorageError("PostgreSQL conversation storage is unavailable.") from exc
 
+    def append(
+        self,
+        data: dict[str, Any],
+        *,
+        messages: list[dict[str, Any]],
+        preserve_historical_context: bool = False,
+    ) -> None:
+        """Append new turn rows without rewriting the existing transcript.
+
+        The caller supplies the already-loaded conversation and only the new
+        message rows. Metadata and message inserts share one short transaction;
+        the provider is never awaited while this transaction is open.
+        """
+
+        record = _conversation_record(data)
+        cleaned_messages = [
+            _conversation_message(
+                message,
+                conversation_id=record["conversation_id"],
+                fallback_timestamp=record["updated_at"],
+            )
+            for message in messages
+            if isinstance(message, dict)
+        ]
+        started = time.perf_counter()
+        sql_calls = 0
+        context_update = "" if preserve_historical_context else (
+            "context_text = EXCLUDED.context_text, "
+            "context_sources = EXCLUDED.context_sources, "
+        )
+        try:
+            with self._connection() as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        f"""INSERT INTO conversations (
+                            conversation_id, title, created_at, updated_at, provider, model,
+                            processing_mode, status, last_error, context_text, context_sources, run_ids
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::jsonb, %s::jsonb)
+                        ON CONFLICT (conversation_id) DO UPDATE SET
+                            title = EXCLUDED.title, updated_at = EXCLUDED.updated_at,
+                            provider = EXCLUDED.provider, model = EXCLUDED.model,
+                            processing_mode = EXCLUDED.processing_mode, status = EXCLUDED.status,
+                            last_error = EXCLUDED.last_error, {context_update}
+                            run_ids = EXCLUDED.run_ids""",
+                        (
+                            record["conversation_id"], record["title"], _timestamp(record["created_at"]),
+                            _timestamp(record["updated_at"]), record["provider"], record["model"],
+                            record["processing_mode"], record["status"], record["last_error"], record["context"],
+                            json.dumps(record["context_sources"]), json.dumps(record["run_ids"]),
+                        ),
+                    )
+                    sql_calls += 1
+                    if cleaned_messages:
+                        cursor.execute(
+                            "SELECT COALESCE(MAX(position) + 1, 0) "
+                            "FROM conversation_messages WHERE conversation_id = %s",
+                            (record["conversation_id"],),
+                        )
+                        sql_calls += 1
+                        position_row = cursor.fetchone()
+                        if isinstance(position_row, dict):
+                            position = int(next(iter(position_row.values())) or 0)
+                        else:
+                            position = int((position_row or (0,))[0] or 0)
+                        for offset, message in enumerate(cleaned_messages):
+                            cursor.execute(
+                                """INSERT INTO conversation_messages (
+                                    conversation_id, position, role, content, run_id, created_at, metadata
+                                ) VALUES (%s, %s, %s, %s, %s, %s, %s::jsonb)""",
+                                (
+                                    record["conversation_id"], position + offset,
+                                    str(message.get("role") or "assistant"),
+                                    str(message.get("content") or ""), message.get("run_id"),
+                                    _timestamp(message.get("created_at", record["updated_at"])),
+                                    json.dumps(_message_metadata(message)),
+                                ),
+                            )
+                            sql_calls += 1
+        except ConversationStorageError:
+            raise
+        except Exception as exc:
+            raise ConversationStorageError("PostgreSQL conversation storage is unavailable.") from exc
+        finally:
+            LOGGER.info(
+                "conversation_append_timing %s",
+                {
+                    "sql_calls": sql_calls,
+                    "message_count": len(cleaned_messages),
+                    "total_ms": round((time.perf_counter() - started) * 1000),
+                },
+            )
+
     def list(self, *, limit: int, query: str = "") -> list[dict[str, Any]]:
         limit = max(1, min(int(limit), 100))
         params: list[Any] = []
@@ -345,6 +519,7 @@ class PostgresConversationRepository:
             )"""
             params.extend((pattern, pattern))
         params.append(limit)
+        started = time.perf_counter()
         try:
             with self._connection() as connection:
                 with connection.cursor(row_factory=self._dict_row) as cursor:
@@ -370,6 +545,11 @@ class PostgresConversationRepository:
             raise
         except Exception as exc:
             raise ConversationStorageError("PostgreSQL conversation storage is unavailable.") from exc
+        finally:
+            LOGGER.info(
+                "conversation_list_timing %s",
+                {"sql_calls": 1, "total_ms": round((time.perf_counter() - started) * 1000)},
+            )
 
     def delete(self, conversation_id: str) -> bool:
         conversation_id = validate_conversation_id(conversation_id)

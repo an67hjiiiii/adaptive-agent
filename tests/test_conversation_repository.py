@@ -23,6 +23,12 @@ class _RecordingCursor:
     def execute(self, statement, parameters=None):
         self.statements.append((" ".join(statement.split()), parameters))
 
+    def fetchone(self):
+        return (0,)
+
+    def fetchall(self):
+        return []
+
     def __enter__(self):
         return self
 
@@ -33,9 +39,16 @@ class _RecordingCursor:
 class _RecordingConnection:
     def __init__(self, *, rowcount: int = 1):
         self.cursor_instance = _RecordingCursor(rowcount=rowcount)
+        self.commit_count = 0
 
     def cursor(self, **_):
         return self.cursor_instance
+
+    def commit(self):
+        self.commit_count += 1
+
+    def rollback(self):
+        return None
 
     def __enter__(self):
         return self
@@ -197,6 +210,23 @@ class ConversationRepositoryTests(unittest.TestCase):
         statement, parameters = connection.cursor_instance.statements[-1]
         self.assertEqual(statement, "DELETE FROM conversations WHERE conversation_id = %s")
         self.assertEqual(parameters, ("chat_repo_delete",))
+
+    def test_postgres_append_reuses_connection_and_does_not_rewrite_history(self):
+        connection = _RecordingConnection()
+        connect_calls = []
+        repository = PostgresConversationRepository.__new__(PostgresConversationRepository)
+        repository._database_url = "postgresql://test"
+        repository._connect = lambda *_args, **_kwargs: connect_calls.append(True) or connection
+        record = self._record("chat_repo_append")
+        new_message = {"role": "user", "content": "Next", "run_id": "run_two", "created_at": 30}
+
+        repository.append({**record, "messages": record["messages"] + [new_message], "run_ids": ["run_one", "run_two"]}, messages=[new_message])
+        repository.append({**record, "messages": record["messages"] + [new_message], "run_ids": ["run_one", "run_two"]}, messages=[])
+
+        statements = [statement for statement, _ in connection.cursor_instance.statements]
+        self.assertEqual(len(connect_calls), 1)
+        self.assertNotIn("DELETE FROM conversation_messages", "\n".join(statements))
+        self.assertGreaterEqual(connection.commit_count, 2)
 
     def test_repository_module_is_product_storage_only(self):
         source = Path(repository_module.__file__).read_text(encoding="utf-8")
