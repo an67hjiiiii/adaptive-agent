@@ -200,6 +200,8 @@ class ConversationRepositoryTests(unittest.TestCase):
         self.assertIn("ON DELETE CASCADE", ddl)
         self.assertIn("conversations_updated_at_idx", ddl)
         self.assertIn("conversation_messages_order_idx", ddl)
+        self.assertIn("project_workspaces", ddl)
+        self.assertIn("project_files", ddl)
 
     def test_postgres_delete_targets_parent_and_relies_on_cascade_without_live_database(self):
         connection = _RecordingConnection(rowcount=1)

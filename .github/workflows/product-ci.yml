@@ -88,6 +88,7 @@ jobs:
             tests.test_product_wiring \
             tests.test_context_v1 \
             tests.test_project_understanding_v11 \
+            tests.test_project_workspace_v12 \
             tests.test_conversation_repository \
             tests.test_runtime.RuntimeFlowTests.test_product_auto_route_matrix_uses_task_structure_not_context_size \
             tests.test_runtime.RuntimeFlowTests.test_product_auto_fast_path_does_not_change_research_adaptive
