@@ -1,6 +1,6 @@
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
-const svgIcon = (name,className="") => `<svg class="ui-icon ${className}" aria-hidden="true"><use href="#i-${name}"></use></svg>`;
+const svgIcon = (name,className="") => `<svg class="ui-icon ${className}" aria-hidden="true"><use href="#${name==="chat"?"ui-message":`i-${name}`}"></use></svg>`;
 const app = $("#app"), messages = $("#messages"), promptEl = $("#prompt"), sendBtn = $("#send"), trace = $("#trace");
 let cfg = null, history = [], busy = false, currentRunId = null, currentConversationId = null;
 let rawEvents = [], compareBusy = false, currentMode = null, currentRequestedMode = "adaptive-auto", liveTurn = null, currentRunEvidence = null, currentMetrics = {};
@@ -32,52 +32,52 @@ function safeFrontendEvidence(value){
 // UI-only vocabulary. Internal enum values, IDs and raw evidence stay unchanged.
 const UI_TEXT = Object.freeze({
   labels: Object.freeze({
-    adaptiveAuto: "Tự động thích ứng (Adaptive AUTO)",
-    adaptiveOrchestrator: "Bộ điều phối thích ứng (Adaptive Orchestrator)",
+    adaptiveAuto: "Tự động",
+    adaptiveOrchestrator: "Bộ điều phối thích ứng",
     controller: "Bộ điều phối",
-    agentExecution: "Lượt Agent thực thi",
-    logicalCall: "Lượt gọi Model logic",
-    physicalRequest: "Request API thực tế",
-    provider: "Nhà cung cấp (Provider)",
-    model: "Mô hình (Model)",
+    agentExecution: "Lượt Agent",
+    logicalCall: "Lượt gọi mô hình",
+    physicalRequest: "Yêu cầu API",
+    provider: "Nhà cung cấp",
+    model: "Mô hình",
     context: "Ngữ cảnh",
-    frozenContext: "Ngữ cảnh đã đóng băng (Frozen Context)",
+    frozenContext: "Ngữ cảnh đã đóng băng",
     copy: "Sao chép",
-    viewExecution: "Xem quá trình xử lý", // Xem execution in the research evidence view.
+    viewExecution: "Chi tiết xử lý",
     unavailable: "Không có dữ liệu",
-    notEvaluated: "Chưa đánh giá (Not evaluated)"
+    notEvaluated: "Chưa đánh giá"
   }),
   modes: Object.freeze({
-    DIRECT: "Trực tiếp (DIRECT)",
-    PARALLEL: "Song song (PARALLEL)",
-    PLANNED: "Theo kế hoạch (PLANNED)",
-    AUTO: "Tự động (AUTO)"
+    DIRECT: "Trực tiếp",
+    PARALLEL: "Song song",
+    PLANNED: "Theo kế hoạch",
+    AUTO: "Tự động"
   }),
   strategies: Object.freeze({
     single: "Single (một lượt)",
     fixed: "Fixed (topology cố định)",
     static: "Static (preset cố định)",
-    adaptive: "Adaptive AUTO"
+    adaptive: "Adaptive"
   }),
   roles: Object.freeze({
-    Analyzer: "Agent phân tích (Analyzer)",
-    Planner: "Agent lập kế hoạch (Planner)",
-    Worker: "Agent xử lý (Worker)",
-    Synthesizer: "Agent tổng hợp (Synthesizer)",
-    Verifier: "Agent kiểm tra (Verifier)",
-    "Runtime Verifier": "Agent kiểm tra (Verifier)",
-    "Direct Solver": "Agent xử lý trực tiếp (Direct Solver)"
+    Analyzer: "Agent phân tích",
+    Planner: "Agent lập kế hoạch",
+    Worker: "Agent xử lý",
+    Synthesizer: "Agent tổng hợp",
+    Verifier: "Agent kiểm tra",
+    "Runtime Verifier": "Agent kiểm tra",
+    "Direct Solver": "Agent xử lý trực tiếp"
   }),
   statuses: Object.freeze({
-    PASS: "Đạt (PASS)",
-    FAIL: "Không đạt (FAIL)",
-    NEEDS_WORK: "Cần bổ sung (NEEDS_WORK)",
-    STOP_SUFFICIENT: "Đã đủ yêu cầu (STOP_SUFFICIENT)",
-    STOP_FAILURE: "Dừng do lỗi (STOP_FAILURE)",
-    STOP_BUDGET_OR_VERIFICATION: "Dừng do ngân sách/kiểm chứng (STOP_BUDGET_OR_VERIFICATION)",
-    STOP_VERIFICATION_UNAVAILABLE: "Dừng vì Verifier không khả dụng (STOP_VERIFICATION_UNAVAILABLE)",
-    STOP_BUDGET_LOGICAL_CALLS: "Dừng do vượt lượt gọi logic (STOP_BUDGET_LOGICAL_CALLS)",
-    STOP_BUDGET_PHYSICAL_REQUESTS: "Dừng do vượt request API (STOP_BUDGET_PHYSICAL_REQUESTS)",
+    PASS: "Đạt",
+    FAIL: "Không đạt",
+    NEEDS_WORK: "Cần bổ sung",
+    STOP_SUFFICIENT: "Đã đủ yêu cầu",
+    STOP_FAILURE: "Dừng do lỗi",
+    STOP_BUDGET_OR_VERIFICATION: "Dừng do ngân sách hoặc kiểm chứng",
+    STOP_VERIFICATION_UNAVAILABLE: "Dừng vì Agent kiểm tra không khả dụng",
+    STOP_BUDGET_LOGICAL_CALLS: "Dừng do vượt lượt gọi",
+    STOP_BUDGET_PHYSICAL_REQUESTS: "Dừng do vượt yêu cầu API",
     running: "Đang chạy",
     completed: "Hoàn thành",
     failed: "Thất bại",
@@ -102,16 +102,16 @@ const UI_TEXT = Object.freeze({
     "Static route frozen": "Đã cố định tuyến Static",
     "Static preset worker slots": "Các vị trí Worker của preset Static",
     "Static verifier observed": "Verifier của Static đã kiểm tra",
-    "Frozen Context Snapshot": "Ngữ cảnh đã đóng băng (Frozen Context)",
+    "Frozen Context Snapshot": "Ngữ cảnh đã đóng băng",
     "Targeted escalation": "Bổ sung xử lý có mục tiêu",
     "Early stop after escalation": "Dừng sớm sau bổ sung xử lý",
-    "Runtime Verifier unavailable": "Verifier runtime không khả dụng",
+    "Runtime Verifier unavailable": "Agent kiểm tra không khả dụng",
     "Ready-set batch": "Nhóm ready-set",
-    "Ready-set scheduler": "Bộ lập lịch ready-set (Ready-set scheduler)",
-    "Verifier": "Agent kiểm tra (Verifier)",
-    "Analyzer": "Agent phân tích (Analyzer)",
-    "Planner": "Agent lập kế hoạch (Planner)",
-    "Synthesizer": "Agent tổng hợp (Synthesizer)"
+    "Ready-set scheduler": "Bộ lập lịch theo phụ thuộc",
+    "Verifier": "Agent kiểm tra",
+    "Analyzer": "Agent phân tích",
+    "Planner": "Agent lập kế hoạch",
+    "Synthesizer": "Agent tổng hợp"
   })
 });
 function modeText(value){const raw=String(value||"");if(raw==="adaptive-auto"||raw.toLowerCase()==="auto")return UI_TEXT.modes.AUTO;return UI_TEXT.modes[raw]||String(value||"—")}
@@ -124,9 +124,9 @@ function roleText(value){
   const raw=String(value||"").trim();
   if(UI_TEXT.roles[raw])return UI_TEXT.roles[raw];
   const worker=raw.match(/^Worker\s*[·:]\s*(.+)$/i);
-  if(worker)return `Agent xử lý ${worker[1]} (Worker)`;
+  if(worker)return `Agent xử lý ${worker[1]}`;
   const verifier=raw.match(/^(?:Runtime\s+)?Verifier\s*[·:]\s*(.+)$/i);
-  if(verifier)return `Agent kiểm tra ${verifier[1]} (Verifier)`;
+  if(verifier)return `Agent kiểm tra ${verifier[1]}`;
   return raw;
 }
 function eventTitleText(value){return UI_TEXT.eventTitles[String(value||"")]||roleText(value)||String(value||"")}
@@ -154,8 +154,8 @@ function phraseText(value){
     ["policy/routing", "chính sách/định tuyến"], ["runtime", "runtime"], ["controller", "bộ điều phối"]
   ];
   for(const [from,to] of replacements){if(to===null)continue;text=text.replace(new RegExp(from,"gi"),to)}
-  text=text.replace(/\bDIRECT\b/g,"Trực tiếp (DIRECT)").replace(/\bPARALLEL\b/g,"Song song (PARALLEL)").replace(/\bPLANNED\b/g,"Theo kế hoạch (PLANNED)");
-  text=text.replace(/\bPASS\b/g,"Đạt (PASS)").replace(/\bNEEDS_WORK\b/g,"Cần bổ sung (NEEDS_WORK)").replace(/\bFAIL\b/g,"Không đạt (FAIL)").replace(/\bSTOP_SUFFICIENT\b/g,"Đã đủ yêu cầu (STOP_SUFFICIENT)");
+  text=text.replace(/\bDIRECT\b/g,"Trực tiếp").replace(/\bPARALLEL\b/g,"Song song").replace(/\bPLANNED\b/g,"Theo kế hoạch");
+  text=text.replace(/\bPASS\b/g,"Đạt").replace(/\bNEEDS_WORK\b/g,"Cần bổ sung").replace(/\bFAIL\b/g,"Không đạt").replace(/\bSTOP_SUFFICIENT\b/g,"Đã đủ yêu cầu");
   return text;
 }
 function unavailableText(){return UI_TEXT.labels.unavailable}
@@ -218,10 +218,10 @@ function restorePanels(){
 
 function selectedModel(){return $("#model").value}
 const FALLBACK_PRODUCT_MODES=Object.freeze([
-  {id:"adaptive-auto",label:"Tự động",description:"Analyzer chọn DIRECT, PARALLEL hoặc PLANNED."},
-  {id:"DIRECT",label:"Trực tiếp",description:"Một Direct Solver xử lý task rồi qua Verifier."},
-  {id:"PARALLEL",label:"Song song",description:"Các phần độc lập chạy theo ready-set song song."},
-  {id:"PLANNED",label:"Theo kế hoạch",description:"Planner dựng DAG trước khi thực thi."},
+  {id:"adaptive-auto",label:"Tự động"},
+  {id:"DIRECT",label:"Trực tiếp"},
+  {id:"PARALLEL",label:"Song song"},
+  {id:"PLANNED",label:"Theo kế hoạch"},
 ]);
 function selectedMode(){
   const saved=localStorage.getItem("adaptive.mode"),configured=cfg?.default_mode||"adaptive-auto";
@@ -230,16 +230,15 @@ function selectedMode(){
 function productModeOptions(){return Array.isArray(cfg?.mode_options)&&cfg.mode_options.length?cfg.mode_options:FALLBACK_PRODUCT_MODES}
 function updateModeDisplay(){
   const mode=selectedMode(),item=productModeOptions().find(option=>option.id===mode);
-  if($("#modeName"))$("#modeName").textContent=item?.label||modeText(mode);
   const summary=$("#settingsModeSummary");if(summary)summary.textContent=item?.label||modeText(mode);
-  const badge=$("#modelModeBadge");if(badge)badge.textContent=mode==="adaptive-auto"?"AUTO":"FIXED";
+  const badge=$("#modelModeBadge");if(badge)badge.textContent=item?.label||modeText(mode);
 }
 function modelTierText(value){return ({recommended:"Đề xuất",balanced:"Cân bằng",economy:"Tiết kiệm",quality:"Chất lượng cao",fast:"Nhanh",faster:"Nhanh hơn",general:"Đa dụng",offline:"Ngoại tuyến","dev-only":"Thử nghiệm"}[String(value||"")]||cap(value))}
 function positionModelMenu(){const menu=$("#modelMenu"),button=$("#modelMenuButton");if(!menu?.classList.contains("open")||!button)return;const rect=button.getBoundingClientRect(),gap=8,width=menu.offsetWidth,height=menu.offsetHeight;menu.style.left=Math.max(10,Math.min(innerWidth-width-10,rect.left))+"px";menu.style.top=Math.max(10,rect.top-height-gap)+"px"}
 function renderModelPicker(){if(!cfg)return;const provider=$("#provider").value,model=selectedModel(),mode=selectedMode(),providers=$("#providerChoices"),models=$("#modelChoices"),modes=$("#modeChoices");if(!providers||!models)return;
   providers.innerHTML=Object.keys(cfg.models).map(key=>`<button type="button" class="provider-choice${key===provider?" selected":""}" role="tab" aria-selected="${key===provider}" data-provider="${esc(key)}" ${cfg.available[key]?"":"disabled"}><span>${esc(providerText(key))}</span>${key===provider?svgIcon("check","small"):""}</button>`).join("");
   const items=cfg.model_options?.[provider]||[];models.innerHTML=items.length?items.map(item=>`<button type="button" class="model-choice${item.id===model?" selected":""}" role="option" aria-selected="${item.id===model}" data-model="${esc(item.id)}"><span><b>${esc(item.label)}</b><small>${esc(modelTierText(item.tier))}</small></span>${item.id===model?svgIcon("check","small"):""}</button>`).join(""):'<div class="model-empty">Provider này chưa có model khả dụng.</div>';
-  if(modes)modes.innerHTML=productModeOptions().map(item=>`<button type="button" class="mode-choice${item.id===mode?" selected":""}" role="radio" aria-checked="${item.id===mode}" data-mode="${esc(item.id)}"><span><b>${esc(item.label)}</b><small>${esc(item.description||"")}</small></span>${item.id===mode?svgIcon("check","small"):""}</button>`).join("");
+  if(modes)modes.innerHTML=productModeOptions().map(item=>`<button type="button" class="mode-choice${item.id===mode?" selected":""}" role="radio" aria-checked="${item.id===mode}" data-mode="${esc(item.id)}"><span><b>${esc(item.label)}</b></span>${item.id===mode?svgIcon("check","small"):""}</button>`).join("");
   $$("#providerChoices .provider-choice").forEach(button=>button.onclick=()=>{$("#provider").value=button.dataset.provider;localStorage.setItem("adaptive.provider",button.dataset.provider);populateModels();requestAnimationFrame(positionModelMenu)});
   $$("#modelChoices .model-choice").forEach(button=>button.onclick=()=>{$("#model").value=button.dataset.model;localStorage.setItem(`adaptive.model.${provider}`,button.dataset.model);updateProviderDisplay();closeFloatingUi();$("#modelMenuButton").focus()})
   $$("#modeChoices .mode-choice").forEach(button=>button.onclick=()=>{const selected=mapUiModeToChatStrategy(button.dataset.mode)||"adaptive-auto";localStorage.setItem("adaptive.mode",selected);currentRequestedMode=selected;updateModeDisplay();renderModelPicker();closeFloatingUi();$("#modelMenuButton").focus()})
@@ -276,11 +275,11 @@ function makeTurnCard(userText,{createdAt=null,pending=false}={}){
 }
 function setTurnAnswer(card,text,meta={}){
   if(!card)return;const body=card.querySelector(".answer-body"),pill=card.querySelector(".mode-pill"),head=card.querySelector(".answer-meta"),footer=card.querySelector(".turn-footer");body.innerHTML=markdown(text);body.classList.toggle("error-answer",meta.status==="failed");if(meta.status==="failed")body.setAttribute("role","alert");else body.removeAttribute("role");
-  const mode=meta.mode||"AUTO",requestedMode=mapUiModeToChatStrategy(meta.requestedMode||meta.processing_mode)||"adaptive-auto";pill.textContent=meta.status==="failed"?statusText("FAIL"):meta.status==="degraded"?statusText("degraded"):modeText(mode);card.classList.toggle("failed",meta.status==="failed");card.classList.toggle("degraded",meta.status==="degraded");head.textContent=[meta.provider&&providerText(meta.provider),meta.model].filter(Boolean).join(" · ")||UI_TEXT.labels.adaptiveAuto;
+  const mode=meta.mode||"AUTO";pill.textContent=meta.status==="failed"?statusText("FAIL"):meta.status==="degraded"?statusText("degraded"):modeText(mode);card.classList.toggle("failed",meta.status==="failed");card.classList.toggle("degraded",meta.status==="degraded");head.textContent=meta.model||UI_TEXT.labels.adaptiveAuto;
   footer.innerHTML="";const m=meta.metrics||{},summary=document.createElement("div"),actions=document.createElement("div");summary.className="run-summary-line";actions.className="turn-actions";
-  const details=[m.agent_executions!=null&&`${m.agent_executions} lượt Agent thực thi`,m.logical_calls!=null&&`${m.logical_calls} lượt gọi Model logic`,m.total_tokens!=null&&`${Number(m.total_tokens).toLocaleString()} Token`,m.e2e_ms!=null&&fmtLatency(m.e2e_ms)].filter(Boolean);
-  const modeSummary=requestedMode==="adaptive-auto"?`Tự động thích ứng → ${modeText(mode)}`:`${modeText(requestedMode)} → ${modeText(mode)}`;
-  summary.innerHTML=`<b>${esc(modeSummary)}</b>${details.length?` · ${esc(details.join(" · "))}`:""}${meta.stopReason?` · <span class="run-stop">${esc(stopText(meta.stopReason))}</span>`:""}`;
+  const details=[m.agent_executions!=null&&`${m.agent_executions} Agent`,m.logical_calls!=null&&`${m.logical_calls} lượt gọi`,m.total_tokens!=null&&`${Number(m.total_tokens).toLocaleString()} token`,m.e2e_ms!=null&&fmtLatency(m.e2e_ms)].filter(Boolean);
+  const showStop=meta.status==="failed"||meta.status==="degraded";
+  summary.innerHTML=`<b>${esc(modeText(mode))}</b>${details.length?` · ${esc(details.join(" · "))}`:""}${showStop&&meta.stopReason?` · <span class="run-stop">${esc(stopText(meta.stopReason))}</span>`:""}`;
   const sources=(Array.isArray(meta.sources)?meta.sources:[]).map(source=>typeof source==="string"?source:source?.filename).filter(Boolean);
   if(sources.length){const sourceBox=document.createElement("div");sourceBox.className="turn-sources";sourceBox.innerHTML=`<span class="source-label">Nguồn</span>${sources.map(source=>`<span class="source-chip">${svgIcon("file","small")}${esc(source)}</span>`).join("")}`;footer.appendChild(sourceBox)}
   const copy=document.createElement("button");copy.className="mini-action";copy.innerHTML=`${svgIcon("copy","small")}<span>${UI_TEXT.labels.copy}</span>`;copy.onclick=()=>navigator.clipboard.writeText(text||"").then(()=>toast("Đã sao chép","success"));actions.appendChild(copy);
@@ -311,14 +310,14 @@ function renderSnapshot(meta){
 }
 function resetInspector(mode="running"){
   trace.innerHTML=mode==="idle"?'<div class="empty">Chọn một lượt chạy trong hội thoại để xem luồng thực thi.</div>':"";rawEvents=[];currentRunEvidence=null;currentMetrics={};$("#rawEvents").textContent="[]";$("#insMode").textContent="—";currentMode=null;currentRequestedMode=selectedMode();updateModeDisplay();resetSnapshot();
-  ["mAgents","mCalls","mRequests","mEsc"].forEach(id=>$("#"+id).textContent="0");["mInputTokens","mOutputTokens","mTokens","mRetries","mCost","mLatency"].forEach(id=>$("#"+id).textContent="—");$("#autoExplain").innerHTML='<b>Quyết định AUTO</b><span>Agent phân tích (Analyzer) sẽ tự chọn Trực tiếp (DIRECT), Song song (PARALLEL) hoặc Theo kế hoạch (PLANNED) cho từng lượt.</span>';
+  ["mAgents","mCalls","mRequests","mEsc"].forEach(id=>$("#"+id).textContent="0");["mInputTokens","mOutputTokens","mTokens","mRetries","mCost","mLatency"].forEach(id=>$("#"+id).textContent="—");$("#autoExplain").innerHTML='<b>Chế độ tự động</b><span>Adaptive Agent sẽ tự chọn cách xử lý phù hợp cho từng lượt.</span>';
   $("#runState").textContent=mode==="idle"?statusText("idle"):statusText("running");$("#runState").className=`run-state ${mode}`
   renderEvidencePanels();
 }
 function appendTrace(e){
   const d=document.createElement("div");d.className=`trace-item ${e.kind||""}`;d.innerHTML=`<b>${esc(eventTitleText(e.title))}</b><p>${esc(phraseText(e.detail||""))}</p><time>${e.t_ms||0}ms</time>`;trace.appendChild(d);
   if(e.kind==="rag"&&e.meta)renderSnapshot(e.meta);
-  if(e.meta?.mode){currentMode=e.meta.mode;$("#insMode").textContent=modeText(currentMode);$("#modeName").textContent=e.title==="Product mode selected"?modeText(currentMode):`Tự động → ${modeText(currentMode)}`}
+  if(e.meta?.mode){currentMode=e.meta.mode;$("#insMode").textContent=modeText(currentMode)}
   if(e.title==="AUTO route selected"||e.title==="Product mode selected"){const agents=e.meta?.selected_agents||{};const automatic=e.title==="AUTO route selected";$("#autoExplain").innerHTML=`<b>${automatic?"Tự động chọn":"Đã cố định mode"} → ${esc(modeText(e.detail))}</b><span>${esc(phraseText(e.meta?.why||e.detail||""))} · ${Object.entries(agents).filter(x=>x[1]).map(x=>roleText(x[0])+" × "+x[1]).join(" · ")}</span>`}
 }
 function traceEvent(e){rawEvents.push(e);if(!currentRunEvidence)currentRunEvidence={strategy:"adaptive",events:rawEvents};else currentRunEvidence.events=rawEvents;$("#rawEvents").textContent=JSON.stringify(safeFrontendEvidence(rawEvents),null,2);appendTrace(e);renderEvidencePanels();trace.scrollTop=trace.scrollHeight}
@@ -399,7 +398,7 @@ function switchInspectorTab(name){
 }
 function openInspector(){if($("#compareModal")?.classList.contains("open"))closeCompare();if(innerWidth<=900)app.classList.add("mobile-ins-open");else app.classList.remove("ins-collapsed");persistPanels();}
 function closeInspector(){if(innerWidth<=900)app.classList.remove("mobile-ins-open");else app.classList.add("ins-collapsed");persistPanels()}
-function selectionLabel(key){return ({direct_solver:"Agent xử lý trực tiếp (Direct Solver)",planner:"Agent lập kế hoạch (Planner)",workers:"Agent xử lý (Worker)",verifier:"Agent kiểm tra (Verifier)",synthesizer:"Agent tổng hợp (Synthesizer)",analyzer:"Agent phân tích (Analyzer)"}[key]||key.replace(/_/g," "))}
+function selectionLabel(key){return ({direct_solver:"Agent xử lý trực tiếp",planner:"Agent lập kế hoạch",workers:"Agent xử lý",verifier:"Agent kiểm tra",synthesizer:"Agent tổng hợp",analyzer:"Agent phân tích"}[key]||key.replace(/_/g," "))}
 function renderOverview(model){
   const box=$("#overviewContent");if(!box)return;const a=model.analysis||{},aspects=Array.isArray(a.aspects)?a.aspects:[],deps=Array.isArray(a.dependencies)?a.dependencies:[],groups=Array.isArray(a.parallelizable_groups)?a.parallelizable_groups:[],reasons=Array.isArray(a.verification_reasons)?a.verification_reasons:[];
   const aspectItems=aspects.map((item,index)=>typeof item==="object"?`${item.name||`Khía cạnh ${index+1}`} · ${item.goal||""}`:String(item));
@@ -417,7 +416,7 @@ function renderOverview(model){
       <section class="overview-section"><h4>Phân tích cấu trúc</h4><div class="overview-field"><b>Khía cạnh (Aspects)</b>${displayList(aspectItems,"Chưa có evidence từ Analyzer")}</div><div class="overview-field"><b>Phụ thuộc (Dependencies)</b>${displayList(dependencyItems,"Không có")}</div><div class="overview-field"><b>Khả năng song song</b>${displayList(groupItems,"Chưa có nhóm song song")}</div></section>
       <section class="overview-section"><h4>Kiểm chứng và lựa chọn</h4><div class="overview-field"><b>Mức yêu cầu kiểm chứng</b><span class="evidence-value">${displayText(demandText(a.verification_demand),40)}</span></div><div class="overview-field"><b>Lý do</b>${displayList(reasons.map(phraseText),"Không có")}</div><div class="overview-field"><b>Vai trò / số lượng đã chọn</b>${displayList(roles,"Chưa có evidence lựa chọn")}</div><div class="overview-field"><b>Phán định</b>${displayList(verdicts,"Chưa có evidence từ Verifier")}</div></section>
     </div>
-    <section class="overview-section overview-rationale"><h4>Lý giải của Agent phân tích (Analyzer)</h4><p>${a.rationale?displayText(phraseText(a.rationale),900):"Chưa ghi nhận lý giải của Analyzer."}</p></section>`
+    <section class="overview-section overview-rationale"><h4>Lý giải của Agent phân tích</h4><p>${a.rationale?displayText(phraseText(a.rationale),900):"Chưa ghi nhận lý giải từ Agent phân tích."}</p></section>`
 }
 function renderAgents(model){
   const list=$("#agentList"),count=$("#agentCount");if(!list)return;count.textContent=String(model.agents.length);
@@ -496,13 +495,13 @@ async function testProvider(){
 
 async function loadConversations(openLatest=false){
   try{const response=await fetch("/api/conversations?limit=60");if(!response.ok)throw new Error(`History error (${response.status})`);const data=await response.json(),box=$("#threads");conversationCache=data.conversations||[];box.innerHTML="";if(!conversationCache.length){box.innerHTML='<div class="history-empty">Chưa có cuộc trò chuyện.</div>';renderSearchResults($("#searchInput")?.value||"");return}
-    conversationCache.forEach(c=>{const active=c.conversation_id===currentConversationId,card=document.createElement("div");card.className="thread-card"+(active?" active":"");card.dataset.id=c.conversation_id;card.innerHTML=`<button class="thread-main">${svgIcon(active?"chat":"history","small")}<span class="thread-title">${esc(c.title)}</span></button><div class="thread-actions"><details class="thread-menu"><summary title="Tùy chọn" aria-label="Tùy chọn cuộc trò chuyện ${esc(c.title||"")}">${svgIcon("more","small")}</summary><div class="thread-menu-popover"><button class="rename">Đổi tên</button><button class="delete">Xóa</button></div></details></div>`;const main=card.querySelector(".thread-main"),rename=card.querySelector(".rename"),remove=card.querySelector(".delete"),menu=card.querySelector(".thread-menu"),popover=card.querySelector(".thread-menu-popover"),summary=card.querySelector("summary");const turnCount=c.turn_count||c.run_count||0,preview=c.last_preview||"Chưa có nội dung",time=fmtTime(c.updated_at);main.setAttribute("aria-label",`Mở cuộc trò chuyện ${c.title||""}`);main.title=`${preview}\n${turnCount} lượt${time?` · ${time}`:""}`;rename.setAttribute("aria-label",`Đổi tên cuộc trò chuyện ${c.title||""}`);remove.setAttribute("aria-label",`Xóa cuộc trò chuyện ${c.title||""}`);main.onclick=()=>loadConversation(c.conversation_id);menu.addEventListener("toggle",()=>{if(!menu.open)return;closeConversationMenus(menu);requestAnimationFrame(()=>{const rect=summary.getBoundingClientRect(),width=popover.offsetWidth,height=popover.offsetHeight;popover.style.left=Math.max(8,Math.min(innerWidth-width-8,rect.right-width))+"px";const below=rect.bottom+4,top=below+height<=innerHeight-8?below:Math.max(8,rect.top-height-4);popover.style.top=top+"px"})});rename.onclick=e=>{e.stopPropagation();menu.open=false;renameConversation(c)};remove.onclick=e=>{e.stopPropagation();menu.open=false;deleteConversation(c)};box.appendChild(card)});renderSearchResults($("#searchInput")?.value||"");
+    conversationCache.forEach(c=>{const active=c.conversation_id===currentConversationId,card=document.createElement("div");card.className="thread-card"+(active?" active":"");card.dataset.id=c.conversation_id;card.innerHTML=`<button class="thread-main"><span class="sidebar-icon">${svgIcon("chat","small")}</span><span class="thread-title">${esc(c.title)}</span></button><div class="thread-actions"><details class="thread-menu"><summary title="Tùy chọn" aria-label="Tùy chọn cuộc trò chuyện ${esc(c.title||"")}"><span class="sidebar-icon conv-more"><svg class="ui-icon small"><use href="#ui-more"></use></svg></span></summary><div class="thread-menu-popover"><button class="rename">Đổi tên</button><button class="delete">Xóa</button></div></details></div>`;const main=card.querySelector(".thread-main"),rename=card.querySelector(".rename"),remove=card.querySelector(".delete"),menu=card.querySelector(".thread-menu"),popover=card.querySelector(".thread-menu-popover"),summary=card.querySelector("summary");const turnCount=c.turn_count||c.run_count||0,preview=c.last_preview||"Chưa có nội dung",time=fmtTime(c.updated_at);main.setAttribute("aria-label",`Mở cuộc trò chuyện ${c.title||""}`);main.title=`${preview}\n${turnCount} lượt${time?` · ${time}`:""}`;rename.setAttribute("aria-label",`Đổi tên cuộc trò chuyện ${c.title||""}`);remove.setAttribute("aria-label",`Xóa cuộc trò chuyện ${c.title||""}`);main.onclick=()=>loadConversation(c.conversation_id);menu.addEventListener("toggle",()=>{if(!menu.open)return;closeConversationMenus(menu);requestAnimationFrame(()=>{const rect=summary.getBoundingClientRect(),width=popover.offsetWidth,height=popover.offsetHeight;popover.style.left=Math.max(8,Math.min(innerWidth-width-8,rect.right-width))+"px";const below=rect.bottom+4,top=below+height<=innerHeight-8?below:Math.max(8,rect.top-height-4);popover.style.top=top+"px"})});rename.onclick=e=>{e.stopPropagation();menu.open=false;renameConversation(c)};remove.onclick=e=>{e.stopPropagation();menu.open=false;deleteConversation(c)};box.appendChild(card)});renderSearchResults($("#searchInput")?.value||"");
     if(openLatest&&!currentConversationId){const remembered=localStorage.getItem(ACTIVE_CONVERSATION_KEY);const candidate=conversationCache.find(x=>x.conversation_id===remembered)||conversationCache[0];await loadConversation(candidate.conversation_id)}
   }catch(error){toast("Không tải được lịch sử: "+error.message,"error")}
 }
 function renderSearchResults(query=""){
   const box=$("#searchResults");if(!box)return;const needle=query.trim().toLocaleLowerCase("vi-VN"),items=conversationCache.filter(item=>!needle||`${item.title||""} ${item.last_preview||""}`.toLocaleLowerCase("vi-VN").includes(needle));
-  box.innerHTML="";if(!items.length){box.innerHTML='<div class="empty-search">Không tìm thấy cuộc trò chuyện.</div>';return}items.forEach(item=>{const row=document.createElement("button");row.className="search-result";row.type="button";row.setAttribute("role","option");row.innerHTML=`<span>${esc(item.title||"Cuộc trò chuyện")}</span><small>${esc(item.last_preview||"")}</small>`;row.onclick=()=>{closeFloatingUi();loadConversation(item.conversation_id)};box.appendChild(row)})
+  box.innerHTML="";if(!items.length){box.innerHTML='<div class="empty-search">Không tìm thấy cuộc trò chuyện</div>';return}items.forEach(item=>{const row=document.createElement("button"),title=String(item.title||"Cuộc trò chuyện"),preview=String(item.last_preview||"").trim(),secondary=preview&&preview!==title?`<small>${esc(preview)}</small>`:"";row.className="search-result";row.type="button";row.setAttribute("role","option");row.innerHTML=`<span class="sidebar-icon search-result-icon">${svgIcon("chat","small")}</span><span class="search-result-copy"><b>${esc(title)}</b>${secondary}</span>`;row.onclick=()=>{closeFloatingUi();loadConversation(item.conversation_id)};box.appendChild(row)})
 }
 function renameConversation(c){pendingRenameConversation=c;const dialog=$("#renameDialog"),input=$("#renameInput");input.value=c.title||"";dialog.classList.add("open");dialog.setAttribute("aria-hidden","false");requestAnimationFrame(()=>{input.focus();input.select()})}
 async function confirmRenameConversation(){const c=pendingRenameConversation,title=$("#renameInput").value.trim();if(!c||!title)return;try{const r=await fetch(`/api/conversations/${encodeURIComponent(c.conversation_id)}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({title})});if(!r.ok)throw new Error(await r.text());if(currentConversationId===c.conversation_id)$("#chatTitle").textContent=title;closeRenameDialog();await loadConversations();toast("Đã đổi tên","success")}catch(e){toast("Không đổi tên được: "+e.message,"error")}}
@@ -624,11 +623,10 @@ $$('[data-close-context]').forEach(button=>button.onclick=closeContextScreens);$
 $("#rawCopyBtn").onclick=()=>navigator.clipboard.writeText($("#rawEvents").textContent||"[]").then(()=>toast("Đã sao chép evidence an toàn","success"));$("#rawDownloadBtn").onclick=downloadCurrentEvidence;
 $("#modelMenuButton").onclick=event=>{event.stopPropagation();toggleAnchoredPopover($("#modelMenuButton"),$("#modelMenu"))};$("#modelMenu").onclick=event=>event.stopPropagation();$("#searchChat").onclick=()=>{const opened=toggleAnchoredPopover($("#searchChat"),$("#searchPopover"));if(opened){renderSearchResults($("#searchInput").value);$("#searchInput").focus()}};$("#searchInput").oninput=event=>renderSearchResults(event.target.value);
 $("#settingsButton").onclick=openSettings;$("#settingsClose").onclick=closeSettings;$("#settingsOverlay").onclick=event=>{if(event.target===$("#settingsOverlay"))closeSettings()};$$('.settings-tab').forEach(button=>button.onclick=()=>switchSettingsTab(button.dataset.settingsTab));$$('.switch').forEach(button=>button.onclick=()=>{const on=!button.classList.contains('on');button.classList.toggle('on',on);button.setAttribute('aria-pressed',String(on))});
-$("#helpButton").onclick=()=>toggleAnchoredPopover($("#helpButton"),$("#helpPopover"));$$('[data-help]').forEach(button=>button.onclick=()=>{const text={usage:"Gửi câu hỏi; chọn provider/model và mode riêng trong menu.",files:"Hỗ trợ TXT, Markdown, JSON, CSV và các file text/source PY, JS, TS, HTML, CSS.",modes:"Tự động để controller chọn topology; DIRECT, PARALLEL và PLANNED có thể được cố định từ menu.",about:"Adaptive Agent là ứng dụng local dùng FastAPI và bằng chứng thực thi thật."}[button.dataset.help];toast(text)});$("#shareButton").onclick=()=>toggleAnchoredPopover($("#shareButton"),$("#sharePopover"));$("#profile").onclick=()=>toggleAnchoredPopover($("#profile"),$("#accountMenu"));
+$("#helpButton").onclick=()=>toggleAnchoredPopover($("#helpButton"),$("#helpPopover"));$$('[data-help]').forEach(button=>button.onclick=()=>{const text={usage:"Gửi câu hỏi; chọn mô hình và cách xử lý trong menu.",files:"Hỗ trợ TXT, Markdown, JSON, CSV và các file text/source PY, JS, TS, HTML, CSS.",modes:"Tự động để Adaptive Agent chọn cách xử lý; bạn cũng có thể chọn chế độ cố định.",about:"Adaptive Agent là ứng dụng local dùng FastAPI và bằng chứng thực thi thật."}[button.dataset.help];toast(text)});$("#shareButton").onclick=()=>toggleAnchoredPopover($("#shareButton"),$("#sharePopover"));$("#profile").onclick=()=>toggleAnchoredPopover($("#profile"),$("#accountMenu"));
 $("#renameForm").onsubmit=event=>{event.preventDefault();confirmRenameConversation()};$("#cancelRename").onclick=closeRenameDialog;$("#renameDialog").onclick=event=>{if(event.target===$("#renameDialog"))closeRenameDialog()};$("#cancelDelete").onclick=closeDeleteConfirm;$("#confirmDelete").onclick=confirmDeleteConversation;$("#deleteConfirm").onclick=event=>{if(event.target===$("#deleteConfirm"))closeDeleteConfirm()};document.addEventListener("click",event=>{if(!event.target.closest(".anchor-pop,.sidebar-popover,.account-menu,.model-menu,#searchChat,#helpButton,#shareButton,#profile,#modelMenuButton"))closeFloatingUi();if(!event.target.closest(".thread-menu"))closeConversationMenus()});$("#threads").addEventListener("scroll",()=>closeConversationMenus(),{passive:true});
 installResizer($("#inspectorResizer"),$("#inspector"),{min:300,max:620,cssVariable:"--locked-detail"});installResizer($("#compareResizer"),$("#compareModal"),{min:520,max:900});
 promptEl.oninput=autoSize;promptEl.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();runChat()}};sendBtn.onclick=runChat;
-fetch("/api/health").then(r=>r.json()).then(()=>$("#serverStatus").textContent="Server đang hoạt động").catch(()=>$("#serverStatus").textContent="Server ngoại tuyến");
 window.addEventListener("resize",()=>{updatePanelButtons();closeConversationMenus();if($("#modelMenu").classList.contains("open"))positionModelMenu()});
 window.addEventListener("keydown",event=>{const modal=$("#compareModal"),settings=$("#settingsOverlay");if(event.key==="Escape"){if($$(".context-screen.open").length){closeContextScreens();return}if($("#renameDialog").classList.contains("open")){closeRenameDialog();return}if($("#deleteConfirm").classList.contains("open")){closeDeleteConfirm();return}if(settings.classList.contains("open")){closeSettings();return}if(modal.classList.contains("open")){closeCompare();return}if($("#contextDrawer").classList.contains("open")){setContextOpen(false,true);return}if(app.classList.contains("mobile-side-open")||app.classList.contains("mobile-ins-open")){closeMobilePanels();return}closeFloatingUi();$("#advancedMenu").open=false}if(event.key==="Tab"&&(modal.classList.contains("open")||settings.classList.contains("open"))){const scope=settings.classList.contains("open")?settings:modal,focusables=[...scope.querySelectorAll('button:not([disabled]),[href],select,textarea,[tabindex]:not([tabindex="-1"])')].filter(node=>node.offsetParent!==null);if(!focusables.length)return;const first=focusables[0],last=focusables.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}}});
 async function boot(){mountEvidenceWorkspace();restorePanels();switchInspectorTab(["graph","agents","metrics","raw","context"].includes(localStorage.getItem(INSPECTOR_TAB_KEY))?localStorage.getItem(INSPECTOR_TAB_KEY):"graph");renderComparisonSurfaces();await loadConfig();await loadConversations(true);promptEl.focus()}

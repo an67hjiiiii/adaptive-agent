@@ -1404,12 +1404,12 @@ class FrontendV6Tests(unittest.TestCase):
         self.assertIn("trace.appendChild(d)", self.js)
         self.assertNotIn("messages.appendChild(d)", self.js)
         self.assertIn('run.className="run-pill"', self.js)
-        self.assertIn("Xem execution", self.js)
+        self.assertIn("Chi tiết xử lý", self.js)
         self.assertIn('summary.className="run-summary-line"', self.js)
         self.assertIn("m.total_tokens", self.js)
         self.assertIn('class="context-provenance"', self.html)
-        self.assertIn('styles.css?v=21', self.html)
-        self.assertIn('app.js?v=21', self.html)
+        self.assertIn('styles.css?v=23', self.html)
+        self.assertIn('app.js?v=23', self.html)
 
     def test_compare_headers_and_result_cells_have_exact_metric_mapping(self):
         head = self.html.split('<table class="compare-table"><thead><tr>', 1)[1].split("</tr>", 1)[0]
@@ -1431,7 +1431,7 @@ class FrontendV6Tests(unittest.TestCase):
         self.assertIn("function mapUiModeToChatStrategy", self.js)
         self.assertIn('if(raw==="auto")return "adaptive-auto";', self.js)
         self.assertIn('direct:"DIRECT"', self.js)
-        self.assertIn("DIRECT, PARALLEL và PLANNED do controller chọn", self.html)
+        self.assertIn("Tự động để Adaptive Agent tự chọn cách xử lý phù hợp.", self.html)
         self.assertIn(".threads{display:flex;flex:1 1 auto", self.css)
 
     def test_failed_turn_has_friendly_error_hierarchy(self):
@@ -1536,7 +1536,8 @@ class FrontendV6Tests(unittest.TestCase):
         self.assertIn('role="listbox"', self.html)
         self.assertIn('function renderModelPicker', self.js)
         self.assertIn('function positionModelMenu', self.js)
-        self.assertIn('active?"chat":"history"', self.js)
+        self.assertIn('svgIcon("chat","small")', self.js)
+        self.assertNotIn('active?"chat":"history"', self.js)
         self.assertIn('position:fixed;left:auto;top:auto;bottom:auto', self.css)
         self.assertIn('.thread-card{height:37px;min-height:37px', self.css)
         self.assertIn('.thread-preview,.thread-meta{display:none!important}', self.css)
@@ -1556,21 +1557,20 @@ class FrontendV6Tests(unittest.TestCase):
             "Output Tokens", "Total Tokens", "E2E Latency", "Calculated Cost", "Quality",
         ):
             self.assertIn(heading, self.html)
-        self.assertIn("Not evaluated", self.html)
+        self.assertIn("Chưa đánh giá", self.html)
         self.assertIn("Unavailable", self.js)
         self.assertIn('m.total_tokens==null?"Unavailable"', self.js)
         self.assertIn("compare-evidence", self.js)
         self.assertIn("Frozen Context Snapshot", self.js)
-        self.assertIn("Not evaluated", self.js)
+        self.assertIn("Chưa đánh giá", self.js)
         self.assertNotIn("overall QLC", self.html + self.js)
 
     def test_vietnamese_ui_localization_keeps_runtime_identifiers_intact(self):
         for label in (
-            "Cuộc trò chuyện mới", "Nhà cung cấp (Provider)", "Mô hình (Model)",
+            "Cuộc trò chuyện mới", "Nhà cung cấp", "Mô hình",
             "Chi tiết thực thi", "Tổng quan", "Sơ đồ", "Các Agent", "Chỉ số",
-            "Dữ liệu gốc", "Ngữ cảnh đã đóng băng (Frozen Context)",
-            "Tự động thích ứng (Adaptive AUTO)", "Đã đủ yêu cầu (STOP_SUFFICIENT)",
-            "Cần bổ sung (NEEDS_WORK)", "Không đạt (FAIL)", "Không có dữ liệu",
+            "Dữ liệu gốc", "Ngữ cảnh đã đóng băng",
+            "Tự động", "Đã đủ yêu cầu", "Cần bổ sung", "Không đạt", "Không có dữ liệu",
         ):
             self.assertIn(label, self.html + self.js)
         self.assertIn("const UI_TEXT", self.js)
@@ -1579,6 +1579,32 @@ class FrontendV6Tests(unittest.TestCase):
         for internal_value in ("DIRECT", "PARALLEL", "PLANNED", "PASS", "FAIL", "NEEDS_WORK"):
             self.assertIn(internal_value, self.js)
         self.assertIn("safeFrontendEvidence", self.js)
+
+    def test_ui_polish_keeps_normal_mode_copy_short_and_menu_upright(self):
+        for label in ('DIRECT: "Trực tiếp"', 'PARALLEL: "Song song"', 'PLANNED: "Theo kế hoạch"'):
+            self.assertIn(label, self.js)
+        self.assertNotIn("Trực tiếp (DIRECT)", self.js)
+        self.assertNotIn("Song song (PARALLEL)", self.js)
+        self.assertNotIn("Theo kế hoạch (PLANNED)", self.js)
+        self.assertIn('mode-choice${item.id===mode', self.js)
+        self.assertNotIn('mode-choice${item.id===mode?" selected":""}" role="radio" aria-checked="${item.id===mode}" data-mode="${esc(item.id)}"><span><b>${esc(item.label)}</b><small>', self.js)
+        self.assertNotIn('#inspectorToggle[aria-expanded="false"]{transform:rotate(180deg)}', self.css)
+        self.assertIn('.advanced-menu,.advanced-menu>summary,.advanced-menu .advanced-popover{direction:ltr;writing-mode:horizontal-tb;transform:none}', self.css)
+
+    def test_v102_icon_system_and_model_trigger_are_compact_and_real_svg(self):
+        self.assertEqual(self.html.count('id="i-chevron"'), 1)
+        self.assertIn('class="ui-icon model-chevron"', self.html)
+        self.assertIn('<use href="#i-chevron"></use>', self.html)
+        self.assertNotIn('id="modeName"', self.html)
+        self.assertNotIn('⌄', self.html)
+        self.assertEqual(self.js.count('$("#modelName").textContent'), 1)
+        self.assertNotIn('id="serverStatus"', self.html)
+        self.assertNotIn('class="online"', self.html)
+        self.assertNotIn('serverStatus', self.js)
+        self.assertIn('.ui-icon{width:18px;height:18px', self.css)
+        self.assertIn('.ui-icon.small{width:16px;height:16px}', self.css)
+        self.assertIn('#modelMenuButton[aria-expanded="true"] .model-chevron{transform:rotate(180deg)}', self.css)
+        self.assertNotIn('#modelMenuButton[aria-expanded="true"]{transform:', self.css)
 
     def test_locked_ui_uses_real_conversation_and_file_capabilities(self):
         self.assertIn('fetch("/api/conversations?limit=60")', self.js)

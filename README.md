@@ -13,6 +13,15 @@ Mở `http://127.0.0.1:8000`.
 
 > Đừng mở `preview-*.html` để test API. App thật phải chạy qua FastAPI.
 
+## Deploy trên Render
+
+1. Push repository lên GitHub và tạo Render Blueprint/Web Service từ repository.
+2. Render sẽ dùng `render.yaml`; thêm key provider cần dùng trong Environment.
+3. Deploy rồi mở URL `*.onrender.com` được cấp.
+
+Provider key chỉ nằm ở Environment Variables server-side. Dữ liệu conversation/file-backed
+trong `runs/` có thể tạm thời và bị mất sau restart/redeploy trên Render.
+
 ## Provider
 
 App hỗ trợ:
