@@ -113,6 +113,16 @@ class ContextFileRequest(BaseModel):
     content:str|None=Field(default=None,max_length=MAX_CONTEXT_FILE_BYTES)
     content_base64:str|None=Field(default=None,max_length=140000)
 
+class ProjectWorkspaceFileRequest(BaseModel):
+    filename:str=Field(min_length=1,max_length=255)
+    relative_path:str=Field(min_length=1,max_length=255)
+    content:str=Field(min_length=1,max_length=MAX_CONTEXT_FILE_BYTES)
+
+class ProjectWorkspaceRequest(BaseModel):
+    conversation_id:str|None=Field(default=None,pattern="^chat_[A-Za-z0-9_-]+$")
+    name:str=Field(min_length=1,max_length=100)
+    files:list[ProjectWorkspaceFileRequest]=Field(min_length=1,max_length=20)
+
 class CompareRequest(ChatRequest): pass
 class ProviderTestRequest(BaseModel):
     provider:str=Field(pattern="^(fake|openai|gemini|groq|openrouter)$")
@@ -356,6 +366,48 @@ def save_failed_run_evidence(*,strategy,provider,model,message,context,retrieval
 def new_conversation_id(): return f"chat_{uuid.uuid4().hex[:12]}"
 
 
+_PROJECT_RELEVANCE_TERMS=(
+    "file", "tệp", "path", "đường dẫn", "code", "mã", "function", "hàm", "class", "lớp",
+    "module", "route", "api", "endpoint", "entry point", "entrypoint", "framework", "dependency",
+    "project", "dự án", "repo", "repository", "app", "ứng dụng",
+)
+_PROJECT_FOLLOWUP_TERMS=("file này", "tệp này", "đoạn này", "route đó", "api đó", "hàm đó", "nó gọi gì")
+_PROJECT_GREETING_RE=re.compile(r"^\s*(?:hi|hello|hey|chào(?: bạn)?|bạn là ai|nói tiếng việt đi)\s*[!?.,]*\s*$",re.I)
+
+
+def project_relevance_gate(message,history):
+    """Cheap Product gate: project retrieval is independent from AUTO topology."""
+    text=re.sub(r"\s+"," ",str(message or "").casefold()).strip()
+    if not text or _PROJECT_GREETING_RE.fullmatch(text): return False
+    if re.fullmatch(r"[\d\s+\-*/().,=]+",text): return False
+    if "chỉ trả lời dựa trên project" in text or "chỉ trả lời dựa trên file" in text: return True
+    if any(term in text for term in _PROJECT_RELEVANCE_TERMS): return True
+    if any(term in text for term in _PROJECT_FOLLOWUP_TERMS):
+        recent=" ".join(str(item.get("content","")).casefold() for item in (history or [])[-6:])
+        return any(term in recent for term in _PROJECT_RELEVANCE_TERMS)
+    return False
+
+
+def workspace_context(workspace):
+    files=workspace.get("files") or []
+    paths=[item.get("relative_path") for item in files if item.get("relative_path")]
+    tree="\n".join(sorted(paths))
+    body="\n\n".join(
+        f"SOURCE: {item['relative_path']}\n{item['content']}"
+        for item in files if item.get("relative_path") and isinstance(item.get("content"),str)
+    )
+    return f"[PROJECT STRUCTURE]\n{tree}\n\n[RETRIEVED CONTEXT]\n\n{body}" if body else ""
+
+
+def workspace_selected_sources(workspace,retrieval_meta):
+    by_path={item.get("relative_path"):item.get("source") for item in workspace.get("files",[])}
+    selected=[]
+    for chunk in retrieval_meta.get("selected_chunks",[]):
+        source=by_path.get(chunk.get("source_path"))
+        if source and source not in selected: selected.append(deepcopy(source))
+    return selected
+
+
 _CONVERSATION_UNSET = object()
 PRODUCT_TIMING_FIELDS = (
     "request_received_ms", "conversation_load_ms", "user_message_persist_ms",
@@ -391,6 +443,14 @@ def write_conversation(data):
         raise HTTPException(400,"Invalid conversation id") from exc
     except ConversationStorageError as exc:
         raise HTTPException(503,"Conversation storage is unavailable") from exc
+
+def get_project_workspace(conversation_id,*,include_content=False):
+    try:
+        return conversation_repository().get_project_workspace(conversation_id,include_content=include_content)
+    except ValueError as exc:
+        raise HTTPException(400,"Invalid conversation id") from exc
+    except ConversationStorageError as exc:
+        raise HTTPException(503,"Project workspace storage is unavailable") from exc
 
 
 def append_conversation(data, *, messages, preserve_historical_context=False):
@@ -720,11 +780,26 @@ async def list_conversations(limit:int=30,query:str=""):
         raise HTTPException(503,"Conversation storage is unavailable") from exc
     return {"conversations":rows}
 
+@app.post("/api/conversations/project-workspace")
+async def save_project_workspace(payload:ProjectWorkspaceRequest):
+    conversation_id=payload.conversation_id or new_conversation_id()
+    try:
+        workspace=conversation_repository().save_project_workspace(
+            conversation_id,
+            {"name":payload.name,"files":[item.model_dump() for item in payload.files]},
+        )
+    except ValueError as exc:
+        raise HTTPException(422,str(exc)) from None
+    except ConversationStorageError as exc:
+        raise HTTPException(503,"Project workspace storage is unavailable") from exc
+    return {"conversation_id":conversation_id,"project_workspace":workspace}
+
 @app.get("/api/conversations/{conversation_id}")
 async def get_conversation(conversation_id:str):
     data=read_conversation(conversation_id)
     if not data: raise HTTPException(404,"Conversation not found")
-    return {**data,"turns":conversation_turns(data)}
+    public_data={key:value for key,value in data.items() if key!="project_workspace"}
+    return {**public_data,"project_workspace":get_project_workspace(conversation_id),"turns":conversation_turns(data)}
 
 class ConversationUpdate(BaseModel):
     title:str=Field(min_length=1,max_length=100)
@@ -740,6 +815,17 @@ async def rename_conversation(conversation_id:str,payload:ConversationUpdate):
     data["updated_at"]=int(time.time())
     write_conversation(data)
     return {"ok":True,"conversation_id":conversation_id,"title":data["title"]}
+
+@app.delete("/api/conversations/{conversation_id}/project-workspace")
+async def detach_project_workspace(conversation_id:str):
+    try:
+        detached=conversation_repository().detach_project_workspace(conversation_id)
+    except ValueError as exc:
+        raise HTTPException(400,"Invalid conversation id") from exc
+    except ConversationStorageError as exc:
+        raise HTTPException(503,"Project workspace storage is unavailable") from exc
+    if not detached: raise HTTPException(404,"Project workspace not found")
+    return {"ok":True,"conversation_id":conversation_id}
 
 @app.delete("/api/conversations/{conversation_id}")
 async def delete_conversation(conversation_id:str):
@@ -824,12 +910,29 @@ async def chat(payload:ChatRequest):
                     # Old or manually edited local history must never make the
                     # normal product request fail or leak raw persisted values.
                     context_sources=[]
+        execution_context=context
+        execution_sources=list(context_sources)
+        project_workspace=None
+        if project_relevance_gate(payload.message,stored_history):
+            project_workspace=get_project_workspace(conversation_id,include_content=True)
+            if project_workspace:
+                project_context=workspace_context(project_workspace)
+                if project_context:
+                    execution_context=(f"{context}\n\n{project_context}" if context else project_context)
         accepted_started=time.perf_counter()
-        snapshot,meta=frozen_snapshot(payload.message,context)
+        snapshot,meta=frozen_snapshot(payload.message,execution_context)
         meta=deepcopy(meta)
         meta["context_prep_ms"] = round((time.perf_counter()-accepted_started)*1000)
-        if context_sources:
-            meta["attached_sources"] = deepcopy(context_sources)
+        if project_workspace:
+            selected_sources=workspace_selected_sources(project_workspace,meta)
+            execution_sources.extend(item for item in selected_sources if item not in execution_sources)
+            meta["project_workspace"]={
+                "project_id":project_workspace.get("project_id"),
+                "project_hash":project_workspace.get("project_hash"),
+                "selected_relative_paths":[item.get("relative_path") for item in selected_sources],
+            }
+        if execution_sources:
+            meta["attached_sources"] = deepcopy(execution_sources)
         async def work():
             try:
                 data=await execute_once(strategy="adaptive",provider_name=payload.provider,model_name=payload.model,
@@ -839,7 +942,7 @@ async def chat(payload:ChatRequest):
                     e2e_started_at=accepted_started,performance_timings=timings)
                 persistence_started=time.perf_counter()
                 append_turn(conversation_id,message=payload.message,data=data,context=context,
-                            context_sources=context_sources,
+                            context_sources=execution_sources,
                             preserve_historical_context=preserve_historical_context,
                             existing=existing)
                 persistence_ms=round((time.perf_counter()-persistence_started)*1000)
@@ -879,7 +982,7 @@ async def chat(payload:ChatRequest):
                         "context_hash":meta.get("context_hash"),
                         "source_document_ids":meta.get("source_document_ids",[]),
                         "chunk_ids":meta.get("chunk_ids",[]),
-                        "sources":deepcopy(context_sources),
+                        "sources":deepcopy(execution_sources),
                         "status":"failed","stop_reason":"STOP_FAILURE","error":safe_error,
                         "metrics":{"e2e_ms":round((time.perf_counter()-accepted_started)*1000),
                                    "e2e_boundary_version":"E2E-MEASURE-V2",
@@ -903,7 +1006,7 @@ async def chat(payload:ChatRequest):
                     persistence_started=time.perf_counter()
                     append_failed_turn(conversation_id,message=payload.message,
                         provider=payload.provider,model=payload.model,error=safe_error,
-                        context=context,run_id=run_id,context_sources=context_sources,
+                        context=context,run_id=run_id,context_sources=execution_sources,
                         processing_mode=selected_mode,
                         preserve_historical_context=preserve_historical_context,
                         existing=existing)
@@ -924,7 +1027,7 @@ async def chat(payload:ChatRequest):
                 await q.put({"type":"fatal","error":safe_error,"run_id":run_id,
                              "conversation_id":conversation_id,"provider":payload.provider,
                              "model":payload.model,"processing_mode":selected_mode,
-                             "sources":deepcopy(context_sources)})
+                             "sources":deepcopy(execution_sources)})
             finally: await q.put(None)
         t=asyncio.create_task(work())
         try:

@@ -8,6 +8,7 @@ falls back to a local file.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
@@ -21,13 +22,19 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Protocol
 
-from app.core.context_files import ContextFileError, normalize_context_sources
+from app.core.context_files import (
+    ContextFileError,
+    MAX_CONTEXT_FILES,
+    normalize_context_sources,
+    prepare_context_file,
+)
 
 
 LOGGER = logging.getLogger(__name__)
 
 
 CONVERSATION_ID_RE = re.compile(r"chat_[A-Za-z0-9_-]+$")
+PROJECT_ID_RE = re.compile(r"project_[A-Za-z0-9_-]+$")
 
 
 class ConversationStorageError(RuntimeError):
@@ -46,6 +53,9 @@ class ConversationRepository(Protocol):
     ) -> None: ...
     def list(self, *, limit: int, query: str = "") -> list[dict[str, Any]]: ...
     def delete(self, conversation_id: str) -> bool: ...
+    def get_project_workspace(self, conversation_id: str, *, include_content: bool = False) -> dict[str, Any] | None: ...
+    def save_project_workspace(self, conversation_id: str, workspace: dict[str, Any]) -> dict[str, Any]: ...
+    def detach_project_workspace(self, conversation_id: str) -> bool: ...
 
 
 def validate_conversation_id(conversation_id: str) -> str:
@@ -61,6 +71,87 @@ def _safe_sources(value: Any) -> list[dict[str, Any]]:
         return normalize_context_sources(value if isinstance(value, list) else [])
     except ContextFileError:
         return []
+
+
+def _safe_workspace_name(value: Any) -> str:
+    name = str(value or "").strip()
+    if not name or len(name) > 100 or "/" in name or "\\" in name or any(ord(char) < 32 for char in name):
+        raise ValueError("Invalid project workspace name")
+    return name
+
+
+def _workspace_record(value: Any, *, conversation_id: str) -> dict[str, Any]:
+    """Normalize persisted project text through the existing source validator."""
+
+    if not isinstance(value, dict):
+        raise ValueError("Invalid project workspace")
+    files = value.get("files")
+    if not isinstance(files, list) or not files or len(files) > MAX_CONTEXT_FILES:
+        raise ValueError("Invalid project workspace files")
+    project_id = str(value.get("project_id") or f"project_{uuid.uuid4().hex[:12]}")
+    if not PROJECT_ID_RE.fullmatch(project_id):
+        raise ValueError("Invalid project id")
+    now = _epoch(value.get("updated_at"))
+    created_at = _epoch(value.get("created_at", now))
+    normalized_files: list[dict[str, Any]] = []
+    seen_paths: set[str] = set()
+    for item in files:
+        if not isinstance(item, dict):
+            raise ValueError("Invalid project file")
+        try:
+            prepared = prepare_context_file(
+                filename=item.get("filename"),
+                relative_path=item.get("relative_path"),
+                content=item.get("content"),
+            )
+        except ContextFileError as exc:
+            raise ValueError(exc.message) from exc
+        source = prepared["source"]
+        relative_path = source.get("relative_path")
+        if not relative_path or relative_path in seen_paths:
+            raise ValueError("Project files require unique relative paths")
+        seen_paths.add(relative_path)
+        text = prepared["text"]
+        normalized_files.append({
+            "relative_path": relative_path,
+            "filename": source["filename"],
+            "content_hash": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+            "byte_count": len(text.encode("utf-8")),
+            "source": source,
+            "content": text,
+        })
+    normalized_files.sort(key=lambda item: item["relative_path"])
+    project_hash = hashlib.sha256(json.dumps(
+        [(item["relative_path"], item["content_hash"]) for item in normalized_files],
+        separators=(",", ":"), ensure_ascii=False,
+    ).encode("utf-8")).hexdigest()
+    return {
+        "project_id": project_id,
+        "conversation_id": validate_conversation_id(conversation_id),
+        "name": _safe_workspace_name(value.get("name")),
+        "created_at": created_at,
+        "updated_at": now,
+        "project_hash": project_hash,
+        "file_count": len(normalized_files),
+        "files": normalized_files,
+    }
+
+
+def _workspace_public(workspace: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not workspace:
+        return None
+    return {
+        key: deepcopy(workspace.get(key))
+        for key in ("project_id", "conversation_id", "name", "created_at", "updated_at", "project_hash", "file_count")
+    } | {
+        "files": [{
+            "relative_path": item["relative_path"],
+            "filename": item["filename"],
+            "content_hash": item["content_hash"],
+            "byte_count": item["byte_count"],
+            "source": deepcopy(item["source"]),
+        } for item in workspace.get("files", [])],
+    }
 
 
 def _epoch(value: Any) -> int:
@@ -117,7 +208,7 @@ def _conversation_message(message: dict[str, Any], *, conversation_id: str, fall
 def _conversation_record(data: dict[str, Any]) -> dict[str, Any]:
     conversation_id = validate_conversation_id(data.get("conversation_id", ""))
     created_at = _epoch(data.get("created_at"))
-    return {
+    record = {
         "conversation_id": conversation_id,
         "title": str(data.get("title") or "Cuộc trò chuyện")[:100],
         "created_at": created_at,
@@ -136,6 +227,11 @@ def _conversation_record(data: dict[str, Any]) -> dict[str, Any]:
             for item in data.get("messages", []) if isinstance(item, dict)
         ],
     }
+    if data.get("project_workspace"):
+        record["project_workspace"] = _workspace_record(
+            data["project_workspace"], conversation_id=conversation_id,
+        )
+    return record
 
 
 class JsonConversationRepository:
@@ -208,6 +304,44 @@ class JsonConversationRepository:
         if not path.exists():
             return False
         path.unlink()
+        return True
+
+    def get_project_workspace(self, conversation_id: str, *, include_content: bool = False) -> dict[str, Any] | None:
+        record = self.read(conversation_id)
+        workspace = record.get("project_workspace") if record else None
+        if not workspace:
+            return None
+        return deepcopy(workspace) if include_content else _workspace_public(workspace)
+
+    def save_project_workspace(self, conversation_id: str, workspace: dict[str, Any]) -> dict[str, Any]:
+        conversation_id = validate_conversation_id(conversation_id)
+        existing = self.read(conversation_id)
+        now = int(time.time())
+        record = existing or {
+            "conversation_id": conversation_id,
+            "title": _safe_workspace_name(workspace.get("name")),
+            "created_at": now,
+            "updated_at": now,
+            "messages": [],
+            "run_ids": [],
+        }
+        candidate = dict(workspace)
+        if record.get("project_workspace"):
+            candidate.setdefault("project_id", record["project_workspace"].get("project_id"))
+            candidate.setdefault("created_at", record["project_workspace"].get("created_at"))
+        candidate["updated_at"] = now
+        record["updated_at"] = now
+        record["project_workspace"] = _workspace_record(candidate, conversation_id=conversation_id)
+        self.write(record)
+        return _workspace_public(record["project_workspace"])
+
+    def detach_project_workspace(self, conversation_id: str) -> bool:
+        record = self.read(conversation_id)
+        if not record or not record.get("project_workspace"):
+            return False
+        record.pop("project_workspace", None)
+        record["updated_at"] = int(time.time())
+        self.write(record)
         return True
 
 
@@ -302,6 +436,29 @@ class PostgresConversationRepository:
             )""",
             "CREATE INDEX IF NOT EXISTS conversations_updated_at_idx ON conversations (updated_at DESC)",
             "CREATE INDEX IF NOT EXISTS conversation_messages_order_idx ON conversation_messages (conversation_id, position)",
+            """CREATE TABLE IF NOT EXISTS project_workspaces (
+                project_id TEXT PRIMARY KEY,
+                conversation_id TEXT NOT NULL UNIQUE REFERENCES conversations(conversation_id) ON DELETE CASCADE,
+                name TEXT NOT NULL,
+                project_hash TEXT NOT NULL,
+                file_count INTEGER NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL,
+                updated_at TIMESTAMPTZ NOT NULL
+            )""",
+            """CREATE TABLE IF NOT EXISTS project_files (
+                project_id TEXT NOT NULL REFERENCES project_workspaces(project_id) ON DELETE CASCADE,
+                position INTEGER NOT NULL,
+                relative_path TEXT NOT NULL,
+                filename TEXT NOT NULL,
+                content_hash TEXT NOT NULL,
+                byte_count INTEGER NOT NULL,
+                source_metadata JSONB NOT NULL,
+                content_text TEXT NOT NULL,
+                PRIMARY KEY(project_id, position),
+                UNIQUE(project_id, relative_path)
+            )""",
+            "CREATE INDEX IF NOT EXISTS project_workspaces_conversation_idx ON project_workspaces (conversation_id)",
+            "CREATE INDEX IF NOT EXISTS project_files_order_idx ON project_files (project_id, position)",
         )
         with self._connection() as connection:
             with connection.cursor() as cursor:
@@ -562,6 +719,111 @@ class PostgresConversationRepository:
             raise
         except Exception as exc:
             raise ConversationStorageError("PostgreSQL conversation storage is unavailable.") from exc
+
+    def get_project_workspace(self, conversation_id: str, *, include_content: bool = False) -> dict[str, Any] | None:
+        conversation_id = validate_conversation_id(conversation_id)
+        fields = "position, relative_path, filename, content_hash, byte_count, source_metadata"
+        if include_content:
+            fields += ", content_text"
+        try:
+            with self._connection() as connection:
+                with connection.cursor(row_factory=self._dict_row) as cursor:
+                    cursor.execute(
+                        "SELECT project_id, conversation_id, name, project_hash, file_count, created_at, updated_at "
+                        "FROM project_workspaces WHERE conversation_id = %s",
+                        (conversation_id,),
+                    )
+                    row = cursor.fetchone()
+                    if row is None:
+                        return None
+                    cursor.execute(
+                        f"SELECT {fields} FROM project_files WHERE project_id = %s ORDER BY position ASC",
+                        (row["project_id"],),
+                    )
+                    files = []
+                    for file_row in cursor.fetchall():
+                        source = _safe_sources([_json_value(file_row["source_metadata"], {})])
+                        item = {
+                            "relative_path": file_row["relative_path"],
+                            "filename": file_row["filename"],
+                            "content_hash": file_row["content_hash"],
+                            "byte_count": file_row["byte_count"],
+                            "source": source[0] if source else {"filename": file_row["filename"], "relative_path": file_row["relative_path"]},
+                        }
+                        if include_content:
+                            item["content"] = file_row["content_text"]
+                        files.append(item)
+                    workspace = {
+                        "project_id": row["project_id"], "conversation_id": row["conversation_id"],
+                        "name": row["name"], "project_hash": row["project_hash"], "file_count": row["file_count"],
+                        "created_at": _epoch(row["created_at"]), "updated_at": _epoch(row["updated_at"]), "files": files,
+                    }
+                    return workspace if include_content else _workspace_public(workspace)
+        except ConversationStorageError:
+            raise
+        except Exception as exc:
+            raise ConversationStorageError("PostgreSQL project workspace storage is unavailable.") from exc
+
+    def save_project_workspace(self, conversation_id: str, workspace: dict[str, Any]) -> dict[str, Any]:
+        conversation_id = validate_conversation_id(conversation_id)
+        candidate = _workspace_record(workspace, conversation_id=conversation_id)
+        now = _timestamp(candidate["updated_at"])
+        try:
+            with self._connection() as connection:
+                with connection.cursor(row_factory=self._dict_row) as cursor:
+                    cursor.execute(
+                        """INSERT INTO conversations (
+                            conversation_id, title, created_at, updated_at, context_text, context_sources, run_ids
+                        ) VALUES (%s, %s, %s, %s, '', '[]'::jsonb, '[]'::jsonb)
+                        ON CONFLICT (conversation_id) DO NOTHING""",
+                        (conversation_id, candidate["name"], now, now),
+                    )
+                    cursor.execute(
+                        """INSERT INTO project_workspaces (
+                            project_id, conversation_id, name, project_hash, file_count, created_at, updated_at
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        ON CONFLICT (conversation_id) DO UPDATE SET
+                            name = EXCLUDED.name, project_hash = EXCLUDED.project_hash,
+                            file_count = EXCLUDED.file_count, updated_at = EXCLUDED.updated_at
+                        RETURNING project_id, created_at""",
+                        (
+                            candidate["project_id"], conversation_id, candidate["name"], candidate["project_hash"],
+                            candidate["file_count"], _timestamp(candidate["created_at"]), now,
+                        ),
+                    )
+                    row = cursor.fetchone()
+                    project_id = row["project_id"] if isinstance(row, dict) else row[0]
+                    created_at = row["created_at"] if isinstance(row, dict) else row[1]
+                    cursor.execute("DELETE FROM project_files WHERE project_id = %s", (project_id,))
+                    for position, item in enumerate(candidate["files"]):
+                        cursor.execute(
+                            """INSERT INTO project_files (
+                                project_id, position, relative_path, filename, content_hash, byte_count, source_metadata, content_text
+                            ) VALUES (%s, %s, %s, %s, %s, %s, %s::jsonb, %s)""",
+                            (
+                                project_id, position, item["relative_path"], item["filename"], item["content_hash"],
+                                item["byte_count"], json.dumps(item["source"]), item["content"],
+                            ),
+                        )
+                    candidate["project_id"] = project_id
+                    candidate["created_at"] = _epoch(created_at)
+                    return _workspace_public(candidate)
+        except ConversationStorageError:
+            raise
+        except Exception as exc:
+            raise ConversationStorageError("PostgreSQL project workspace storage is unavailable.") from exc
+
+    def detach_project_workspace(self, conversation_id: str) -> bool:
+        conversation_id = validate_conversation_id(conversation_id)
+        try:
+            with self._connection() as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute("DELETE FROM project_workspaces WHERE conversation_id = %s", (conversation_id,))
+                    return cursor.rowcount > 0
+        except ConversationStorageError:
+            raise
+        except Exception as exc:
+            raise ConversationStorageError("PostgreSQL project workspace storage is unavailable.") from exc
 
 
 def repository_from_environment(*, database_url: str | None, json_directory: Path) -> ConversationRepository:
