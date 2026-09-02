@@ -261,7 +261,18 @@ class ContextUiContractTests(unittest.TestCase):
         self.assertIn("function renderContextAttachments", self.js)
         self.assertIn("function contextAttachmentPending", self.js)
         self.assertIn("MAX_CONTEXT_FILE_BYTES_V1", self.js)
-        self.assertIn("clearContextFile();currentConversationId=id", self.js)
+        load_conversation = self.js.split("async function loadConversation(id)", 1)[1].split(
+            "async function loadRunInspector", 1
+        )[0]
+        self.assertIn("clearContextFile()", load_conversation)
+        self.assertIn("currentConversationId=id", load_conversation)
+        self.assertIn("rememberConversation(id)", load_conversation)
+        self.assertLess(load_conversation.index("clearContextFile()"), load_conversation.index("fetch("))
+        self.assertLess(load_conversation.index("fetch("), load_conversation.index("currentConversationId=id"))
+        self.assertLess(
+            load_conversation.index("currentConversationId=id"),
+            load_conversation.index("rememberConversation(id)"),
+        )
         self.assertIn("persistedContextSources=Array.isArray(conversation.context_sources)", self.js)
         self.assertIn("context-file-row", self.css)
 
