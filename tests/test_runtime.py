@@ -160,6 +160,30 @@ async def run_adaptive(provider, budget=None):
     return state, orchestrator, emitted
 
 
+async def run_product_auto(provider, *, task="Test task", context="Frozen test context", budget=None):
+    emitted = []
+
+    async def emit(event):
+        emitted.append(event)
+
+    state = RunState(
+        strategy="adaptive",
+        provider=provider.name,
+        model=provider.model,
+        task=task,
+        context=context,
+        retrieval_meta={"method": "test", "chunks_total": 20, "chunks_selected": 20},
+    )
+    orchestrator = Orchestrator(
+        provider,
+        emit,
+        budget=budget or Budget(),
+        product_auto=True,
+    )
+    await orchestrator.run(state)
+    return state, orchestrator, emitted
+
+
 async def run_strategy(strategy, provider, *, task="Test task", budget=None):
     emitted = []
 
@@ -272,6 +296,65 @@ class RuntimeFlowTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(orchestrator.budget.logical_calls, 3)
         self.assertEqual(orchestrator.budget.physical_requests, 3)
         self.assertGreater(orchestrator.metrics(state)["calculated_cost_usd"], 0)
+
+    async def test_product_auto_route_matrix_uses_task_structure_not_context_size(self):
+        provider = ScriptedProvider(analyzer=analyzer_payload(count=3))
+        orchestrator = Orchestrator(provider, lambda _event: None, budget=Budget(), product_auto=True)
+        direct = [
+            "Project này sử dụng những công nghệ chính nào?",
+            "Entry point của backend nằm ở file nào?",
+            "Hãy liệt kê các file trong context và mô tả ngắn vai trò.",
+            "Project có những route nào?",
+            "style.css và script.js có vai trò gì?",
+            "Tóm tắt project cho developer mới.",
+            "Đọc tất cả 20 file và tóm tắt.",
+        ]
+        for task in direct:
+            fast = orchestrator.product_auto_fast_path(task)
+            mode = fast[0] if fast else orchestrator.choose_product_mode(provider.analyzer, task)[0]
+            self.assertEqual(mode, "DIRECT", task)
+        self.assertEqual(
+            orchestrator.product_auto_fast_path("Entry point của backend nằm ở file nào?" )[0],
+            "DIRECT",
+        )
+        self.assertEqual(
+            orchestrator.choose_product_mode(provider.analyzer,
+                                             "Phân tích project này.")[0],
+            "DIRECT",
+        )
+        for task in (
+            "Đánh giá riêng frontend, backend và deployment của project.",
+            "Phân tích độc lập authentication, database access và error handling.",
+            "So sánh ba module độc lập theo chức năng, dependency và rủi ro.",
+        ):
+            self.assertEqual(orchestrator.choose_product_mode(provider.analyzer, task)[0], "PARALLEL", task)
+        for task in (
+            "Trace luồng từ form người dùng qua backend cho tới result template.",
+            "Tìm nguyên nhân lỗi, xác định nơi phát sinh rồi xác định các bước sửa theo dependency.",
+            "Xác định entry point, trace startup sequence rồi giải thích thứ tự khởi tạo.",
+        ):
+            self.assertEqual(orchestrator.choose_product_mode(provider.analyzer, task)[0], "PLANNED", task)
+        huge_context = "\n".join(f"file_{index}.py" for index in range(20))
+        state, _, _ = await run_product_auto(
+            FakeProvider(),
+            task="Hãy liệt kê các file bạn thực sự thấy trong context và mô tả ngắn vai trò.",
+            context=huge_context,
+        )
+        route = next(event["meta"]["mode"] for event in state.events if event["title"] == "AUTO route selected")
+        self.assertEqual(route, "DIRECT")
+        self.assertFalse(any(event["meta"].get("agent_type") == "Analyzer" for event in state.events))
+
+    async def test_product_auto_fast_path_does_not_change_research_adaptive(self):
+        product_state, _, _ = await run_product_auto(
+            FakeProvider(),
+            task="Project này dùng công nghệ gì?",
+            context="app.py\nREADME.md\nrequirements.txt",
+        )
+        product_roles = [event["meta"].get("agent_type") for event in product_state.events if event["kind"] == "agent_start"]
+        self.assertEqual(product_roles, ["Direct Solver", "Verifier"])
+        research_state, _, _ = await run_adaptive(ScriptedProvider())
+        research_roles = [event["meta"].get("agent_type") for event in research_state.events if event["kind"] == "agent_start"]
+        self.assertIn("Analyzer", research_roles)
 
     async def test_e2e_wall_clock_includes_shared_context_preparation(self):
         provider = ScriptedProvider()
@@ -1408,8 +1491,8 @@ class FrontendV6Tests(unittest.TestCase):
         self.assertIn('summary.className="run-summary-line"', self.js)
         self.assertIn("m.total_tokens", self.js)
         self.assertIn('class="context-provenance"', self.html)
-        self.assertIn('styles.css?v=23', self.html)
-        self.assertIn('app.js?v=23', self.html)
+        self.assertIn('styles.css?v=31', self.html)
+        self.assertIn('app.js?v=31', self.html)
 
     def test_compare_headers_and_result_cells_have_exact_metric_mapping(self):
         head = self.html.split('<table class="compare-table"><thead><tr>', 1)[1].split("</tr>", 1)[0]

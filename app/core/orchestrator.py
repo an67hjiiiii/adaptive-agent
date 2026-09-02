@@ -175,7 +175,8 @@ def strategy_config_identity(strategy, budget, *, selected_preset=None,
     return identity
 
 class Orchestrator:
-    def __init__(self,provider,emit,*,budget,request_gate=None,product_mode=None):
+    def __init__(self,provider,emit,*,budget,request_gate=None,product_mode=None,
+                 product_auto=False):
         self.provider=provider; self.emit=emit; self.budget=budget
         # Optional experiment-level pacing gate.  It is shared across all
         # roles/strategies in a Pilot executor; normal chat remains unchanged.
@@ -183,6 +184,9 @@ class Orchestrator:
         # Product mode is an optional forced topology.  Pilot/Compare callers
         # leave it unset and retain the historical strategy dispatch below.
         self.product_mode=product_mode
+        # Product AUTO has a narrow policy layer.  Research Adaptive and the
+        # frozen Single/Fixed/Static paths never set this flag.
+        self.product_auto=bool(product_auto)
 
     def _set_config_identity(self,state,*,selected_preset=None):
         state.config_identity=strategy_config_identity(
@@ -362,6 +366,81 @@ class Orchestrator:
             return "PARALLEL","multiple relatively independent aspects"
         return "DIRECT","single-focus or no useful decomposition"
 
+    @staticmethod
+    def _product_task_signals(task):
+        """Extract a few observable Product-AUTO complexity signals.
+
+        These signals deliberately come from the user's task only.  Attached
+        file count, context length, project/repository words, and source-chip
+        count are not inspected here, so context size cannot escalate a
+        straightforward request.
+        """
+        text=re.sub(r"\s+"," ",str(task or "").strip().casefold())
+        planned_patterns=(
+            r"\btrace\b", r"\btracing\b", r"\bluồng\b",
+            r"\bchuỗi\s+(?:xử\s+lý|khởi\s+động|startup)\b",
+            r"\bstartup\s+(?:sequence|flow)\b",
+            r"\bdependency\s+chain\b", r"\btheo\s+dependency\b",
+            r"\bphụ\s+thuộc\b", r"\b(?:sau\s+đó|từ\s+đó)\b",
+            r"\b(?:nguyên\s+nhân|root\s+cause)\b.*\b(?:rồi|sau\s+đó|then|bước|steps?)\b",
+            r"\btừ\b.{1,100}\b(?:qua|through)\b.{1,100}\b(?:đến|tới|to)\b",
+        )
+        parallel_patterns=(
+            r"\bđánh\s+giá\s+riêng\b", r"\bphân\s+tích\s+độc\s+lập\b",
+            r"\bkiểm\s+tra\s+độc\s+lập\b",
+            r"\b(?:independent(?:ly)?|in\s+parallel|song\s+song|parallel)\b",
+            r"\b(?:front[- ]?end)\b.{0,100}\bbackend\b.{0,100}\bdeployment\b",
+            r"\bauthentication\b.{0,100}\bdatabase(?:\s+access)?\b.{0,100}\berror\s+handling\b",
+            r"\b(?:ba|three)\s+(?:module|modules|phần)\s+độc\s+lập\b",
+            r"\bperformance\b.{0,100}\bmaintainability\b.{0,100}\bsecurity\b",
+        )
+        simple_patterns=(
+            r"\b(?:liệt\s+kê|list|tóm\s+tắt|summari[sz]e|giải\s+thích|explain|mô\s+tả|describe)\b",
+            r"\b(?:entry\s*point|route(?:s)?|công\s+nghệ|technology|framework|file(?:s)?\s+nào|nằm\s+ở\s+đâu|vai\s+trò)\b",
+            r"\b(?:what|which|where|compare|so\s+sánh)\b",
+        )
+        planned=any(re.search(pattern,text) for pattern in planned_patterns)
+        parallel=any(re.search(pattern,text) for pattern in parallel_patterns)
+        simple=any(re.search(pattern,text) for pattern in simple_patterns)
+        parts=[part.strip() for part in re.split(r",|\bvà\b|\band\b|&",text) if part.strip()]
+        action=bool(re.search(r"\b(?:analy[sz]e|phân\s+tích|đánh\s+giá|kiểm\s+tra|compare|so\s+sánh)\b",text))
+        multi_goal=len(parts)>=3 or (len(parts)>=2 and action)
+        return {"simple":simple,"parallel":parallel,"planned":planned,
+                "multi_goal":multi_goal,"text":text}
+
+    def product_auto_fast_path(self,task):
+        """Return a conservative no-analyzer route for obvious simple asks."""
+        signals=self._product_task_signals(task)
+        if signals["simple"] and not signals["parallel"] and not signals["planned"]:
+            return ("DIRECT","Yêu cầu có một mục tiêu rõ ràng và không cần chia nhánh.",signals)
+        return None
+
+    def choose_product_mode(self,a,task):
+        """Choose Product AUTO topology without letting context size escalate.
+
+        Explicit task-level dependency/independence cues win.  In the
+        absence of those cues, analyzer fan-out is accepted only when the
+        task itself has multiple goals; ambiguous requests remain DIRECT.
+        """
+        signals=self._product_task_signals(task)
+        if signals["planned"]:
+            return ("PLANNED",
+                    "Yêu cầu cần trace chuỗi xử lý phụ thuộc qua nhiều bước.",signals)
+        if signals["parallel"]:
+            return ("PARALLEL",
+                    "Yêu cầu nêu các phần phân tích độc lập để xử lý song song.",signals)
+        analyzed_mode,analyzed_why=self.choose_mode(a or {})
+        if analyzed_mode=="PARALLEL" and signals["multi_goal"]:
+            return ("PARALLEL",
+                    "Yêu cầu có nhiều mục tiêu có thể phân tích độc lập.",signals)
+        # A high verification signal alone does not create a dependent plan;
+        # the normal verifier remains in the Direct path.
+        if analyzed_mode=="DIRECT":
+            return ("DIRECT",analyzed_why or
+                    "Yêu cầu có một mục tiêu rõ ràng và không cần chia nhánh.",signals)
+        return ("DIRECT",
+                "Yêu cầu chưa nêu nhánh độc lập hoặc chuỗi phụ thuộc; ưu tiên xử lý trực tiếp.",signals)
+
     def choose_static_preset(self,a):
         """Select one Static preset exactly once from initial structural signals.
 
@@ -498,9 +577,21 @@ class Orchestrator:
                                 execution_meta={"agent_type":"Direct Solver","assigned_goal":"Answer the original task from frozen context","dependencies":[]})
 
     async def run_adaptive(self,state,*,forced_mode=None):
+        policy_signals=None
+        decision_source="adaptive-controller"
         if forced_mode is None:
-            a=await self.analyze(state)
-            mode,why=self.choose_mode(a)
+            fast=self.product_auto_fast_path(state.task) if self.product_auto else None
+            if fast is not None:
+                mode,why,policy_signals=fast
+                a=None
+                decision_source="product-auto-fast-path"
+            else:
+                a=await self.analyze(state)
+                if self.product_auto:
+                    mode,why,policy_signals=self.choose_product_mode(a,state.task)
+                    decision_source="product-auto-policy"
+                else:
+                    mode,why=self.choose_mode(a)
         else:
             mode=forced_mode
             why="Selected by the product processing-mode control."
@@ -508,11 +599,14 @@ class Orchestrator:
             # never delegates the topology decision back to AUTO.  Planned
             # mode obtains its DAG directly from the Planner.
             a=await self.analyze(state) if mode=="PARALLEL" else None
+            decision_source="product-selection"
         agents=self.select_agents(a or {},mode)
         route_title="AUTO route selected" if forced_mode is None else "Product mode selected"
-        await self._event(state,"decision",route_title,mode,
-                          {"mode":mode,"why":why,"selected_agents":agents,
-                           "source":"adaptive-controller" if forced_mode is None else "product-selection"})
+        decision_meta={"mode":mode,"why":why,"selected_agents":agents,
+                       "source":decision_source}
+        if policy_signals is not None:
+            decision_meta["product_policy_signals"]={key:value for key,value in policy_signals.items() if key!="text"}
+        await self._event(state,"decision",route_title,mode,decision_meta)
         await self._event(state,"agent_selection","Agent selection",
                           ", ".join(f"{k}={v}" for k,v in agents.items() if v),agents)
 

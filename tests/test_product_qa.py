@@ -160,6 +160,85 @@ class ProductQATests(unittest.TestCase):
             "PARALLEL",
         )
 
+    def test_product_auto_wiring_q0_ignores_context_file_count(self):
+        """Exercise the real Product endpoint, not only the selector seam."""
+
+        q0 = (
+            "Tôi vừa cung cấp một project. Hãy liệt kê chính xác các file bạn thực sự "
+            "thấy trong context và mô tả ngắn vai trò của từng file. Không suy đoán "
+            "file không tồn tại."
+        )
+        seven_names = [
+            "main.py",
+            "orchestrator.py",
+            "README.md",
+            "PROJECT_CONTRACT.md",
+            "index.html",
+            "app.js",
+            "styles.css",
+        ]
+        twenty_context = "\n".join(f"file_{index:02d}.py" for index in range(1, 21))
+        cases = (
+            ("7 attached sources", "\n".join(seven_names), [{"filename": name} for name in seven_names]),
+            # The public source-identity contract currently caps metadata at 16
+            # entries; this case models 20 files in the frozen context itself.
+            ("20 context files", twenty_context, []),
+        )
+        product_auto_flags = []
+        real_orchestrator = main_module.Orchestrator
+
+        class SpyOrchestrator(real_orchestrator):
+            def __init__(self, *args, **kwargs):
+                product_auto_flags.append(kwargs.get("product_auto"))
+                super().__init__(*args, **kwargs)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            runs, conversations = self._storage(temp_dir)
+            with (
+                patch.object(main_module, "RUNS", runs),
+                patch.object(main_module, "CONVERSATIONS", conversations),
+                patch.object(main_module, "Orchestrator", SpyOrchestrator),
+            ):
+                for label, context, sources in cases:
+                    response = self.client.post(
+                        "/api/chat/stream",
+                        json={
+                            "message": q0,
+                            "context": context,
+                            "context_sources": sources,
+                            "provider": "fake",
+                            "model": "fake-research-v2",
+                            "mode": "adaptive-auto",
+                        },
+                    )
+                    self.assertEqual(response.status_code, 200, label)
+                    events = self._events(response)
+                    final = next(event for event in events if event["type"] == "final")
+                    decision = next(
+                        event["event"]
+                        for event in events
+                        if event["type"] == "trace" and event["event"].get("title") == "AUTO route selected"
+                    )
+                    self.assertEqual(decision["meta"]["source"], "product-auto-fast-path", label)
+                    self.assertEqual(decision["meta"]["mode"], "DIRECT", label)
+                    self.assertEqual(final["processing_mode"], "adaptive-auto", label)
+                    self.assertEqual(final["status"], "completed", label)
+                    self.assertEqual(final["stop_reason"], "STOP_SUFFICIENT", label)
+                    self.assertEqual(final["metrics"]["agent_executions"], 2, label)
+                    self.assertEqual(final["metrics"]["logical_calls"], 2, label)
+                    self.assertEqual(final["metrics"]["physical_requests"], 2, label)
+                    self.assertFalse(
+                        any(
+                            event.get("event", {}).get("title") == "Analyzer"
+                            for event in events
+                            if event["type"] == "trace"
+                        ),
+                        label,
+                    )
+                    raw = json.loads((runs / f"{final['run_id']}.json").read_text(encoding="utf-8"))
+                    self.assertEqual(raw["processing_mode"], "adaptive-auto", label)
+        self.assertEqual(product_auto_flags, [True, True])
+
     def test_forced_direct_mode_executes_successfully(self):
         self._assert_fake_mode("direct", "simple task", "DIRECT", "Product mode selected", "DIRECT")
 

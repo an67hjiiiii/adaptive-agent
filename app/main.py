@@ -511,6 +511,7 @@ async def execute_once(*,strategy,provider_name,model_name=None,mode=None,messag
         budget=make_budget(budget_config),
         request_gate=request_gate,
         product_mode=product_mode_to_orchestrator_mode(product_mode) if product_mode else None,
+        product_auto=(strategy=="adaptive" and product_mode=="adaptive-auto"),
     ); await orch.run(state)
     data={"run_id":state.run_id,"strategy":state.strategy,"provider":state.provider,"model":state.model,
           "processing_mode":product_mode,
