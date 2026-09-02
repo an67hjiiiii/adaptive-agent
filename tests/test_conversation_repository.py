@@ -108,6 +108,35 @@ class ConversationRepositoryTests(unittest.TestCase):
             self.assertIsNone(repository.read("chat_repo_first"))
             self.assertFalse(repository.delete("chat_repo_first"))
 
+    def test_relative_path_roundtrip_and_legacy_source_compatibility(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repository = JsonConversationRepository(Path(temp_dir))
+            record = self._record("chat_repo_paths")
+            project_source = {
+                "filename": "routes.py",
+                "relative_path": "api/routes.py",
+                "source_id": "ctx_0123456789abcdef",
+                "format": "py",
+                "parser": "utf-8-text-v1",
+            }
+            record["context_sources"] = [project_source]
+            record["messages"][0]["context_sources"] = [project_source]
+            repository.write(record)
+            reopened = repository.read("chat_repo_paths")
+            self.assertEqual(reopened["context_sources"][0]["relative_path"], "api/routes.py")
+            self.assertEqual(reopened["messages"][0]["context_sources"][0]["relative_path"], "api/routes.py")
+
+            legacy = self._record("chat_repo_legacy")
+            legacy["context_sources"] = [{"filename": "notes.txt", "source_id": "ctx_0123456789abcdef"}]
+            repository.write(legacy)
+            self.assertEqual(repository.read("chat_repo_legacy")["context_sources"][0]["filename"], "notes.txt")
+            self.assertNotIn("relative_path", repository.read("chat_repo_legacy")["context_sources"][0])
+
+            unsafe = self._record("chat_repo_unsafe")
+            unsafe["context_sources"] = [{"filename": "routes.py", "relative_path": "C:\\Users\\private\\routes.py"}]
+            repository.write(unsafe)
+            self.assertEqual(repository.read("chat_repo_unsafe")["context_sources"], [])
+
     def test_storage_selection_is_json_without_database_and_postgres_with_database(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             directory = Path(temp_dir)
