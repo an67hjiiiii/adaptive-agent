@@ -47,10 +47,24 @@ from app.core.context_files import (
     normalize_context_sources,
     prepare_context_file,
 )
+from app.core.conversation_repository import (
+    ConversationStorageError,
+    JsonConversationRepository,
+    repository_from_environment,
+)
 
 BASE=Path(__file__).resolve().parent
 RUNS=BASE.parent/"runs"; RUNS.mkdir(exist_ok=True)
 CONVERSATIONS=RUNS/"conversations"; CONVERSATIONS.mkdir(exist_ok=True)
+# Storage is deliberately selected once during startup.  A configured database
+# that cannot initialise raises a safe startup error rather than losing history
+# by silently using this local JSON fallback.
+try:
+    CONVERSATION_REPOSITORY=repository_from_environment(
+        database_url=os.getenv("DATABASE_URL"),json_directory=CONVERSATIONS,
+    )
+except ConversationStorageError as exc:
+    raise RuntimeError(str(exc)) from None
 PROVIDER_STATUS=RUNS/"provider_status.json"
 APP_VERSION="0.6.3"
 app=FastAPI(title="Adaptive Agent Lab",version=APP_VERSION)
@@ -332,26 +346,32 @@ def save_failed_run_evidence(*,strategy,provider,model,message,context,retrieval
     save(data)
     return data
 
-def conversation_path(conversation_id):
-    if not re.fullmatch(r"chat_[A-Za-z0-9_-]+",conversation_id):
-        raise HTTPException(400,"Invalid conversation id")
-    return CONVERSATIONS/f"{conversation_id}.json"
-
 def new_conversation_id(): return f"chat_{uuid.uuid4().hex[:12]}"
 
+def conversation_repository():
+    """Return the process-selected backend (with a JSON test-directory seam)."""
+    # Existing focused tests patch CONVERSATIONS to a temporary directory.  This
+    # seam applies only to the JSON fallback; production backend selection stays
+    # fixed at process startup.
+    if isinstance(CONVERSATION_REPOSITORY,JsonConversationRepository) and CONVERSATION_REPOSITORY.directory!=CONVERSATIONS:
+        return JsonConversationRepository(CONVERSATIONS)
+    return CONVERSATION_REPOSITORY
+
 def read_conversation(conversation_id):
-    path=conversation_path(conversation_id)
-    if not path.exists(): return None
-    return json.loads(path.read_text(encoding="utf-8"))
+    try:
+        return conversation_repository().read(conversation_id)
+    except ValueError as exc:
+        raise HTTPException(400,"Invalid conversation id") from exc
+    except ConversationStorageError as exc:
+        raise HTTPException(503,"Conversation storage is unavailable") from exc
 
 def write_conversation(data):
-    # Replace in one operation so a browser refresh cannot observe a half-written
-    # transcript (and a concurrent request cannot leave invalid JSON behind).
-    path=conversation_path(data["conversation_id"])
-    path.parent.mkdir(parents=True,exist_ok=True)
-    temporary=path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
-    temporary.write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding="utf-8")
-    os.replace(temporary,path)
+    try:
+        conversation_repository().write(data)
+    except ValueError as exc:
+        raise HTTPException(400,"Invalid conversation id") from exc
+    except ConversationStorageError as exc:
+        raise HTTPException(503,"Conversation storage is unavailable") from exc
 
 def history_from_conversation(data):
     return [{"role":m.get("role"),"content":m.get("content","")} for m in data.get("messages",[])
@@ -394,7 +414,7 @@ def append_turn(conversation_id,*,message,data,context,context_sources=None):
     )
     conversation["messages"].extend([
       {"conversation_id":conversation_id,"role":"user","content":message,
-       "run_id":data.get("run_id"),"created_at":now},
+       "run_id":data.get("run_id"),"context_sources":deepcopy(context_sources or []),"created_at":now},
       {"conversation_id":conversation_id,"role":"assistant","content":answer,
        "run_id":data.get("run_id"),"status":data.get("status"),"stop_reason":data.get("stop_reason"),
        "provider":data.get("provider"),"model":data.get("model"),"mode":run_mode(data),
@@ -425,7 +445,7 @@ def append_failed_turn(conversation_id,*,message,provider,model,error,context,ru
     conversation["last_error"]=error
     conversation["messages"].extend([
       {"conversation_id":conversation_id,"role":"user","content":message,
-       "run_id":run_id,"created_at":now},
+       "run_id":run_id,"context_sources":deepcopy(context_sources or []),"created_at":now},
       {"conversation_id":conversation_id,"role":"assistant",
        "content":f"Không thể nhận câu trả lời từ {provider}: {error or 'provider request failed'}.","run_id":run_id,
        "status":"failed","stop_reason":"STOP_FAILURE","provider":provider,"model":model,
@@ -634,20 +654,11 @@ async def list_runs(limit:int=14):
     return {"runs":rows}
 
 @app.get("/api/conversations")
-async def list_conversations(limit:int=30):
-    rows=[]
-    paths=sorted(CONVERSATIONS.glob("chat_*.json"),key=lambda p:p.stat().st_mtime,reverse=True)
-    for path in paths[:max(1,min(limit,100))]:
-        try:
-            d=json.loads(path.read_text(encoding="utf-8")); messages=d.get("messages",[])
-            last_user=next((m.get("content","") for m in reversed(messages) if m.get("role")=="user"),"")
-            rows.append({"conversation_id":d.get("conversation_id"),"title":d.get("title") or "Cuộc trò chuyện",
-              "updated_at":d.get("updated_at"),"provider":d.get("provider"),"model":d.get("model"),
-              "mode":d.get("processing_mode"),
-              "status":d.get("status"),"message_count":len(messages),
-              "turn_count":sum(1 for m in messages if m.get("role")=="user"),
-              "run_count":len(d.get("run_ids",[])),"last_preview":last_user[:120]})
-        except Exception: pass
+async def list_conversations(limit:int=30,query:str=""):
+    try:
+        rows=conversation_repository().list(limit=max(1,min(limit,100)),query=query)
+    except ConversationStorageError as exc:
+        raise HTTPException(503,"Conversation storage is unavailable") from exc
     return {"conversations":rows}
 
 @app.get("/api/conversations/{conversation_id}")
@@ -679,7 +690,13 @@ async def delete_conversation(conversation_id:str):
         if isinstance(run_id,str) and re.fullmatch(r"run_[A-Za-z0-9_-]+",run_id):
             try:(RUNS/f"{run_id}.json").unlink(missing_ok=True)
             except Exception:pass
-    conversation_path(conversation_id).unlink(missing_ok=True)
+    try:
+        deleted=conversation_repository().delete(conversation_id)
+    except ValueError as exc:
+        raise HTTPException(400,"Invalid conversation id") from exc
+    except ConversationStorageError as exc:
+        raise HTTPException(503,"Conversation storage is unavailable") from exc
+    if not deleted: raise HTTPException(404,"Conversation not found")
     return {"ok":True,"conversation_id":conversation_id}
 
 @app.get("/api/runs/{run_id}")

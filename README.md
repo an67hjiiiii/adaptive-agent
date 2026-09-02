@@ -19,8 +19,11 @@ Mở `http://127.0.0.1:8000`.
 2. Render sẽ dùng `render.yaml`; thêm key provider cần dùng trong Environment.
 3. Deploy rồi mở URL `*.onrender.com` được cấp.
 
-Provider key chỉ nằm ở Environment Variables server-side. Dữ liệu conversation/file-backed
-trong `runs/` có thể tạm thời và bị mất sau restart/redeploy trên Render.
+Provider key chỉ nằm ở Environment Variables server-side. Để giữ lịch sử chat qua
+restart/redeploy trên Render, cấu hình `DATABASE_URL` tới PostgreSQL. Khi biến này
+không có, local development tiếp tục dùng JSON ở `runs/conversations/`; JSON cũ không
+tự import sang database. Nếu `DATABASE_URL` đã cấu hình nhưng PostgreSQL không khởi tạo
+được, app sẽ fail rõ ràng thay vì âm thầm quay về JSON.
 
 ## Provider
 
@@ -59,7 +62,8 @@ User **không chọn Single/Fixed/Static** trong chat chính. Các strategy đó
 
 ## Conversation persistence
 
-Mỗi cuộc trò chuyện được lưu ở `runs/conversations/`. Mỗi lượt hiển thị thành một khung gồm:
+Mỗi cuộc trò chuyện được lưu trong PostgreSQL khi có `DATABASE_URL`; local fallback là
+`runs/conversations/`. Mỗi lượt hiển thị thành một khung gồm:
 
 - câu hỏi
 - câu trả lời
@@ -69,6 +73,10 @@ Mỗi cuộc trò chuyện được lưu ở `runs/conversations/`. Mỗi lượ
 - link tới Run Evidence
 
 Sidebar có rename/delete conversation.
+
+Context text theo giới hạn request hiện có được giữ để follow-up sau restart vẫn có
+ngữ cảnh. Metadata tệp chỉ giữ filename/source ID/format/parser/count; không lưu bytes
+upload hoặc đường dẫn tuyệt đối của máy.
 
 ## Kiểm tra
 
