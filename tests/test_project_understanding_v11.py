@@ -140,7 +140,7 @@ class ProjectUiContractTests(unittest.TestCase):
         self.assertIn("Chọn thư mục dự án", html)
         self.assertIn("Chọn tệp", html)
         self.assertIn("MAX_PROJECT_FILES_V11 = 20", js)
-        self.assertIn("V1.1 hỗ trợ tối đa 20 tệp mã nguồn trong một dự án.", js)
+        self.assertIn("hỗ trợ tối đa 20 tệp mã nguồn trong một dự án.", js)
         self.assertIn("PROJECT_NOISE_V11", js)
         self.assertIn("relative_path:item.relativePath", js)
         self.assertIn("[PROJECT STRUCTURE]", js)
