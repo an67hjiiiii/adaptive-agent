@@ -227,10 +227,32 @@ function safeErrorDetail(value,status=null,contentType=""){
   const code=Number(status);if(!structured&&[502,503,504].includes(code))return upstreamErrorMessage(code);
   return detail;
 }
+// Provider incidents already return a bounded, secret-safe `safe_message`
+// (see app/core/provider_diagnostics.py SAFE_MESSAGES). This maps the known
+// safe-message categories to concise Vietnamese copy so the chat surface
+// never shows raw backend/provider English strings for common recoverable
+// failures. Anything unrecognized still falls through to the existing
+// safe `detail` (already stripped of HTML/stack traces by safeErrorDetail),
+// never the raw exception.
+const PROVIDER_SAFE_MESSAGE_COPY=Object.freeze([
+  [/rate limit reached/i,"Nhà cung cấp đang giới hạn yêu cầu. Hãy thử lại sau."],
+  [/request timed out/i,"Phản hồi mất quá nhiều thời gian. Bạn có thể thử lại."],
+  [/quota is exhausted|credit balance is exhausted/i,"Nhà cung cấp đã hết hạn mức sử dụng. Hãy thử provider khác hoặc thử lại sau."],
+  [/rejected the configured credentials|api key is not configured/i,"Cấu hình mô hình hiện chưa sẵn sàng."],
+  [/denied access to this operation or model|not found or is unavailable/i,"Mô hình hiện chưa khả dụng với cấu hình này."],
+  [/hostname could not be resolved|outbound network access is blocked/i,"Nhà cung cấp hiện chưa phản hồi. Hãy thử lại sau."],
+  [/returned an upstream error/i,"Nhà cung cấp hiện chưa phản hồi. Hãy thử lại sau."],
+]);
+function providerFriendlyMessage(detail){
+  const match=PROVIDER_SAFE_MESSAGE_COPY.find(([pattern])=>pattern.test(detail));
+  return match?match[1]:null;
+}
 function friendlyRunError(value,provider,model,status=null,contentType=""){
   const detail=safeErrorDetail(value,status,contentType);
   if(/Unsupported model selection/i.test(detail))return `### Không thể chạy với mô hình này\n\nMô hình **${model||"đang chọn"}** không được ${providerText(provider)} hỗ trợ.\n\nHãy chọn mô hình khác trong menu bên dưới ô chat rồi thử lại.`;
   if(/Failed to fetch|NetworkError|network request failed/i.test(detail))return "### Không thể kết nối tới server local\n\nServer chưa phản hồi yêu cầu.\n\nHãy kiểm tra server đang chạy rồi thử lại.";
+  const friendly=providerFriendlyMessage(detail);
+  if(friendly)return `### Không thể hoàn thành lượt chạy\n\n${friendly}`;
   return `### Không thể hoàn thành lượt chạy\n\n${detail||"Lượt chạy đã dừng trước khi tạo được câu trả lời."}`
 }
 function cap(s){return String(s||"").charAt(0).toUpperCase()+String(s||"").slice(1)}
