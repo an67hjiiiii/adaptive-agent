@@ -332,6 +332,7 @@ body{font-size:15px}
 .project-workspace-indicator .ui-icon{width:15px;height:15px;flex:0 0 15px;color:var(--icon-secondary)}
 .project-workspace-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-primary);font-weight:600}
 .project-workspace-count{white-space:nowrap;color:var(--text-secondary)}
+.project-workspace-status{white-space:nowrap;color:var(--text-secondary);font-size:11px}
 .project-workspace-detach{width:22px;height:22px;margin-left:1px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--text-secondary);display:grid;place-items:center;cursor:pointer}
 .project-workspace-detach:hover,.project-workspace-detach:focus-visible{background:var(--surface-hover);color:var(--text-primary);outline:0}
 .project-workspace-detach .ui-icon{width:14px;height:14px}

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -12,6 +13,7 @@ from app.core.context_files import (
 )
 from app.core.orchestrator import Orchestrator
 from app.core.rag import frozen_snapshot
+from app.core.conversation_repository import JsonConversationRepository
 from app.core.types import Budget
 from app.providers.fake import FakeProvider
 import app.main as main_module
@@ -23,7 +25,11 @@ CASES = ROOT / "tests" / "fixtures" / "v11_evaluation" / "cases.json"
 
 
 def fixture_files(name: str) -> list[Path]:
-    return sorted(path for path in (FIXTURES / name).rglob("*") if path.is_file())
+    return sorted(
+        path
+        for path in (FIXTURES / name).rglob("*")
+        if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc"
+    )
 
 
 def project_context(name: str) -> str:
@@ -35,6 +41,25 @@ def project_context(name: str) -> str:
         relative_path = path.relative_to(FIXTURES / name).as_posix()
         lines.extend([f"SOURCE: {relative_path}", path.read_text(encoding="utf-8"), ""])
     return "\n".join(lines).strip()
+
+
+def prepared_fixture_sources(name: str) -> list[dict]:
+    """Use the production preparation contract for every useful fixture file."""
+    prepared=[]
+    for path in fixture_files(name):
+        relative_path=path.relative_to(FIXTURES / name).as_posix()
+        result=prepare_context_file(
+            filename=path.name,
+            relative_path=relative_path,
+            content=path.read_text(encoding="utf-8"),
+        )
+        prepared.append({
+            "filename":path.name,
+            "relative_path":relative_path,
+            "content":result["text"],
+            "source":result["source"],
+        })
+    return sorted(prepared, key=lambda item: item["relative_path"])
 
 
 class ProjectPathSafetyTests(unittest.TestCase):
@@ -129,6 +154,51 @@ class ProjectFixtureAndProductIsolationTests(unittest.TestCase):
         self.assertEqual(orchestrator.product_auto_fast_path("Entry point nằm đâu?")[0], "DIRECT")
         analysis = {"aspects": [{"name": "entry", "goal": "locate entry point"}], "dependencies": [], "parallelizable_groups": [], "verification_demand": "low"}
         self.assertEqual(orchestrator.choose_product_mode(analysis, "Entry point nằm đâu?")[0], "DIRECT")
+
+    def test_s_m_l_fixture_ingestion_keeps_only_safe_relative_source_identity(self):
+        for fixture_name, expected_count in (("small", 5), ("medium", 10), ("large", 20)):
+            with self.subTest(fixture=fixture_name):
+                sources=prepared_fixture_sources(fixture_name)
+                self.assertEqual(len(sources), expected_count)
+                relative_paths=[item["relative_path"] for item in sources]
+                self.assertEqual(relative_paths, sorted(relative_paths))
+                self.assertTrue(any("/" in path for path in relative_paths))
+                for item in sources:
+                    source=item["source"]
+                    self.assertEqual(source["relative_path"], item["relative_path"])
+                    self.assertNotIn("..", source["relative_path"].split("/"))
+                    self.assertFalse(source["relative_path"].startswith(("/", "C:", "D:")))
+
+    def test_workspace_to_rag_handoff_is_deterministic_and_keeps_known_paths(self):
+        expected={
+            "small": ("entry_point", "app/main.py"),
+            "medium": ("fetch_user", "services/user_service.py"),
+            "large": ("entry_point", "app/main.py"),
+        }
+        for fixture_name, (query, source_path) in expected.items():
+            with self.subTest(fixture=fixture_name):
+                workspace={"files": prepared_fixture_sources(fixture_name)}
+                handoff=main_module.workspace_context(workspace)
+                first, first_meta=frozen_snapshot(query, handoff)
+                second, second_meta=frozen_snapshot(query, handoff)
+                self.assertEqual(first, second)
+                self.assertEqual(first_meta["snapshot_hash"], second_meta["snapshot_hash"])
+                self.assertTrue(first.startswith("[PROJECT STRUCTURE]\n"))
+                self.assertIn("[RETRIEVED CONTEXT]", first)
+                self.assertIn(source_path, [chunk["source_path"] for chunk in first_meta["selected_chunks"]])
+                self.assertIn(f"SOURCE: {source_path}", first)
+                self.assertNotIn("C:\\Users\\", first)
+                self.assertNotIn("/home/", first)
+
+    def test_noise_segment_contract_and_workspace_isolation_are_explicit(self):
+        noise={".git", "node_modules", ".venv", "venv", "__pycache__", "dist", "build", "coverage", ".next"}
+        self.assertFalse(any(part in noise for part in "src/build_helper.py".split("/")))
+        self.assertTrue(any(part in noise for part in "build/output.js".split("/")))
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repository=JsonConversationRepository(Path(temp_dir))
+            repository.save_project_workspace("chat_fixture_a", {"name":"small", "files":prepared_fixture_sources("small")})
+            self.assertIsNone(repository.get_project_workspace("chat_fixture_b"))
+            self.assertEqual(repository.get_project_workspace("chat_fixture_a")["file_count"], 5)
 
 
 class ProjectUiContractTests(unittest.TestCase):

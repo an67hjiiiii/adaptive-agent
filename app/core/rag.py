@@ -20,7 +20,7 @@ RAG_CONFIG_ID = "RAG-LEXICAL-V1"
 # ever saw the frozen context.  These are one global, versioned retrieval
 # policy (never a strategy-specific setting) and are recorded in every
 # snapshot so the change is auditable.
-RAG_SETTINGS_VERSION = "RAG-LEXICAL-V1@1.1"
+RAG_SETTINGS_VERSION = "RAG-LEXICAL-V1@1.2"
 DEFAULT_CHUNK_CHARS = 1400
 DEFAULT_TOP_K = 32
 DEFAULT_MAX_CHARS = 16000
@@ -136,16 +136,16 @@ def _project_context(source: str, chunk_size: int) -> tuple[str, list[dict]] | N
         return None
     marker = "\n\n" + RETRIEVED_CONTEXT_HEADER + "\n"
     if marker not in source:
-        return None
-    manifest, body = source[len(PROJECT_STRUCTURE_HEADER) + 1:].split(marker, 1)
+        return ("", [])
+    _manifest, body = source[len(PROJECT_STRUCTURE_HEADER) + 1:].split(marker, 1)
     matches = list(_PROJECT_SOURCE_RE.finditer(body))
     if not matches:
-        return None
+        return ("", [])
     records: list[dict] = []
     for match_index, match in enumerate(matches):
         source_path = _safe_project_path(match.group(1))
         if source_path is None:
-            return None
+            continue
         text_end = matches[match_index + 1].start() if match_index + 1 < len(matches) else len(body)
         file_text = body[match.end():text_end].strip()
         if not file_text:
@@ -160,7 +160,11 @@ def _project_context(source: str, chunk_size: int) -> tuple[str, list[dict]] | N
                 "char_count": len(chunk),
                 "source_path": source_path,
             })
-    return (manifest.strip(), records) if records else None
+    records.sort(key=lambda record: (record["source_path"], record["chunk_id"]))
+    for index, record in enumerate(records):
+        record["index"] = index
+    manifest = "\n".join(sorted({record["source_path"] for record in records}))
+    return manifest, records
 
 
 def frozen_snapshot(

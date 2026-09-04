@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Literal
 import time, uuid
 
 @dataclass
@@ -75,6 +75,35 @@ class Budget:
             and self.remaining_physical_requests >= required_calls
         )
 
+
+@dataclass
+class ExecutionPolicy:
+    """One bounded Product execution-policy record for a single request."""
+
+    scope: Literal["GENERAL", "PROJECT_GROUNDED"]
+    evidence_policy: Literal["OPTIONAL", "REQUIRED"]
+    retrieval_state: Literal["SKIPPED", "HIT", "MISS"]
+    route: Literal["AUTO", "DIRECT", "PARALLEL", "PLANNED"] = "AUTO"
+    active_project: bool = False
+    source_count: int = 0
+    reason: str | None = None
+
+    def resolve_route(self, route: str) -> None:
+        if route not in {"DIRECT", "PARALLEL", "PLANNED"}:
+            raise ValueError("Invalid execution-policy route")
+        self.route = route
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "scope": self.scope,
+            "evidence_policy": self.evidence_policy,
+            "route": self.route,
+            "retrieval_state": self.retrieval_state,
+            "active_project": self.active_project,
+            "source_count": self.source_count,
+            "reason": self.reason,
+        }
+
 @dataclass
 class RunState:
     strategy: str
@@ -84,6 +113,7 @@ class RunState:
     context: str
     chat_history: str = ""
     retrieval_meta: dict[str, Any] = field(default_factory=dict)
+    execution_policy: ExecutionPolicy | None = None
     run_id: str = field(default_factory=lambda: f"run_{uuid.uuid4().hex[:12]}")
     started_at: float = field(default_factory=time.perf_counter)
     # ``started_at`` is the accepted-run boundary supplied by the caller.  It

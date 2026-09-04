@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from app.providers.factory import get_provider
-from app.core.types import RunState,Budget
+from app.core.types import Budget, ExecutionPolicy, RunState
 from app.core.orchestrator import (
     MODEL_CONFIG_ID,
     MODEL_SETTINGS_ID,
@@ -18,7 +18,7 @@ from app.core.orchestrator import (
     Orchestrator,
     strategy_config_identity,
 )
-from app.core.rag import frozen_snapshot
+from app.core.rag import PROJECT_STRUCTURE_HEADER, RETRIEVED_CONTEXT_HEADER, frozen_snapshot
 from app.core.provider_diagnostics import (
     SAFE_MESSAGES,
     classify_provider_error,
@@ -367,15 +367,15 @@ def new_conversation_id(): return f"chat_{uuid.uuid4().hex[:12]}"
 
 
 _PROJECT_RELEVANCE_TERMS=(
-    "file", "tệp", "path", "đường dẫn", "code", "mã", "function", "hàm", "class", "lớp",
-    "module", "route", "api", "endpoint", "entry point", "entrypoint", "framework", "dependency",
-    "project", "dự án", "repo", "repository", "app", "ứng dụng",
+    "file", "tệp", "tài liệu", "document", "source", "nguồn", "readme", "path", "đường dẫn",
+    "function", "hàm", "class", "lớp", "module", "route", "endpoint", "entry point", "entrypoint",
+    "framework", "dependency", "project", "dự án", "repo", "repository",
 )
-_PROJECT_FOLLOWUP_TERMS=("file này", "tệp này", "đoạn này", "route đó", "api đó", "hàm đó", "nó gọi gì")
+_PROJECT_FOLLOWUP_TERMS=("file này", "tệp này", "đoạn này", "cái này", "route đó", "api đó", "hàm đó", "nó gọi gì")
 _PRODUCT_HISTORY_MAX_CHARS=2400
 _PRODUCT_GREETING_RE=re.compile(r"^\s*(?:hi|hello|hey|chào(?: bạn)?|bạn là ai|nói tiếng việt đi|speak english|thanks|thank you|cảm ơn)\s*[!?.,]*\s*$",re.I)
 _PRODUCT_FOLLOWUP_RE=re.compile(
-    r"\b(?:route đó|api đó|hàm đó|file đó|tệp đó|cái đó|nó|phần trên|"
+    r"\b(?:route đó|api đó|hàm đó|file đó|tệp đó|cái đó|cái này|nó|phần trên|"
     r"giải thích rõ hơn|nói rõ hơn|tiếp tục|render file nào|gọi ở đâu|follow[ -]?up)\b",
     re.I,
 )
@@ -386,17 +386,69 @@ _LANGUAGE_PREFERENCE_RE=re.compile(
 )
 
 
-def project_relevance_gate(message,history):
-    """Cheap Product gate: project retrieval is independent from AUTO topology."""
+def product_context_scope(message,history):
+    """Choose Product grounding scope without changing execution topology.
+
+    An active workspace is intentionally not an input signal: it remains
+    available for a later project question, while ordinary chat keeps using
+    normal model knowledge.  This is local/deterministic so it cannot add a
+    provider request ahead of the normal orchestration path.
+    """
     text=re.sub(r"\s+"," ",str(message or "").casefold()).strip()
-    if not text or _PRODUCT_GREETING_RE.fullmatch(text): return False
-    if re.fullmatch(r"[\d\s+\-*/().,=]+",text): return False
-    if "chỉ trả lời dựa trên project" in text or "chỉ trả lời dựa trên file" in text: return True
-    if any(term in text for term in _PROJECT_RELEVANCE_TERMS): return True
+    if not text or _PRODUCT_GREETING_RE.fullmatch(text): return "GENERAL"
+    if re.fullmatch(r"[\d\s+\-*/().,=]+",text): return "GENERAL"
+    explicit_phrases=(
+        "dựa vào file", "dựa vào các file", "dựa vào tệp", "dựa vào tài liệu",
+        "theo readme", "trong project", "trong dự án", "trong repo", "trong repository",
+        "trong app.py", "from the supplied", "based on the file", "according to the readme",
+        "chỉ trả lời dựa trên project", "chỉ trả lời dựa trên file",
+    )
+    if any(phrase in text for phrase in explicit_phrases): return "SOURCE_REQUIRED"
+    if re.search(r"\b[\w.-]+\.(?:py|js|ts|tsx|jsx|md|json|yaml|yml|toml|txt|html|css)\b", text):
+        return "SOURCE_REQUIRED"
+    if any(term in text for term in _PROJECT_RELEVANCE_TERMS): return "SOURCE_REQUIRED"
     if any(term in text for term in _PROJECT_FOLLOWUP_TERMS):
         recent=" ".join(str(item.get("content","")).casefold() for item in (history or [])[-6:])
-        return any(term in recent for term in _PROJECT_RELEVANCE_TERMS)
-    return False
+        if any(term in recent for term in _PROJECT_RELEVANCE_TERMS):
+            return "SOURCE_REQUIRED"
+    return "GENERAL"
+
+
+def product_execution_policy(grounding_scope,retrieval_meta,*,active_project,source_count):
+    """Build the one Product policy record after context retrieval is frozen.
+
+    This does not classify a task or select a topology.  It turns the already
+    resolved scope and the existing retrieval metadata into an auditable
+    contract which the orchestrator later completes with its final route.
+    """
+    if grounding_scope == "GENERAL":
+        return ExecutionPolicy(
+            scope="GENERAL", evidence_policy="OPTIONAL", retrieval_state="SKIPPED",
+            active_project=active_project, source_count=source_count,
+            reason="General chat does not require project evidence.",
+        )
+
+    selected = list((retrieval_meta or {}).get("selected_chunks") or [])
+    scores = [
+        item.get("score") for item in selected
+        if isinstance(item, dict) and isinstance(item.get("score"), (int, float))
+    ]
+    # Simple RAG already records lexical scores.  A source-backed attachment
+    # can be small/full-context and therefore has no score; selected chunks in
+    # that case are still the requested evidence.  A score-only workspace miss
+    # remains MISS without changing retrieval itself.
+    retrieval_state = "HIT" if selected and (not scores or max(scores) > 0) else "MISS"
+    return ExecutionPolicy(
+        scope="PROJECT_GROUNDED", evidence_policy="REQUIRED", retrieval_state=retrieval_state,
+        active_project=active_project, source_count=source_count,
+        reason=("Retrieved source evidence is available." if retrieval_state == "HIT"
+                else "No relevant retrieved source evidence is available."),
+    )
+
+
+def project_relevance_gate(message,history):
+    """Compatibility wrapper for the V1.1 workspace retrieval gate."""
+    return product_context_scope(message,history)=="SOURCE_REQUIRED"
 
 
 def _product_language_preference(history):
@@ -447,13 +499,13 @@ def product_history_for_turn(message,history):
 
 def workspace_context(workspace):
     files=workspace.get("files") or []
-    paths=[item.get("relative_path") for item in files if item.get("relative_path")]
-    tree="\n".join(sorted(paths))
     body="\n\n".join(
         f"SOURCE: {item['relative_path']}\n{item['content']}"
         for item in files if item.get("relative_path") and isinstance(item.get("content"),str)
     )
-    return f"[PROJECT STRUCTURE]\n{tree}\n\n[RETRIEVED CONTEXT]\n\n{body}" if body else ""
+    # V11-C transports source blocks only. V11-B validates the paths and builds
+    # the canonical, bounded manifest from those records in frozen_snapshot.
+    return f"{PROJECT_STRUCTURE_HEADER}\n\n\n{RETRIEVED_CONTEXT_HEADER}\n\n{body}" if body else ""
 
 
 def workspace_selected_sources(workspace,retrieval_meta):
@@ -686,7 +738,7 @@ def write_provider_status(name,status=None,model=None,error=None,diagnostic=None
 async def execute_once(*,strategy,provider_name,model_name=None,mode=None,message,frozen_context,retrieval_meta,history,emit,
                        conversation_id=None,budget_config=None,comparison_meta=None,run_id=None,
                        run_metadata=None,generation_settings=None,e2e_started_at=None,request_gate=None,
-                       performance_timings=None):
+                       performance_timings=None,grounding_scope="SOURCE_REQUIRED",execution_policy=None):
     accepted_started = float(e2e_started_at) if e2e_started_at is not None else time.perf_counter()
     model=validated_model(provider_name,model_name)
     product_mode = validated_processing_mode(mode) if mode is not None else None
@@ -699,6 +751,7 @@ async def execute_once(*,strategy,provider_name,model_name=None,mode=None,messag
         await emit(event)
     state=RunState(strategy=strategy,provider=p.name,model=p.model,task=message,
                    context=frozen_context,chat_history=format_history(history),retrieval_meta=retrieval_meta,
+                   execution_policy=execution_policy,
                    run_id=run_id or f"run_{uuid.uuid4().hex[:12]}",
                    started_at=accepted_started)
     orch=Orchestrator(
@@ -708,6 +761,8 @@ async def execute_once(*,strategy,provider_name,model_name=None,mode=None,messag
         request_gate=request_gate,
         product_mode=product_mode_to_orchestrator_mode(product_mode) if product_mode else None,
         product_auto=(strategy=="adaptive" and product_mode=="adaptive-auto"),
+        grounding_scope=grounding_scope,
+        execution_policy=execution_policy,
     ); await orch.run(state)
     data={"run_id":state.run_id,"strategy":state.strategy,"provider":state.provider,"model":state.model,
           "processing_mode":product_mode,
@@ -910,6 +965,8 @@ async def get_run(run_id:str):
 
 @app.post("/api/chat/stream")
 async def chat(payload:ChatRequest):
+    if not payload.message.strip():
+        raise HTTPException(status_code=422, detail="Message cannot be blank.")
     # Normalize once at request acceptance so every event and persistence
     # record uses the same product-mode identity.  Compare/Pilot callers do
     # not pass this product-only control.
@@ -921,6 +978,18 @@ async def chat(payload:ChatRequest):
             status_code=exc.status_code,
             detail={"code":exc.code,"message":exc.message},
         ) from None
+    if provided_context_sources and (
+        payload.context_active is False
+        or (payload.context_active is True and not payload.context.strip())
+        or ("context" in payload.model_fields_set and not payload.context.strip())
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code":"INVALID_CONTEXT_REFERENCE",
+                "message":"Nguồn ngữ cảnh không có nội dung đã chuẩn bị hợp lệ.",
+            },
+        )
     async def gen():
         request_started=time.perf_counter()
         timings={key:None for key in PRODUCT_TIMING_FIELDS}
@@ -947,6 +1016,7 @@ async def chat(payload:ChatRequest):
         # a deterministic, relevant slice into the provider prompt.  Compare
         # and research execution do not use this endpoint or this selector.
         effective_history=product_history_for_turn(payload.message,stored_history)
+        grounding_scope=product_context_scope(payload.message,effective_history)
         # ``context_active=False`` is the browser's explicit lifecycle signal
         # after reload: historical context stays persisted/displayable, but it
         # must not be promoted into this new execution.  API callers that omit
@@ -974,15 +1044,23 @@ async def chat(payload:ChatRequest):
         execution_context=context
         execution_sources=list(context_sources)
         project_workspace=None
-        if project_relevance_gate(payload.message,effective_history):
+        active_project=False
+        if grounding_scope=="SOURCE_REQUIRED":
             project_workspace=get_project_workspace(conversation_id,include_content=True)
+            active_project=project_workspace is not None
             if project_workspace:
                 project_context=workspace_context(project_workspace)
                 if project_context:
                     execution_context=(f"{context}\n\n{project_context}" if context else project_context)
+        else:
+            # Preserve active-project observability without loading its files
+            # into a general turn or letting it change the grounding scope.
+            active_project=get_project_workspace(conversation_id,include_content=False) is not None
         accepted_started=time.perf_counter()
         snapshot,meta=frozen_snapshot(payload.message,execution_context)
         meta=deepcopy(meta)
+        meta["context_scope"]=grounding_scope
+        meta["context_scope_version"]="PRODUCT-V12-CONTEXT-SCOPE-V1"
         meta["context_prep_ms"] = round((time.perf_counter()-accepted_started)*1000)
         if project_workspace:
             selected_sources=workspace_selected_sources(project_workspace,meta)
@@ -994,13 +1072,21 @@ async def chat(payload:ChatRequest):
             }
         if execution_sources:
             meta["attached_sources"] = deepcopy(execution_sources)
+        execution_policy=product_execution_policy(
+            grounding_scope,
+            meta,
+            active_project=active_project,
+            source_count=len(execution_sources),
+        )
+        meta["execution_policy"] = execution_policy.as_dict()
         async def work():
             try:
                 data=await execute_once(strategy="adaptive",provider_name=payload.provider,model_name=payload.model,
                     mode=selected_mode,
                     message=payload.message,frozen_context=snapshot,retrieval_meta=meta,
                     history=effective_history,emit=emit,conversation_id=conversation_id,
-                    e2e_started_at=accepted_started,performance_timings=timings)
+                    e2e_started_at=accepted_started,performance_timings=timings,
+                    grounding_scope=grounding_scope,execution_policy=execution_policy)
                 persistence_started=time.perf_counter()
                 append_turn(conversation_id,message=payload.message,data=data,context=context,
                             context_sources=context_sources,
